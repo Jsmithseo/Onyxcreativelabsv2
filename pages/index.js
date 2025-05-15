@@ -77,11 +77,11 @@ export default function Index() {
                   Start Project
                 </Button>
               </Link>
-              <Link href="https://calendly.com/jeremy-onyxcreativelabs/client-discovery">
+              {/* <Link href="https://calendly.com/jeremy-onyxcreativelabs/client-discovery">
                 <Button variant="contained" color="primary" type="submit">
                   30 Min Free Consult
                 </Button>
-              </Link>
+              </Link> */}
             </div>
           </Container>
         </div>
