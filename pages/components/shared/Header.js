@@ -87,6 +87,9 @@ const MyHeader = () => {
               <DropdownMenu>
                 <DropdownItem href="/reviews">AI Reviews</DropdownItem>
               </DropdownMenu>
+              <DropdownMenu>
+                <DropdownItem href="https://susuapp.vercel.app/">Susu fi</DropdownItem>
+              </DropdownMenu>
             </Dropdown>
           </NavItem>
         </Nav>
