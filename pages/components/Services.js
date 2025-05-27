@@ -18,7 +18,7 @@ const services = [
   },
   {
     icon: <FaMoneyBillWave size={32} color="#6c757d" />,
-    title: 'Paid Media Management',
+    title: 'Paid Marketing Management',
     description: 'Maximize your return on ad spend with continuous testing, refined targeting. ',
     link: '/paid-marketing',
   },
