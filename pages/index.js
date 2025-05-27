@@ -6,6 +6,10 @@ import Container from '@mui/material/Container';
 import Link from 'next/link';
 import BaseLayout from './components/layouts/BaseLayouts.js';
 import { Row, Col, Button } from 'reactstrap';
+import Approach from "../pages/components/Approach"
+import Services from "../pages/components/Services";
+import Results from "../pages/components/Results";
+
 
 export default function Index() {
   const styles = {
@@ -69,7 +73,7 @@ export default function Index() {
               />
             </div>
             <p style={{ ...styles.text, padding: '0 20px', margin: '20px 0' }}>
-              We’re a full-service digital marketing agency dedicated to delivering innovative technology solutions for small businesses and nonprofits. We specialize in web development, SEO, and content marketing, all while nurturing the next generation of tech talent through hands-on experience and mentorship.
+            We help businesses scale through experimentation, performance design, and precision PPC campaigns. Backed by data. Built by a smart, flexible team.
             </p>
             <div style={styles.buttonContainer}>
               <Link href="/contact">
@@ -77,11 +81,11 @@ export default function Index() {
                   Start Project
                 </Button>
               </Link>
-              {/* <Link href="https://calendly.com/jeremy-onyxcreativelabs/client-discovery">
+              <Link href="https://calendly.com/jeremy-onyxcreativelabs/client-discovery">
                 <Button variant="contained" color="primary" type="submit">
                   30 Min Free Consult
                 </Button>
-              </Link> */}
+              </Link>
             </div>
           </Container>
         </div>
@@ -94,47 +98,26 @@ export default function Index() {
                   className="text-center"
                   style={styles.content}
                 >
-                  <h1 style={styles.header}>How It Works</h1>
+                  <h1 style={styles.header}>No Gaps. No Silos. Just Momentum.</h1>
                   <p style={styles.text}>
-                    At Onyx Creative Labs, we provide high-quality marketing and web development services by leveraging the skills of our students who are eager to gain real-world experience. Our unique approach ensures your project is handled with care, expertise, and a fresh perspective.
+                  We bring the same expert strategies and powerful tools used by the fastest-growing companies to your business. Our integrated ecosystem connects strategy, data, and execution—helping you move faster, collaborate more effectively, and create lasting, measurable impact.
                   </p>
-                  <Button
-                    color="success"
-                    size="lg"
-                    style={styles.button}
-                    href="/how-it-works"
-                  >
-                    Learn More
-                  </Button>
+                  <Services/>
                 </Col>
               </Row>
             </Container>
             <div style={styles.backgroundSection}>
               <Container>
                 <Row>
-                  <Col
-                    md={{ size: 12 }}
-                    className="text-center"
-                    style={styles.content}
-                  >
-                    <h1 style={styles.header}>
-                      Empower the Next Generation of Tech Talent
-                    </h1>
-                    <p style={styles.text}>
-                      What sets us apart is our unique approach to talent development. Your projects will be handled by our talented students, who work under the guidance of an experienced senior developer acting as a mentor. This ensures that your website or app is not only expertly crafted but also continually maintained with the latest industry practices.
-                    </p>
-                    <Button
-                      color="success"
-                      size="lg"
-                      style={styles.button}
-                      href="/contact"
-                    >
-                      Start Project
-                    </Button>
-                  </Col>
+                  <Results/>
                 </Row>
               </Container>
             </div>
+            <Container>
+              <Row>
+                <Approach/>
+              </Row>
+            </Container>
           </div>
         </Container>
       </div>
