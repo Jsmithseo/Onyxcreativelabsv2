@@ -49,14 +49,14 @@ export default function CordeliaCaseStudy() {
         {/* Placeholder Images Section */}
         <Row className="mb-5 text-center">
           <Col md="4">
-            <img src="Cordelia1.png" alt="Homepage screenshot" style={{ width: '100%', borderRadius: '8px' }} />
+            <img src="cordelia1.png" alt="Homepage screenshot" style={{ width: '100%', borderRadius: '8px' }} />
           </Col>
           <Col md="4">
-            <img src="Cordelia2.png" alt="Google Ads dashboard screenshot" style={{ width: '100%', borderRadius: '8px' }} />
+            <img src="cordelia2.png" alt="Google Ads dashboard screenshot" style={{ width: '100%', borderRadius: '8px' }} />
 
           </Col>
           <Col md="4">
-            <img src="Cordelia3.png" alt="Lead tracking screenshot" style={{ width: '100%', borderRadius: '8px' }} />
+            <img src="cordelia3.png" alt="Lead tracking screenshot" style={{ width: '100%', borderRadius: '8px' }} />
 
           </Col>
         </Row>
