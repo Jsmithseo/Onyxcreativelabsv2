@@ -70,7 +70,7 @@ export default function ContactFormPage() {
               { name: 'company', value: formData.company },
               { name: 'website', value: formData.website },
               { name: 'message', value: formData.message },
-              { name: 'services', value: formData.interest.join(', ') }
+              { name: 'interest', value: formData.interest.join(', ') }
             ]
           })
         });

@@ -15,8 +15,15 @@ import Link from 'next/link';
 
 const caseStudies = [
   {
+    brand: 'Poll Everywhere',
+    title: 'Poll Company',
+    excerpt:
+      'Stepping in to clear development backlog, we supported Poll Everywhere through a critical period of limited dev availability—keeping product momentum alive and internal teams unblocked',
+    link: '/poll-case-study',
+    bgColor: '#007acc'
+  },
+  {
     brand: 'Vacation Bike Rentals',
-    tag: 'SEO,CRO',
     title: 'Seasonal Bike Rental Company',
     excerpt:
       'Vacation Bike Rentals needed to boost conversions during the off-season and ramp up visibility ahead of the warmer months. We helped them optimize their site and strategy to stay booked year-round.',
@@ -25,7 +32,6 @@ const caseStudies = [
   },
   {
     brand: 'Cordelia',
-    tag: 'CRO',
     title: "Adult Residetial Care",
     excerpt:
       'Cordelia ARC relied entirely on county referrals—until we helped them launch their first public-facing website and Google Ads campaign to drive private market inquiries',
@@ -34,7 +40,6 @@ const caseStudies = [
   },
   {
     brand: 'STLR Entertainment',
-    tag: 'CRO',
     title: 'Live Entertainment Booking',
     excerpt:
       'STLR Entertainment needed to grow their bookings. We rebuilt their website, implemented CRO strategies, launched Google Ads, and executed a cold calling plan to drive qualified leads and close new deals',
@@ -43,7 +48,6 @@ const caseStudies = [
   },
   {
     brand: 'Parsity',
-    tag: 'CRO',
     title: 'Online Code School',
     excerpt:
       'Parsity.io needed to increase student enrollment. We enhanced their CRO, redesigned landing pages, launched Google Ads, and built a cold outreach strategy to attract qualified applicants.',
