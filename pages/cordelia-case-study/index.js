@@ -7,6 +7,7 @@ import {
 } from 'reactstrap';
 import { FaGlobe, FaBullhorn, FaChartLine, FaHandshake } from 'react-icons/fa';
 import BaseLayout from '../components/layouts/BaseLayouts';
+import Link from 'next/link';
 
 export default function CordeliaCaseStudy() {
   return (
@@ -102,9 +103,11 @@ export default function CordeliaCaseStudy() {
 
         <Row className="text-center">
           <Col>
+          <Link href="/contact" passHref>
             <Button color="primary" size="lg">
               See What We Can Build Together
             </Button>
+            </Link>
           </Col>
         </Row>
       </Container>

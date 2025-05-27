@@ -7,6 +7,7 @@ import {
 } from 'reactstrap';
 import { FaBicycle, FaChartLine, FaMobileAlt, FaBullhorn } from 'react-icons/fa';
 import BaseLayout from '../components/layouts/BaseLayouts';
+import Link from 'next/link';
 
 export default function VacationBikeCaseStudy() {
   return (
@@ -103,9 +104,11 @@ export default function VacationBikeCaseStudy() {
 
         <Row className="text-center">
           <Col>
+          <Link href="/contact" passHref>
             <Button color="primary" size="lg">
               Start Your Optimization Journey
             </Button>
+            </Link>
           </Col>
         </Row>
       </Container>

@@ -7,6 +7,7 @@ import {
 } from 'reactstrap';
 import { FaGlobe, FaBullhorn, FaPhoneAlt, FaMusic } from 'react-icons/fa';
 import BaseLayout from '../components/layouts/BaseLayouts';
+import Link from 'next/link';
 
 export default function STLRCaseStudy() {
   return (
@@ -100,9 +101,11 @@ export default function STLRCaseStudy() {
 
         <Row className="text-center">
           <Col>
+          <Link href="/contact" passHref>
             <Button color="primary" size="lg">
               Let’s Book More Together
             </Button>
+            </Link>
           </Col>
         </Row>
       </Container>

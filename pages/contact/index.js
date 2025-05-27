@@ -1,80 +1,189 @@
-import React from 'react';
+import React, { useState } from 'react';
+import {
+  Container,
+  Row,
+  Col,
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  Button,
+  FormFeedback
+} from 'reactstrap';
 import BaseLayout from '../components/layouts/BaseLayouts';
-import ContactForm from '../components/ContactUsform';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { useRouter } from 'next/router';
 
-const Contact = () => {
+export default function ContactFormPage() {
+  const router = useRouter();
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    company: '',
+    website: '',
+    message: '',
+    interest: []
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    if (type === 'checkbox') {
+      setFormData((prev) => {
+        const newServices = checked
+          ? [...prev.services, value]
+          : prev.services.filter((s) => s !== value);
+        return { ...prev, services: newServices };
+      });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.name) newErrors.name = 'Name is required';
+    if (!formData.email) newErrors.email = 'Email is required';
+    if (!formData.message) newErrors.message = 'Message is required';
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+    } else {
+      try {
+        const res = await fetch('https://api.hsforms.com/submissions/v3/integration/submit/46783071/79f2cfd0-1beb-4264-9f0f-d9b7d728cf95', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            fields: [
+              { name: 'firstname', value: formData.full_name },
+              { name: 'email', value: formData.email },
+              { name: 'company', value: formData.company },
+              { name: 'website', value: formData.website },
+              { name: 'message', value: formData.message },
+              { name: 'services', value: formData.interest.join(', ') }
+            ]
+          })
+        });
+
+        if (res.ok) {
+          setFormData({ full_name: '', email: '', company: '', website: '', message: '', interest: [] });
+          setErrors({});
+          router.push('/thankyou');
+        } else {
+          console.error('HubSpot submission failed');
+        }
+      } catch (error) {
+        console.error('Error submitting to HubSpot:', error);
+      }
+    }
+  };
+
   return (
-    <div
-      style={{
-        backgroundColor: '#f8f9fa', // Light gray background
-        color: '#000',
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-      }}
-    >
-      <BaseLayout>
-        <div className="container-fluid" style={{ padding: '40px 20px' }}>
-          <div className="row">
-            <div className="col-lg-12">
-              <div
-                className="contactHeadline"
-                style={{
-                  fontSize: '42px',
-                  fontWeight: '700',
-                  textAlign: 'center',
-                  marginBottom: '20px',
-                  color: '#000', // Black text for contrast
-                }}
-              >
-                Ready to Start Your Next Project?
-              </div>
-              <p style={{ textAlign: 'center', fontSize: '18px', marginBottom: '50px', color: '#333' }}>
-                Whether you're looking to build a new website, enhance your digital marketing, or develop a custom web application, our team is here to help. 
-                Reach out today, and let's bring your vision to life.
-              </p>
-            </div>
-            <div className="col-lg-12">
-              <div
-                className="contact-form"
-                style={{
-                  background: '#fff', // White background for form
-                  padding: '30px',
-                  borderRadius: '10px',
-                  boxShadow: '0 0 15px rgba(0, 0, 0, 0.1)', // Lighter shadow for light background
-                }}
-              >
-                {/* <h3 style={{ textAlign: 'center', marginBottom: '20px', fontSize: '24px', fontWeight: '600', color: '#000' }}>
-                  Contact Us to Get Started
-                </h3> */}
-                <ContactForm />
-              </div>
-            </div>
-            <div className="col-lg-12" style={{ marginTop: '30px' }}>
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: '20px',
-                  borderRadius: '10px',
-                  color: '#000',
-                  fontSize: '18px',
-                }}
-              >
-                <p>
-                  Have specific questions or want to discuss your project in detail? Feel free to contact us at <a href="mailto:jeremy@onyxcreativelabs.com" style={{ color: '#007bff' }}>jeremy@onyxcreativelabs.com</a> or call us directly at <a href="tel:+5109257174" style={{ color: '#007bff' }}>510-925-7174</a>.
-                </p>
-                <p>
-                  We're excited to partner with you and turn your ideas into reality.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </BaseLayout>
-    </div>
-  );
-};
+    <BaseLayout>
+      <div style={{ backgroundColor: '#f8f9fa', padding: '4rem 0', textAlign: 'center' }}>
+        <Container>
+          <h1 className="fw-bold">Let’s Talk</h1>
+          <p className="mt-3 text-muted">
+            Ready to grow? Tell us more about your project and goals.
+          </p>
+        </Container>
+      </div>
 
-export default Contact;
+      <Container className="py-5">
+        <Row className="justify-content-center">
+          <Col md="8">
+            <Form onSubmit={handleSubmit}>
+              <FormGroup>
+                <Label for="name">Full Name *</Label>
+                <Input
+                  type="text"
+                  name="full_name"
+                  id="name"
+                  value={formData.full_name}
+                  onChange={handleChange}
+                  invalid={!!errors.full_name}
+                />
+                <FormFeedback>{errors.full_name}</FormFeedback>
+              </FormGroup>
+              <FormGroup>
+                <Label for="email">Email *</Label>
+                <Input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  invalid={!!errors.email}
+                />
+                <FormFeedback>{errors.email}</FormFeedback>
+              </FormGroup>
+              <FormGroup>
+                <Label for="company">Company</Label>
+                <Input
+                  type="text"
+                  name="company"
+                  id="company"
+                  value={formData.company}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label for="website">Website(if applicatiable)</Label>
+                <Input
+                  type="text"
+                  name="website"
+                  id="website"
+                  value={formData.website}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Which solutions are you interested in?</Label>
+                <div>
+                  {['CRO', 'Web Development', 'Email Marketing', 'Research & Strategy', 'Paid Marketing'].map((interest) => (
+                    <div key={interest} className="form-check">
+                      <Input
+                        type="checkbox"
+                        id={interest}
+                        value={interest}
+                        checked={formData.interest.includes(interest)}
+                        onChange={handleChange}
+                      />
+                      <Label className="form-check-label" htmlFor={interest}>{interest}</Label>
+                    </div>
+                  ))}
+                </div>
+              </FormGroup>
+              <FormGroup>
+                <Label for="message">Message *</Label>
+                <Input
+                  type="textarea"
+                  name="message"
+                  id="message"
+                  rows="5"
+                  value={formData.message}
+                  onChange={handleChange}
+                  invalid={!!errors.message}
+                />
+                <FormFeedback>{errors.message}</FormFeedback>
+              </FormGroup>
+              <div className="text-center mt-4">
+                <Button color="primary" size="lg" type="submit">
+                  Submit Inquiry
+                </Button>
+              </div>
+            </Form>
+          </Col>
+        </Row>
+      </Container>
+    </BaseLayout>
+  );
+}

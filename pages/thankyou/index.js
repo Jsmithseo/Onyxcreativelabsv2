@@ -1,86 +1,65 @@
 import React, { useEffect } from 'react';
-import 'bootstrap/dist/css/bootstrap.css';
 import { Container, Row, Col, Button } from 'reactstrap';
-import Image from 'next/image';
 import BaseLayout from '../components/layouts/BaseLayouts';
 import Link from 'next/link';
 
-const MainStyle = {
-  overflowX: 'hidden',
-  backgroundColor: '#f8f9fa',
-  padding: '50px 0',
-};
-
-const copyStyle = {
-  fontSize: '24px',
-  fontFamily: 'avenir',
-  textAlign: 'center',
-  color: '#333',
-  marginBottom: '20px',
-};
-
-const buttonStyle = {
-  display: 'block',
-  margin: '20px auto',
-  padding: '10px 30px',
-  backgroundColor: '#007bff',
-  color: '#fff',
-  borderRadius: '5px',
-  fontSize: '18px',
-  fontFamily: 'avenir',
-  textAlign: 'center',
-  textDecoration: 'none',
-};
-
-const imageStyle = {
-  display: 'block',
-  margin: '0 auto 20px',
-};
-
-export default function Thankyou() {
+export default function ThankYou() {
   useEffect(() => {
-    // Google event snippet for conversion tracking
-    window.gtag('event', 'conversion', { 'send_to': 'AW-16644561919/yx4DCJzujcMZEP-334A-' });
+    window.gtag?.('event', 'conversion', {
+      send_to: 'AW-16644561919/yx4DCJzujcMZEP-334A-'
+    });
   }, []);
 
   return (
     <BaseLayout>
-      <div style={MainStyle}>
+      <div style={{ backgroundColor: '#f8f9fa', padding: '5rem 0', textAlign: 'center' }}>
         <Container>
           <Row>
-            <Col md="12">
-
-              <div style={copyStyle}>
-                Thank you for reaching out! We'll be in touch with you soon.
+            <Col md={{ size: 8, offset: 2 }}>
+              <h1 className="fw-bold mb-4">Thanks for Reaching Out!</h1>
+              <p className="lead mb-4">
+                We’ve received your message and will be in touch shortly.
+                In the meantime, feel free to explore more about what we do.
+              </p>
+              <div className="d-flex justify-content-center gap-3">
+                <Link href="/case-studies" passHref>
+                  <Button color="primary" size="lg">Explore Case Studies</Button>
+                </Link>
+                <Link href="/" passHref>
+                  <Button color="secondary" size="lg">Back to Home</Button>
+                </Link>
               </div>
-              <div style={copyStyle}>
-                In the meantime, feel free to explore more of our services or check out our latest blog posts.
-              </div>
-              <Link href="/" style={buttonStyle}>
-                Explore Our Services
-              </Link>
-              <Link href="/" style={buttonStyle}>
-                Read Our Blog
-              </Link>
             </Col>
-          
           </Row>
-          <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-
-            <br></br>
-            <br></br>
-            <br></br>        </Container>
+        </Container>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
       </div>
     </BaseLayout>
   );

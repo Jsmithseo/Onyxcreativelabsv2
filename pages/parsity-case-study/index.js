@@ -7,6 +7,7 @@ import {
 } from 'reactstrap';
 import { FaGlobe, FaUserGraduate, FaChartLine, FaBullhorn } from 'react-icons/fa';
 import BaseLayout from '../components/layouts/BaseLayouts';
+import Link from 'next/link';
 
 export default function ParsityCaseStudy() {
   return (
@@ -103,9 +104,11 @@ export default function ParsityCaseStudy() {
 
         <Row className="text-center">
           <Col>
+          <Link href="/contact" passHref>
             <Button color="primary" size="lg">
               Boost Your Enrollment Strategy
             </Button>
+            </Link>
           </Col>
         </Row>
       </Container>

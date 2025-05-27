@@ -58,6 +58,21 @@ const MyHeader = () => {
             </NavLink>
           </NavItem>
           <NavItem>
+            <Dropdown nav isOpen={dropdownOpen} toggle={toggleDropdown}>
+              <DropdownToggle nav caret style={linkStyle}>
+                Solutions 
+              </DropdownToggle>
+              <DropdownMenu>
+                <DropdownItem href="/cro">Conversion Rate optimization</DropdownItem>
+                <DropdownItem href="/paid-marketing">Paid Marketing</DropdownItem>
+                <DropdownItem href="/email">Email</DropdownItem>
+                <DropdownItem href="/dev">Web Development</DropdownItem>
+                <DropdownItem href="/research">Research and Strategy</DropdownItem>
+
+              </DropdownMenu>
+            </Dropdown>
+          </NavItem>
+          <NavItem>
             <NavLink
               href="/case-studies"
               style={linkStyle}
@@ -79,7 +94,7 @@ const MyHeader = () => {
           </NavItem> */}
 
           {/* Pricing Dropdown */}
-          <NavItem>
+          {/* <NavItem>
             <Dropdown nav isOpen={dropdownOpen} toggle={toggleDropdown}>
               <DropdownToggle nav caret style={linkStyle}>
                 Products 
@@ -89,7 +104,7 @@ const MyHeader = () => {
                 <DropdownItem href="https://susuapp.vercel.app/">Susu Fi</DropdownItem>
               </DropdownMenu>
             </Dropdown>
-          </NavItem>
+          </NavItem> */}
         </Nav>
       </Collapse>
     </Navbar>
