@@ -17,8 +17,9 @@ export default function ContactFormPage() {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
-    name: '',
+    full_name: '',
     email: '',
+    phone: '',
     company: '',
     website: '',
     message: '',
@@ -31,10 +32,10 @@ export default function ContactFormPage() {
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
       setFormData((prev) => {
-        const newServices = checked
-          ? [...prev.services, value]
-          : prev.services.filter((s) => s !== value);
-        return { ...prev, services: newServices };
+        const newInterest = checked
+          ? [...prev.interest, value]
+          : prev.interest.filter((s) => s !== value);
+        return { ...prev, interest: newInterest };
       });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -43,7 +44,7 @@ export default function ContactFormPage() {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.name) newErrors.name = 'Name is required';
+    if (!formData.full_name) newErrors.full_name = 'Name is required';
     if (!formData.email) newErrors.email = 'Email is required';
     if (!formData.message) newErrors.message = 'Message is required';
     return newErrors;
@@ -65,6 +66,7 @@ export default function ContactFormPage() {
             fields: [
               { name: 'firstname', value: formData.full_name },
               { name: 'email', value: formData.email },
+              { name: 'phone', value: formData.phone },
               { name: 'company', value: formData.company },
               { name: 'website', value: formData.website },
               { name: 'message', value: formData.message },
@@ -74,7 +76,7 @@ export default function ContactFormPage() {
         });
 
         if (res.ok) {
-          setFormData({ full_name: '', email: '', company: '', website: '', message: '', interest: [] });
+          setFormData({ full_name: '', email: '', phone: '', company: '', website: '', message: '', interest: [] });
           setErrors({});
           router.push('/thankyou');
         } else {
@@ -126,6 +128,16 @@ export default function ContactFormPage() {
                 <FormFeedback>{errors.email}</FormFeedback>
               </FormGroup>
               <FormGroup>
+                <Label for="phone">Phone</Label>
+                <Input
+                  type="tel"
+                  name="phone"
+                  id="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              <FormGroup>
                 <Label for="company">Company</Label>
                 <Input
                   type="text"
@@ -136,7 +148,7 @@ export default function ContactFormPage() {
                 />
               </FormGroup>
               <FormGroup>
-                <Label for="website">Website(if applicatiable)</Label>
+                <Label for="website">Website (if applicable)</Label>
                 <Input
                   type="text"
                   name="website"
