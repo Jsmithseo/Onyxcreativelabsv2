@@ -77,12 +77,12 @@ export default function Index() {
             </p>
             <div style={styles.buttonContainer}>
               <Link href="/contact">
-                <Button variant="contained" color="success" type="submit">
+                <Button variant="contained" color="success" type="submit" style={{ fontWeight: '600' }}>
                   Start Project
                 </Button>
               </Link>
               <Link href="https://calendly.com/jeremy-onyxcreativelabs/client-discovery">
-                <Button variant="contained" color="primary" type="submit">
+                <Button variant="contained" color="primary" type="submit" style={{ fontWeight: '600' }}>
                   30 Min Free Consult
                 </Button>
               </Link>
