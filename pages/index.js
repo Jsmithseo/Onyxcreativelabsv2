@@ -73,7 +73,7 @@ export default function Index() {
               />
             </div>
             <p style={{ ...styles.text, padding: '0 20px', margin: '20px 0' }}>
-            We help businesses scale through experimentation, performance design, and precision PPC campaigns. Backed by data. Built by a smart, flexible team.
+            We help businesses scale through experimentation, performance design, and precision PPC campaigns. Backed by data.
             </p>
             <div style={styles.buttonContainer}>
               <Link href="/contact">
