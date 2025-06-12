@@ -73,7 +73,6 @@ export default function CaseStudyPage() {
             <span style={{ color: '#33a1fd' }}>Impact</span> speaks louder than words
           </h1>
           <p className="mt-3">
-            We partner with some of the world’s most forward-thinking teams to uncover powerful growth strategies.
           </p>
           <Link href="https://calendly.com/jeremy-onyxcreativelabs/client-discovery">
           <Button color="primary" size="lg" className="mt-4">
