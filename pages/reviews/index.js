@@ -3,127 +3,117 @@
 import React from "react";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 import BaseLayout from "../components/layouts/BaseLayouts";
-import { Container, Row, Col, Card, CardBody, CardTitle, Button } from "reactstrap";
+import { Container, Row, Col, Button } from "reactstrap";
 
-const plans = [
-  {
-    title: "Starter",
-    price: "$199/mo",
-    limit: "Up to 50 reviews",
-    features: [
-      "AI-powered text outreach",
-      "Smart suggested response templates",
-      "Performance tracking dashboard",
-    ],
-    link: "https://3zvb63hc.reviewly.ai/subscribe/NzcxMTg1NA==",
-  },
-  {
-    title: "Growth",
-    price: "$299/mo",
-    limit: "Up to 200 reviews",
-    features: [
-      "Everything in Starter",
-      "Priority support",
-      "Custom branding for outreach",
-    ],
-    link: "https://3zvb63hc.reviewly.ai/subscribe/NzcxMzIxNw==",
-  },
-  {
-    title: "Unlimited",
-    price: "$499/mo",
-    limit: "Unlimited reviews",
-    features: [
-      "Everything in Growth",
-      "Unlimited contact uploads",
-      "White glove onboarding",
-    ],
-    link: "https://3zvb63hc.reviewly.ai/subscribe/NzcxNDU4MA==",
-  },
-];
-
-const Reviews = () => {
+export default function Reviews() {
   return (
     <>
       <Head>
-        <title>Review Automation – Onyx Creative Labs</title>
+        <title>Why ask for your own reviews? Let AI do it. – Onyx Creative Labs</title>
       </Head>
 
       <BaseLayout>
-        <Container className="my-5">
-          <div className="text-center mb-5">
-            <h1 className="fw-bold">AI-Powered Review Automation</h1>
-            <p className="text-muted">
-              Onyx Reviews helps you generate 5-star reviews using smart SMS outreach and AI-generated message suggestions. More trust. More traffic. More sales.
-            </p>
-          </div>
-
-          {/* Embedded YouTube Short */}
-          <div className="text-center mb-5">
-            <div style={{ position: "relative", paddingBottom: "60%", height: 0, overflow: "hidden", maxWidth: "100%" }}>
-              <iframe
-                src="https://www.youtube.com/embed/J5DXXsBBdjI"
-                title="Onyx Reviews Overview"
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  border: 0
-                }}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
+        <Container className="py-5">
+          {/* Hero */}
+          <Row className="align-items-center mb-5">
+            <Col md="6" className="text-center text-md-start">
+              <h1 className="display-4 fw-bold">
+                Why ask for your own reviews? Let AI do it.
+              </h1>
+              <p className="lead text-muted">
+                Asking for your own reviews can be difficult—or even come across
+                as annoying. Onyx Reviews automates the entire process so you
+                can focus on running your business.
+              </p>
+              <Link href="/early-access" passHref>
+                <Button color="primary" size="lg" className="mt-3">
+                  Sign up for early access
+                </Button>
+              </Link>
+            </Col>
+            <Col md="6" className="text-center">
+              <Image
+                src="/images/reviews-hero.png"
+                alt="Onyx Reviews App Preview"
+                width={400}
+                height={300}
+                className="img-fluid rounded shadow-sm"
               />
-            </div>
-          </div>
-
-          {/* Pricing Plans */}
-          <Row className="mb-5">
-            {plans.map((plan, idx) => (
-              <Col md="4" className="mb-4" key={idx}>
-                <Card className="h-100 shadow-sm border-0">
-                  <CardBody className="d-flex flex-column justify-content-between">
-                    <div>
-                      <CardTitle tag="h4" className="fw-bold text-center">
-                        {plan.title}
-                      </CardTitle>
-                      <h5 className="text-primary text-center">{plan.price}</h5>
-                      <p className="text-center text-muted">{plan.limit}</p>
-                      <ul className="mt-3">
-                        {plan.features.map((feature, i) => (
-                          <li key={i} className="text-muted mb-2">
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="text-center mt-4">
-                      <Link href={plan.link} passHref>
-                        <Button color="primary" className="w-100 fw-bold">
-                          Get Started
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardBody>
-                </Card>
-              </Col>
-            ))}
+            </Col>
           </Row>
 
-          {/* Footer Copy */}
-          <div className="text-center text-muted" style={{ maxWidth: 800, margin: "0 auto" }}>
-            <p>
-              Our AI review assistant integrates directly with your business to help you follow up with customers via SMS, using tested messaging sequences and dynamic templates. All you do is upload your contacts — we handle the rest.
-            </p>
-            <p>
-              Whether you're looking to grow your local visibility or build trust with new clients, this tool takes the guesswork out of review generation.
-            </p>
-          </div>
+          {/* Features Block 1 */}
+          <Row className="align-items-center mb-5">
+            <Col md="6">
+              <h3 className="fw-bold">Automated Outreach</h3>
+              <p className="text-muted mb-4">
+                Our AI crafts personalized SMS and email messages on your
+                behalf, removing the awkward “please leave us a review” ask.
+              </p>
+
+              <h3 className="fw-bold">Smart Scheduling</h3>
+              <p className="text-muted">
+                Specify your preferred windows, and the system will ping
+                customers at optimal times to maximize response rates.
+              </p>
+            </Col>
+            <Col md="6" className="text-center">
+              <Image
+                src="/images/reviews-outreach.png"
+                alt="Automated outreach workflow"
+                width={500}
+                height={300}
+                className="img-fluid rounded shadow-sm"
+              />
+            </Col>
+          </Row>
+
+          {/* Features Block 2 (staggered) */}
+          <Row className="align-items-center mb-5">
+            <Col
+              md="6"
+              className="order-2 order-md-1 text-center text-md-start"
+            >
+              <Image
+                src="/images/reviews-analytics.png"
+                alt="Real-time analytics dashboard"
+                width={500}
+                height={300}
+                className="img-fluid rounded shadow-sm"
+              />
+            </Col>
+            <Col md="6" className="order-1 order-md-2">
+              <h3 className="fw-bold">Real-Time Analytics</h3>
+              <p className="text-muted mb-4">
+                Monitor open-rates, response rates, and review scores all from
+                one intuitive dashboard.
+              </p>
+
+              <h3 className="fw-bold">Seamless Integrations</h3>
+              <p className="text-muted">
+                Connect with Google, Facebook, Yelp, and 100+ other platforms in
+                under a minute.
+              </p>
+            </Col>
+          </Row>
+
+          {/* Final CTA */}
+          <Row className="justify-content-center text-center">
+            <Col lg="8">
+              <h2 className="fw-bold mb-4">
+                Ready to watch your reviews skyrocket?
+              </h2>
+              <Link href="/early-access" passHref>
+                <Button color="primary" size="lg">
+                  Sign up for early access
+                </Button>
+              </Link>
+            </Col>
+          </Row>
         </Container>
       </BaseLayout>
     </>
   );
-};
-
-export default Reviews;
+}
