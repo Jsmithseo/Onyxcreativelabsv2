@@ -15,6 +15,14 @@ import Link from 'next/link';
 
 const caseStudies = [
   {
+    brand: 'Pathway Humanity',
+    title: 'Servcing the community',
+    excerpt:
+      'Redesigned the website for clearer navigation, modern UI, and faster performance. Set up ongoing content services, including blog maintenance (editing/publishing), monthly newsletter creation and sends, and routine website updates (copy, images, and feature tweaks) to keep the site current and conversion-ready.',
+    link: '/pathway-case-study',
+    bgColor: '#009a9a'
+  },
+  {
     brand: 'Poll Everywhere',
     title: 'Poll Company',
     excerpt:
@@ -53,7 +61,7 @@ const caseStudies = [
       'Parsity.io needed to increase student enrollment. We enhanced their CRO, redesigned landing pages, launched Google Ads, and built a cold outreach strategy to attract qualified applicants.',
     link: '/parsity-case-study',
     bgColor: '#234d9b'
-  }
+  },
 ];
 
 export default function CaseStudyPage() {
