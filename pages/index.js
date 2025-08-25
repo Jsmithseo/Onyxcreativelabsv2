@@ -72,8 +72,8 @@ export default function Index() {
                 height={75}
               />
             </div>
-            <p style={{ ...styles.text, padding: '0 20px', margin: '20px 0' }}>
-            We help businesses scale through experimentation, performance design, and precision PPC campaigns. Backed by data.
+            <p style={{ ...styles.text, padding: '0 20px', margin: '20px 0' , fontSize: "40px"}}>
+              <b>Business Development</b> is what we do!
             </p>
             <div style={styles.buttonContainer}>
               <Link href="/contact">
