@@ -14,6 +14,15 @@ import BaseLayout from '../components/layouts/BaseLayouts';
 import Link from 'next/link';
 
 const caseStudies = [
+
+  {
+    brand: 'Stretchy',
+    title: 'Assisted Stretching Company',
+    excerpt:
+      'Stretchy had one golf club and big ambitions. We built a simple outbound engine—calls, email, pilot offers—and secured two more clubs, a high-end apartment partner, and a school district serving 1,200 staff. We also designed the staffing playbook and launch kit to scale locations fast.',
+    link: '/stretchy-case-study',
+    bgColor: '#ecdd01'
+  },
   {
     brand: 'Pathway Humanity',
     title: 'Servcing the community',
@@ -62,6 +71,7 @@ const caseStudies = [
     link: '/parsity-case-study',
     bgColor: '#234d9b'
   },
+  
 ];
 
 export default function CaseStudyPage() {
