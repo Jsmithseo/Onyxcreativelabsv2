@@ -38,9 +38,9 @@ export default function ExperimentationApproachSection() {
           </p>
         </Col>
       </Row>
-      <Link href="https://calendly.com/jeremy-onyxcreativelabs/client-discovery">
+      <Link href="https://calendly.com/jeremy-onyxcreativelabs/sales-training?month=2025-10">
       <Button color="primary" size="lg" style={{ marginTop: '2rem', fontWeight: '600' }}>
-        Get A Free Consultation
+        Schedule Consult
       </Button>
       </Link>
     </Container>
