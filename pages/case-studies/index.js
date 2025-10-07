@@ -92,7 +92,7 @@ export default function CaseStudyPage() {
           </h1>
           <p className="mt-3">
           </p>
-          <Link href="https://calendly.com/jeremy-onyxcreativelabs/client-discovery">
+          <Link href="https://calendly.com/jeremy-onyxcreativelabs/sales-training?month=2025-10">
           <Button color="primary" size="lg" className="mt-4">
             Start A Conversation
           </Button>
