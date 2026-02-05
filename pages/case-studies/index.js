@@ -14,6 +14,14 @@ import BaseLayout from '../components/layouts/BaseLayouts';
 import Link from 'next/link';
 
 const caseStudies = [
+  {
+    brand: 'SoHo Fit',
+    title: 'Sohofit is a private personal training studio',
+    excerpt:
+      'Launched a sprint-based experiment program for SoHo Fit Tampa — improving site speed, tightening the conversion path, and driving measurable lifts in sign-ups',
+    link: '/sohofit-case-study',
+    bgColor: '#D03D4D'
+  },
 
   {
     brand: 'Stretchy',
