@@ -24,7 +24,7 @@ const caseStudies = [
   },
 
   {
-    brand: 'Stretchy',
+    brand: 'Stretchy.Us',
     title: 'Assisted Stretching Company',
     excerpt:
       'Stretchy had one golf club and big ambitions. We built a simple outbound engine—calls, email, pilot offers—and secured two more clubs, a high-end apartment partner, and a school district serving 1,200 staff. We also designed the staffing playbook and launch kit to scale locations fast.',
