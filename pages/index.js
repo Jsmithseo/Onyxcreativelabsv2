@@ -73,7 +73,7 @@ export default function Index() {
               />
             </div>
             <p style={{ ...styles.text, padding: '0 20px', margin: '20px 0' , fontSize: "40px"}}>
-              <b>Business Development</b> is what we do!
+              <b>Business Development</b> that scales
             </p>
             <div style={styles.buttonContainer}>
               <Link href="/contact">
