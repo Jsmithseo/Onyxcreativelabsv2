@@ -3,11 +3,9 @@ import Image from 'next/image';
 import Logo from '../public/logo.PNG';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
-import Link from 'next/link';
 import BaseLayout from './components/layouts/BaseLayouts.js';
 import { Row, Col, Button } from 'reactstrap';
 import Approach from "../pages/components/Approach"
-import Services from "../pages/components/Services";
 import Results from "../pages/components/Results";
 
 
@@ -73,14 +71,19 @@ export default function Index() {
               />
             </div>
             <p style={{ ...styles.text, padding: '0 20px', margin: '20px 0' , fontSize: "40px"}}>
-              <b>Business Development</b> that scales
+              <b>Validate Your AI Product with a 90-Day Pilot</b>
+            </p>
+            <p style={{ ...styles.text, padding: '0 20px', margin: '20px 0' }}>
+              Stress-test your product with targeted market outreach, cold calling, inbound lead follow-up, and content to discover whether it has viable market fit.
             </p>
             <div style={styles.buttonContainer}>
-              <Link href="/contact">
-                <Button variant="contained" color="success" type="submit" style={{ fontWeight: '600' }}>
-                  Start Project
-                </Button>
-              </Link>
+              <Button
+                color="success"
+                href="https://calendly.com/softwaresmitty/discovery"
+                style={{ fontWeight: '600' }}
+              >
+                Book Time to Talk
+              </Button>
               {/* <Link href="https://calendly.com/jeremy-onyxcreativelabs/client-discovery">
                 <Button variant="contained" color="primary" type="submit" style={{ fontWeight: '600' }}>
                   30 Min Free Consult
@@ -98,11 +101,10 @@ export default function Index() {
                   className="text-center"
                   style={styles.content}
                 >
-                  <h1 style={styles.header}>No Gaps. No Silos. Just Momentum.</h1>
+                  <h1 style={styles.header}>Build a Growth Engine, Not a Patchwork.</h1>
                   <p style={styles.text}>
-                  We bring the same expert strategies and powerful tools used by the fastest-growing companies to your business. Our integrated ecosystem connects strategy, data, and execution—helping you move faster, collaborate more effectively, and create lasting, measurable impact.
+                  We connect strategy, outreach, and execution to help businesses create demand, strengthen their sales pipeline, and make informed growth decisions.
                   </p>
-                  <Services/>
                 </Col>
               </Row>
             </Container>

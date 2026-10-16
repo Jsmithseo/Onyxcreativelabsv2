@@ -74,6 +74,16 @@ const MyHeader = () => {
           </NavItem>
           <NavItem>
             <NavLink
+              href="/products"
+              style={linkStyle}
+              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+            >
+              Products
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink
               href="/case-studies"
               style={linkStyle}
               onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
