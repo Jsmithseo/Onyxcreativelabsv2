@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Script from 'next/script';
+import './styles/theme.css';
 
 const GA_TRACKING_ID = 'AW-16644561919';
 

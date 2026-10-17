@@ -1,48 +1,39 @@
 import React from 'react';
 import { Container, Row, Col, Button } from 'reactstrap';
-import { FaTools, FaLightbulb, FaFlask } from 'react-icons/fa';
 import Link from 'next/link';
 
 export default function ExperimentationApproachSection() {
   return (
-    <Container className="text-center py-5">
-      <h2 style={{ fontWeight: '700' }}>
-        We Don’t Guess, <span style={{ color: '#007bff' }}>We Test</span>
-      </h2>
-      <p className="mt-3 text-muted" style={{ maxWidth: '700px', margin: '0 auto' }}>
-        It’s our scientific approach to growth marketing that keeps clients coming back. 
-        Because we’re not here to keep doing what’s worked before — we’re going to find 
-        out what can work, and what will work better.
-      </p>
-
-      <Row className="mt-5 justify-content-center">
-        <Col xs="12" md="4" className="mb-4">
-          <FaTools size={40} color="#28a745" />
-          <h5 className="mt-3 fw-bold">Build</h5>
-          <p className="text-muted">
-            See what a strong culture of experimentation can do to evolve the impact of your marketing.
+    <Container className="py-5">
+      <Row className="align-items-center justify-content-center">
+        <Col md="6" className="text-center text-md-start mb-4 mb-md-0">
+          <h2 className="onyx-section-heading">
+            More Reviews, <span style={{ color: '#2563eb' }}>Less Chasing</span>
+          </h2>
+          <p className="mt-3 text-muted" style={{ fontSize: '1.1rem', maxWidth: '34rem' }}>
+            Onyx Reviews uses AI to automate thoughtful review requests, so you can keep your focus on your customers and your business.
           </p>
+          <Link href="/reviews">
+            <Button color="primary" size="lg" style={{ marginTop: '1rem', fontWeight: '600' }}>
+              Explore Onyx Reviews
+            </Button>
+          </Link>
         </Col>
-        <Col xs="12" md="4" className="mb-4">
-          <FaLightbulb size={40} color="#f0ad4e" />
-          <h5 className="mt-3 fw-bold">Try</h5>
-          <p className="text-muted">
-            We launch, measure, and analyze real-world tests across all channels and audiences.
-          </p>
-        </Col>
-        <Col xs="12" md="4" className="mb-4">
-          <FaFlask size={40} color="#007bff" />
-          <h5 className="mt-3 fw-bold">Optimize</h5>
-          <p className="text-muted">
-            Insights from testing guide us toward scalable, lasting results—based on proof, not opinion.
-          </p>
+        <Col md="6" className="text-center">
+          <div
+            className="rounded shadow-sm text-start p-4 mx-auto"
+            style={{ backgroundColor: '#f4f4f5', border: '1px solid #e4e4e7', maxWidth: '400px' }}
+          >
+            <p className="text-uppercase mb-2" style={{ color: '#2563eb', fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.08em' }}>
+              Onyx Reviews
+            </p>
+            <h3 className="h4 fw-bold">A better way to ask</h3>
+            <p className="text-muted mb-0">
+              Automated review requests, thoughtful follow-up, and clear response insights in one place.
+            </p>
+          </div>
         </Col>
       </Row>
-      <Link href="https://calendly.com/jeremy-onyxcreativelabs/sales-training?month=2025-10">
-      <Button color="primary" size="lg" style={{ marginTop: '2rem', fontWeight: '600' }}>
-        Schedule Consult
-      </Button>
-      </Link>
     </Container>
   );
 }
