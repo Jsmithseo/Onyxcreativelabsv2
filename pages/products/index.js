@@ -6,16 +6,22 @@ import BaseLayout from '../components/layouts/BaseLayouts';
 export default function ProductsPage() {
   return (
     <BaseLayout>
-      <div style={{ backgroundColor: '#f8f9fa', padding: '4rem 0' }}>
+      <div className="onyx-products-page">
         <Container className="text-center">
-          <h1 className="fw-bold">Products</h1>
-          <Row className="justify-content-center g-4 mt-1">
+          <div className="onyx-products-intro">
+            <p className="onyx-products-eyebrow">Onyx Products</p>
+            <h1>Tools built from practical market insight.</h1>
+            <p>
+              Our products are crafted in the lab to solve practical customer problems. We use market research and real-world learning to turn recurring needs into clear, useful tools.
+            </p>
+          </div>
+          <Row className="justify-content-center g-4">
             <Col md="6" lg="5" className="order-2">
-              <Card className="h-100 shadow-sm text-start">
-                <CardBody className="d-flex flex-column">
-                  <CardTitle tag="h2" className="h4 fw-bold">SuSu</CardTitle>
-                  <CardText className="text-muted">
-                    Explore rotating savings circles and reach your financial goals together today.
+              <Card className="onyx-product-card h-100 text-start">
+                <CardBody className="d-flex flex-column p-4 p-md-5">
+                  <CardTitle tag="h2">SuSu</CardTitle>
+                  <CardText>
+                    A community-rooted rotating savings circle that gives trusted groups a shared rhythm for saving, accountability, and working toward goals together.
                   </CardText>
                   <Link href="/susu" passHref legacyBehavior>
                     <Button color="primary" className="mt-auto align-self-start">
@@ -26,11 +32,11 @@ export default function ProductsPage() {
               </Card>
             </Col>
             <Col md="6" lg="5" className="order-1">
-              <Card className="h-100 shadow-sm text-start">
-                <CardBody className="d-flex flex-column">
-                  <CardTitle tag="h2" className="h4 fw-bold">Onyx Reviews</CardTitle>
-                  <CardText className="text-muted">
-                    Automate review requests so you can focus on running your business.
+              <Card className="onyx-product-card h-100 text-start">
+                <CardBody className="d-flex flex-column p-4 p-md-5">
+                  <CardTitle tag="h2">Onyx Reviews</CardTitle>
+                  <CardText>
+                    An AI-assisted SMS platform that helps businesses make review requests easy, gather feedback, and manage their reputation with less manual follow-up.
                   </CardText>
                   <Link href="/reviews" passHref legacyBehavior>
                     <Button color="primary" className="mt-auto align-self-start">

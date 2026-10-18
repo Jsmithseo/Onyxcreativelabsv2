@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
 :root {
   --onyx-black: #18181b;
   --onyx-charcoal: #3f3f46;
@@ -5,13 +7,15 @@
   --onyx-light-gray: #f4f4f5;
   --onyx-border: #e4e4e7;
   --onyx-accent: #2563eb;
+  --onyx-font: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
 }
 
 body {
   background: #ffffff;
   color: var(--onyx-black);
-  font-family: Avenir, "Avenir Next", "Helvetica Neue", Arial, sans-serif !important;
+  font-family: var(--onyx-font) !important;
   font-size: 16px;
+  font-weight: 400;
   line-height: 1.55;
 }
 
@@ -31,8 +35,8 @@ h5,
 h6 {
   color: var(--onyx-black);
   font-family: inherit !important;
-  font-weight: 700;
-  letter-spacing: -0.025em;
+  font-weight: 600;
+  letter-spacing: -0.015em;
   line-height: 1.15;
 }
 
@@ -48,6 +52,90 @@ p {
 .onyx-hero-logo {
   margin: 0 auto 1.75rem;
   text-align: center;
+}
+
+.onyx-live-logo {
+  align-items: center;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.onyx-logo-mark {
+  height: 60px;
+  overflow: hidden;
+  position: relative;
+  width: 165px;
+}
+
+.onyx-logo-mark img {
+  height: 103px;
+  left: -143px;
+  max-width: none;
+  position: absolute;
+  top: -2px;
+  width: 452px;
+}
+
+.onyx-logo-water {
+  background:
+    linear-gradient(165deg, rgba(186, 230, 253, 0.1) 0 25%, rgba(56, 189, 248, 0.42) 26% 40%, rgba(14, 116, 144, 0.58) 41% 100%);
+  border-radius: 50%;
+  height: 48px;
+  left: 29px;
+  mix-blend-mode: screen;
+  opacity: 0.42;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  top: 7px;
+  width: 48px;
+  z-index: 1;
+}
+
+.onyx-logo-water::before,
+.onyx-logo-water::after {
+  background: rgba(255, 255, 255, 0.38);
+  border-radius: 48% 52% 45% 55%;
+  content: '';
+  height: 28px;
+  left: -24px;
+  position: absolute;
+  top: 8px;
+  transform: rotate(-7deg);
+  width: 100px;
+}
+
+.onyx-logo-water::before {
+  animation: onyx-water-wave 7s ease-in-out infinite alternate;
+}
+
+.onyx-logo-water::after {
+  animation: onyx-water-wave 8.5s ease-in-out infinite alternate-reverse;
+  opacity: 0.3;
+  top: 16px;
+}
+
+@keyframes onyx-water-wave {
+  from { transform: translateX(-10px) rotate(-7deg); }
+  to { transform: translateX(18px) rotate(7deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onyx-logo-water::before,
+  .onyx-logo-water::after {
+    animation: none;
+  }
+}
+
+.onyx-live-logo span {
+  color: var(--onyx-black);
+  font-size: clamp(0.95rem, 1.7vw, 1.2rem);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
+  transform: translateX(-10px);
 }
 
 .onyx-hero-title {
@@ -89,6 +177,52 @@ p {
 .onyx-muted-section {
   background: var(--onyx-light-gray);
   padding: 1rem 0;
+}
+
+.onyx-products-page {
+  background: var(--onyx-light-gray);
+  padding: 5rem 0;
+}
+
+.onyx-products-intro {
+  margin: 0 auto 3rem;
+  max-width: 760px;
+}
+
+.onyx-products-intro h1 {
+  font-size: clamp(2.25rem, 4vw, 3.25rem);
+  margin: 0 0 1rem;
+}
+
+.onyx-products-intro > p:last-child {
+  color: var(--onyx-charcoal);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.onyx-products-eyebrow {
+  color: var(--onyx-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin: 0 0 0.85rem;
+  text-transform: uppercase;
+}
+
+.onyx-product-card {
+  background: #ffffff;
+  border: 1px solid var(--onyx-border);
+  border-radius: 0;
+}
+
+.onyx-product-card h2 {
+  font-size: 1.6rem;
+  margin: 0 0 0.75rem;
+}
+
+.onyx-product-card .card-text {
+  color: var(--onyx-charcoal);
+  margin-bottom: 2rem;
 }
 
 .onyx-content-section {
@@ -141,6 +275,10 @@ p {
 
 .onyx-pilot-section {
   padding: 5rem 0;
+}
+
+.onyx-pilot-programs-section {
+  padding: 2.75rem 0 4rem;
 }
 
 .onyx-pilot-process-section {
@@ -216,7 +354,7 @@ p {
 
 .onyx-feature-list {
   list-style: none;
-  margin: 1rem 0 2rem;
+  margin: 1rem 0 1.25rem;
   padding: 0;
 }
 

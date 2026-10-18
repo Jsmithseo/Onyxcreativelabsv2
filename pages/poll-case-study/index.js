@@ -41,7 +41,7 @@ function LegacyPollEverywhereCaseStudy() {
             <h3 className="fw-bold">The Opportunity</h3>
             <p>
               As a contracted dev partner, we joined their team to quickly ramp up and tackle backlog items,
-              bugs, and ticket resolution — giving the internal team breathing room to focus on long-term initiatives.
+              bugs, and ticket resolution, giving the internal team breathing room to focus on long-term initiatives.
             </p>
           </Col>
         </Row>

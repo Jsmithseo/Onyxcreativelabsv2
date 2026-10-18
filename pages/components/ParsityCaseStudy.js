@@ -43,7 +43,7 @@ export default function ParsityCaseStudy() {
               <h2>Build the bridge between initial interest and a confident decision.</h2>
             </Col>
             <Col lg="8">
-              <p>Onyx Creative Labs supported Parsity as an extension of its sales-development process. We focused on rapid warm-lead response, appointment setting, nurture, and follow-up—helping interested prospects reach the mentors who could speak directly to the program and guide a final decision.</p>
+              <p>Onyx Creative Labs supported Parsity as an extension of its sales-development process. We focused on rapid warm-lead response, appointment setting, nurture, and follow-up. This helped interested prospects reach the mentors who could speak directly to the program and guide a final decision.</p>
               <p className="mb-0">That work also created an active listening channel. Beyond moving deals forward, each conversation surfaced the language, questions, and hesitation shaping how people evaluate AI-focused technical education.</p>
             </Col>
           </Row>
@@ -65,13 +65,13 @@ export default function ParsityCaseStudy() {
         <Row className="g-5">
           <Col lg="4">
             <p className="onyx-lab-eyebrow">The result</p>
-            <h2>A more active pipeline and 10–15 additional deals per month.</h2>
+            <h2>A more active pipeline and 10 to 15 additional deals per month.</h2>
           </Col>
           <Col lg="8">
             <p>Through warm calling, appointment setting, presentations, and steady follow-up, the partnership helps Parsity generate 10 to 15 additional deals each month. The team has a clearer way to connect interested students and buyers with the people who can close and support them.</p>
             <div className="onyx-case-learning">
               <h3>The key learning</h3>
-              <p className="mb-0">For a technical education product, a sales pipeline is also a learning system. Conversations with interested people reveal how the market understands the offer—and what the product, message, or sales process should answer next.</p>
+              <p className="mb-0">For a technical education product, a sales pipeline is also a learning system. Conversations with interested people reveal how the market understands the offer and what the product, message, or sales process should answer next.</p>
             </div>
           </Col>
         </Row>

@@ -8,19 +8,13 @@ import {
   Button,
   Collapse,
   NavbarToggler,
-  Dropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
 } from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const MyHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const toggleNavbar = () => setIsOpen(!isOpen);
-  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
   const linkStyle = {
     textDecoration: 'none',
@@ -56,21 +50,6 @@ const MyHeader = () => {
             >
               Our Story
             </NavLink>
-          </NavItem>
-          <NavItem>
-            <Dropdown nav isOpen={dropdownOpen} toggle={toggleDropdown}>
-              <DropdownToggle nav caret style={linkStyle}>
-                Solutions 
-              </DropdownToggle>
-              <DropdownMenu>
-                <DropdownItem href="/cro">Conversion Rate optimization</DropdownItem>
-                <DropdownItem href="/paid-marketing">Paid Marketing</DropdownItem>
-                <DropdownItem href="/email">Email</DropdownItem>
-                <DropdownItem href="/dev">Web Development</DropdownItem>
-                <DropdownItem href="/research">Research and Strategy</DropdownItem>
-
-              </DropdownMenu>
-            </Dropdown>
           </NavItem>
           <NavItem>
             <NavLink

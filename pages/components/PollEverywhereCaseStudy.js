@@ -7,7 +7,7 @@ const interventions = [
   ['Marketing-Engineering Bridge', 'We brought together marketing judgment and engineering fluency, working directly in the existing codebase while keeping every technical contribution connected to campaign, messaging, and conversion needs.'],
   ['Landing Page Development', 'We developed and updated marketing pages, landing pages, and supporting scripts so the marketing site could respond more quickly to new priorities.'],
   ['Brand-Aligned Component Library', 'We created a component library that met Poll Everywhere’s brand standards, giving the team reusable, predefined building blocks for common marketing-page patterns.'],
-  ['Repeatable Publishing System', 'Those components made it possible to assemble new pages with more speed and consistency—without treating every launch as a one-off engineering project.'],
+  ['Repeatable Publishing System', 'Those components made it possible to assemble new pages with more speed and consistency without treating every launch as a one-off engineering project.'],
 ];
 
 export default function PollEverywhereCaseStudy() {
@@ -43,7 +43,7 @@ export default function PollEverywhereCaseStudy() {
               <h2>Build a system that lets marketing create without starting from zero.</h2>
             </Col>
             <Col lg="8">
-              <p>Onyx Creative Labs contributed as both an engineer and a marketer—working in the codebase to develop pages and scripts while keeping the marketing team’s message, brand, and conversion goals in view.</p>
+              <p>Onyx Creative Labs contributed as both an engineer and a marketer, working in the codebase to develop pages and scripts while keeping the marketing team’s message, brand, and conversion goals in view.</p>
               <p className="mb-0">The centerpiece of the work was a reusable component library. By defining on-brand components that function like flexible building blocks, the team gained a more dependable way to compose new landing pages and marketing experiences without reinventing the interface each time.</p>
             </Col>
           </Row>
@@ -71,7 +71,7 @@ export default function PollEverywhereCaseStudy() {
             <p>Poll Everywhere gained direct technical support for its marketing site and a component foundation that made new pages easier to produce. The system helped align speed with quality, allowing marketing needs, brand standards, and conversion requirements to be addressed together.</p>
             <div className="onyx-case-learning">
               <h3>The key learning</h3>
-              <p className="mb-0">When marketing and engineering share a practical system, the website becomes easier to improve. Reusable components do more than save build time—they give a team a reliable way to turn strategy into a consistent digital experience.</p>
+              <p className="mb-0">When marketing and engineering share a practical system, the website becomes easier to improve. Reusable components do more than save build time. They give a team a reliable way to turn strategy into a consistent digital experience.</p>
             </div>
           </Col>
         </Row>

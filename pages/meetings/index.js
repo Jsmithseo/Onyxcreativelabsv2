@@ -10,7 +10,7 @@ const MainStyle = {
 
 const copyStyle = {
   fontSize: '22px',
-  fontFamily: 'avenir',
+  fontFamily: 'inherit',
   textAlign: 'center',
 };
 
@@ -49,7 +49,7 @@ export default function Meetings() {
                     and facilitate the agile process. Here's how a non-profit
                     organization can set a productive meeting cadence.
                   </p>
-                  <h3>Section 1: The Scrum Framework – An Overview</h3>
+                  <h3>Section 1: The Scrum Framework: An Overview</h3>
                   <ul>
                     <li>Scrum Basics: Sprints, Roles, and Artifacts</li>
                     <li>Adapting Scrum to Non-Profit Projects</li>

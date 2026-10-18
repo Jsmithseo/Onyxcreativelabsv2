@@ -17,7 +17,7 @@ const caseStudies = [
     brand: 'Stretchy.Us',
     title: 'Assisted Stretching Company',
     excerpt:
-      'Stretchy had one golf club and big ambitions. We built a simple outbound engine—calls, email, pilot offers—and secured two more clubs, a high-end apartment partner, and a school district serving 1,200 staff. We also designed the staffing playbook and launch kit to scale locations fast.',
+      'Stretchy had one golf club and big ambitions. We built a simple outbound engine with calls, email, and pilot offers. This secured two more clubs, a high-end apartment partner, and a school district serving 1,200 staff. We also designed the staffing playbook and launch kit to scale locations fast.',
     link: '/stretchy-case-study',
     studyArea: 'Market expansion study'
   },
@@ -41,7 +41,7 @@ const caseStudies = [
     brand: 'SoHo Fit',
     title: 'Sohofit is a private personal training studio',
     excerpt:
-      'Launched a sprint-based experiment program for SoHo Fit Tampa — improving site speed, tightening the conversion path, and driving measurable lifts in sign-ups',
+      'Launched a sprint-based experiment program for SoHo Fit Tampa, improving site speed, tightening the conversion path, and driving measurable lifts in sign-ups',
     link: '/sohofit-case-study',
     studyArea: 'Conversion study'
   },
@@ -49,7 +49,7 @@ const caseStudies = [
     brand: 'Poll Everywhere',
     title: 'Poll Company',
     excerpt:
-      'Stepping in to clear development backlog, we supported Poll Everywhere through a critical period of limited dev availability—keeping product momentum alive and internal teams unblocked',
+      'Stepping in to clear development backlog, we supported Poll Everywhere through a critical period of limited dev availability, keeping product momentum alive and internal teams unblocked',
     link: '/poll-case-study',
     studyArea: 'Product delivery study'
   },

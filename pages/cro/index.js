@@ -29,7 +29,7 @@ export default function CROServicesPage() {
           <Col md="6">
             <h3 className="fw-bold">What is CRO?</h3>
             <p>
-              Conversion Rate Optimization is the practice of using data, testing, and insights to continuously improve how your website converts traffic. Whether you're looking for more signups, purchases, or inquiries — our CRO strategies are tailored to your goals.
+              Conversion Rate Optimization is the practice of using data, testing, and insights to continuously improve how your website converts traffic. Whether you're looking for more signups, purchases, or inquiries, our CRO strategies are tailored to your goals.
             </p>
             <ul>
               <li><FaCheckCircle className="me-2 text-success" /> Increase conversions without increasing ad spend</li>
@@ -62,7 +62,7 @@ export default function CROServicesPage() {
           <Col md="3">
             <FaChartLine size={40} color="#6f42c1" />
             <h6 className="mt-3 fw-bold">Ongoing Optimization</h6>
-            <p>CRO is never done — we help your team stay ahead with iterative wins month over month.</p>
+            <p>CRO is never done. We help your team stay ahead with iterative wins month over month.</p>
           </Col>
         </Row>
 

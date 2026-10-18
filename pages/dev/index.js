@@ -12,7 +12,7 @@ export default function WebDesignPage() {
         <Container>
           <h1 className="fw-bold">Web Design & Development</h1>
           <p className="mt-3 text-muted">
-            From idea to launch — we build beautiful, high-performing websites that grow with your business.
+            From idea to launch, we build beautiful, high-performing websites that grow with your business.
           </p>
         </Container>
       </div>
@@ -57,7 +57,7 @@ export default function WebDesignPage() {
           <Col md="3">
             <FaRocket size={40} color="#6f42c1" />
             <h6 className="mt-3 fw-bold">Launch & Support</h6>
-            <p>From DNS to hosting — we handle setup, testing, and post-launch success.</p>
+            <p>From DNS to hosting, we handle setup, testing, and post-launch success.</p>
           </Col>
         </Row>
 

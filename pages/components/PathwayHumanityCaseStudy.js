@@ -30,7 +30,7 @@ export default function PathwayHumanityCaseStudy() {
           </Col>
           <Col lg="8">
             <p>Pathway Humanity was already doing meaningful work, but its website and public story did not fully convey the value of the organization or the range of support it could help clients access. The task was not to invent a new offer. It was to define the value already there and make it easier for people to see.</p>
-            <p className="mb-0">That meant connecting the organization’s story, message, content, and partnership opportunities into one clearer experience—one that could build trust with visitors and better support the people looking for help.</p>
+            <p className="mb-0">That meant connecting the organization’s story, message, content, and partnership opportunities into one clearer experience. It could build trust with visitors and better support the people looking for help.</p>
           </Col>
         </Row>
       </Container>
@@ -71,7 +71,7 @@ export default function PathwayHumanityCaseStudy() {
             <p>Pathway Humanity left with a redesigned website, clearer messaging, and a content foundation built around its real strengths. The work helps the organization explain its role more confidently, keep audiences engaged over time, and strengthen relationships that expand the support available to its clients.</p>
             <div className="onyx-case-learning">
               <h3>The key learning</h3>
-              <p className="mb-0">For mission-driven organizations, growth is not always about reaching more people first. It can begin by making the existing value unmistakable—so the right people can understand it, trust it, and connect with it.</p>
+              <p className="mb-0">For mission-driven organizations, growth is not always about reaching more people first. It can begin by making the existing value unmistakable, so the right people can understand it, trust it, and connect with it.</p>
             </div>
           </Col>
         </Row>

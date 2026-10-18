@@ -26,7 +26,7 @@ function LegacyStretchyCaseStudy() {
           <h1 className="onyx-hero-title">Business Development Scale-Up for Stretchy</h1>
           <p className="onyx-hero-copy">
             How Onyx Creative Labs is expanding Stretchy’s footprint from a single golf club to
-            multi-location partnerships—while building the staffing engine to support growth.
+            multi-location partnerships while building the staffing engine to support growth.
           </p>
           <a className="onyx-case-study-site-link" href="https://stretchy.us" target="_blank" rel="noopener noreferrer">
             Visit Website ↗
@@ -49,8 +49,8 @@ function LegacyStretchyCaseStudy() {
           <Col md="6">
             <h3 className="fw-bold">The Opportunity</h3>
             <p>
-              Build a simple but powerful business development engine—target lists, phone + email
-              outreach, partner proposals, fast pilots—and pair it with a staffing playbook so new
+              Build a simple but powerful business development engine with target lists, phone and email
+              outreach, partner proposals, and fast pilots. Pair it with a staffing playbook so new
               locations could launch quickly without straining operations.
             </p>
           </Col>

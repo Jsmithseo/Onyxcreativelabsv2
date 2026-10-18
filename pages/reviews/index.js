@@ -10,7 +10,7 @@ export default function Reviews() {
   return (
     <>
       <Head>
-        <title>Why ask for your own reviews? Let AI do it. – Onyx Creative Labs</title>
+        <title>Why ask for your own reviews? Let AI do it. Onyx Creative Labs</title>
       </Head>
 
       <BaseLayout>
@@ -32,7 +32,7 @@ export default function Reviews() {
               <h2>Reviews turn good work into visible trust.</h2>
             </Col>
             <Col lg="8">
-              <p className="onyx-reviews-lead">Your best customers are often willing to share their experience—they just need an easy moment to do it. Onyx Reviews creates that moment without putting your team in the uncomfortable position of repeatedly asking.</p>
+              <p className="onyx-reviews-lead">Your best customers are often willing to share their experience. They just need an easy moment to do it. Onyx Reviews creates that moment without putting your team in the uncomfortable position of repeatedly asking.</p>
               <p className="mb-0">The result is a more consistent review process that supports the way people evaluate local businesses online: through customer experiences, clear signals of trust, and a responsive reputation.</p>
             </Col>
           </Row>

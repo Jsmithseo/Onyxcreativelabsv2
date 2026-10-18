@@ -10,7 +10,7 @@ const MainStyle = {
 
 const copyStyle = {
   fontSize: '22px',
-  fontFamily: 'avenir',
+  fontFamily: 'inherit',
   textAlign: 'center',
 };
 
@@ -111,7 +111,7 @@ export default function Planning() {
                   </p>
                   <p>
                     Remember, in the non-profit sector, the "customers" are the
-                    beneficiaries of your services – whether they're
+                    beneficiaries of your services, whether they're
                     individuals, communities, or causes you serve. Therefore,
                     all planning and prioritization efforts should center on
                     maximizing positive outcomes for these groups
@@ -366,7 +366,7 @@ export default function Planning() {
                     For nonprofit teams, it's important to remember that the
                     "user" in user stories may not be a software user but could
                     represent beneficiaries, donors, staff members, or
-                    volunteers—essentially any group or individual who will
+                    volunteers, essentially any group or individual who will
                     benefit from the task's completion.
                   </p>
                   <p>

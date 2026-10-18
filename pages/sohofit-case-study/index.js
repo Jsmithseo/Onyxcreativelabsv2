@@ -29,7 +29,7 @@ function LegacySoHoFitTampaCaseStudy() {
         <Container>
           <h1 className="fw-bold">CRO + Speed Optimization for SoHo Fit Tampa</h1>
           <p className="mt-3 text-muted">
-            How Onyx Creative Labs launched a sprint-based experiment program for SoHo Fit Tampa—
+            How Onyx Creative Labs launched a sprint-based experiment program for SoHo Fit Tampa.
             improving site speed, tightening the conversion path, and driving measurable lifts in sign-ups.
           </p>
           <a
@@ -49,7 +49,7 @@ function LegacySoHoFitTampaCaseStudy() {
             <h3 className="fw-bold">The Challenge</h3>
             <p>
               SoHo Fit Tampa was generating interest, but the website had performance drag that
-              could hurt mobile experience and conversion—especially for first-time visitors.
+              could hurt mobile experience and conversion, especially for first-time visitors.
               The brand wanted to improve sign-ups and build a repeatable system to continuously
               improve the website over time.
             </p>
@@ -59,7 +59,7 @@ function LegacySoHoFitTampaCaseStudy() {
             <p>
               Pair technical performance improvements (speed + stability) with a structured CRO
               experimentation program. Meet sprint-style, review metrics, ship improvements, measure lift,
-              and repeat—so results compound month over month.
+              and repeat, so results compound month over month.
             </p>
           </Col>
         </Row>
@@ -70,7 +70,7 @@ function LegacySoHoFitTampaCaseStudy() {
             <FaTachometerAlt size={40} color="#0d6efd" />
             <h6 className="mt-3 fw-bold">Speed Optimization</h6>
             <p className="mb-0">
-              Cleaned up unnecessary JS/CSS, reduced payload, and improved load performance—especially on mobile.
+              Cleaned up unnecessary JS/CSS, reduced payload, and improved load performance, especially on mobile.
             </p>
           </Col>
 
@@ -137,7 +137,7 @@ function LegacySoHoFitTampaCaseStudy() {
             <FaSyncAlt size={36} />
             <h6 className="mt-3 fw-bold">Continuous Iteration</h6>
             <p className="mb-0">
-              Changes ship in cycles—measure impact, keep what works, and build the next sprint backlog.
+              Changes ship in cycles. Measure impact, keep what works, and build the next sprint backlog.
             </p>
           </Col>
           <Col md="4" className="mb-4">

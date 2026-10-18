@@ -23,7 +23,7 @@ export default function ResearchAnalyticsPage() {
           <Col md="6">
             <h3 className="fw-bold">Why It Matters</h3>
             <p>
-              Great outcomes start with clarity. Our team helps you uncover trends, understand your audience, and build a strategy that drives results. From market research to funnel analysis — we guide you from insight to impact.
+              Great outcomes start with clarity. Our team helps you uncover trends, understand your audience, and build a strategy that drives results. From market research to funnel analysis, we guide you from insight to impact.
             </p>
             <ul>
               <li>✓ Customer & Market Research</li>

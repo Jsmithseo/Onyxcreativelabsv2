@@ -28,7 +28,7 @@ export default function PaidMarketingPage() {
           <Col md="6">
             <h3 className="fw-bold">Why Paid Media?</h3>
             <p>
-              Paid marketing allows you to reach high-intent audiences and convert faster. With performance-driven campaigns on Google, Meta, and beyond — we help you get the most out of your ad spend.
+              Paid marketing allows you to reach high-intent audiences and convert faster. With performance-driven campaigns on Google, Meta, and beyond, we help you get the most out of your ad spend.
             </p>
             <ul>
               <li>✓ Google Ads (Search, Display, YouTube)</li>

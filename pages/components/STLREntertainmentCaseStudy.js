@@ -29,7 +29,7 @@ export default function STLREntertainmentCaseStudy() {
             <h2>What is the most reliable way to create more live-performance opportunities?</h2>
           </Col>
           <Col lg="8">
-            <p>STLR Entertainment had an established history and a roster of artists to represent, but the work of consistently creating new venue opportunities required a more focused business-development system. The team needed more than visibility—it needed a repeatable way to start and advance booking conversations.</p>
+            <p>STLR Entertainment had an established history and a roster of artists to represent, but the work of consistently creating new venue opportunities required a more focused business-development system. The team needed more than visibility. It needed a repeatable way to start and advance booking conversations.</p>
             <p className="mb-0">Getting there took time. We explored content, website messaging, artist promotion, advertising, and other channels before the pattern became clear: the strongest path was speaking directly with the local venues that could host the artists.</p>
           </Col>
         </Row>
@@ -68,7 +68,7 @@ export default function STLREntertainmentCaseStudy() {
             <h2>A practical booking system built around real venue conversations.</h2>
           </Col>
           <Col lg="8">
-            <p>STLR Entertainment left with a clearer message, a more consistent content foundation, and—most importantly—a direct venue-outreach pipeline. The team could systematically identify local opportunities, start real conversations, and follow up in a way that supported ongoing booking development.</p>
+            <p>STLR Entertainment left with a clearer message, a more consistent content foundation, and most importantly, a direct venue-outreach pipeline. The team could systematically identify local opportunities, start real conversations, and follow up in a way that supported ongoing booking development.</p>
             <div className="onyx-case-learning">
               <h3>The key learning</h3>
               <p className="mb-0">The best channel is not always the most polished or automated one. For STLR Entertainment, direct human conversations with venues created the clearest path to understanding demand and developing new performance opportunities.</p>

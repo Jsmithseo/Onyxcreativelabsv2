@@ -18,7 +18,7 @@ export default function CordeliaCaseStudy() {
           <p className="onyx-lab-eyebrow">Case Study / Market Access</p>
           <h1 className="onyx-hero-title">Bringing Cordelia ARC to the Public Market</h1>
           <p className="onyx-hero-copy">
-            From county referrals to public visibility — a digital launch for growth.
+            From county referrals to public visibility, a digital launch for growth.
           </p>
           <a className="onyx-case-study-site-link" href="https://cordeliaarc.com" target="_blank" rel="noopener noreferrer">
             Visit Website ↗

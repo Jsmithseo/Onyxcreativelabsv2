@@ -29,7 +29,7 @@ export default function LifecycleEmailsPage() {
           <Col md="6">
             <h3 className="fw-bold">What Are Lifecycle Emails?</h3>
             <p>
-              Lifecycle emails are automated email sequences tailored to where a customer is in their journey — welcoming new users, nudging repeat purchases, re-engaging dormant contacts, or rewarding loyalty.
+              Lifecycle emails are automated email sequences tailored to where a customer is in their journey, welcoming new users, nudging repeat purchases, re-engaging dormant contacts, or rewarding loyalty.
             </p>
             <ul>
               <li>✓ Welcome Series</li>
@@ -53,7 +53,7 @@ export default function LifecycleEmailsPage() {
           <Col md="3">
             <FaUserClock size={40} color="#28a745" />
             <h6 className="mt-3 fw-bold">Automated Timing</h6>
-            <p>Emails are triggered by behavior and time — not guesses — to increase open and conversion rates.</p>
+            <p>Emails are triggered by behavior and time, not guesses, to increase open and conversion rates.</p>
           </Col>
           <Col md="3">
             <FaPaperPlane size={40} color="#ffc107" />

@@ -38,7 +38,7 @@ function LegacyPathwayHumanityCaseStudy() {
           <Col md="6">
             <h3 className="fw-bold">The Challenge</h3>
             <p>
-              Pathway Humanity offers mental health and addiction recovery, transitional housing, and job support—
+              Pathway Humanity offers mental health and addiction recovery, transitional housing, and job support.
               but the website didn’t reflect the full scope of services. Navigation was unclear, content was dated,
               and there wasn’t a consistent cadence for updates or newsletters. As a result, qualified visitors weren’t
               converting into inquiries.
@@ -48,7 +48,7 @@ function LegacyPathwayHumanityCaseStudy() {
             <h3 className="fw-bold">The Opportunity</h3>
             <p>
               Redesign the site around clear service pathways, improve performance and accessibility, and launch an
-              ongoing content engine—blog maintenance, monthly newsletters, and regular website updates—to keep the
+              ongoing content engine with blog maintenance, monthly newsletters, and regular website updates to keep the
               brand current and conversion-ready.
             </p>
           </Col>
@@ -62,7 +62,7 @@ function LegacyPathwayHumanityCaseStudy() {
             <FaSitemap size={40} color="#0d6efd" />
             <h6 className="mt-3 fw-bold">Website Redesign</h6>
             <p>
-              Rebuilt IA and page templates to spotlight core services—Recovery, Transitional Housing, and Job Support—
+              Rebuilt IA and page templates to spotlight core services: Recovery, Transitional Housing, and Job Support.
               with clear CTAs on every page.
             </p>
           </Col>

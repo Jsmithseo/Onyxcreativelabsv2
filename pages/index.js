@@ -1,7 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import Logo from '../public/logo.PNG';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 import BaseLayout from './components/layouts/BaseLayouts.js';
@@ -25,12 +23,13 @@ export default function Index() {
         <section className="onyx-hero">
           <Container>
             <div className="onyx-hero-logo">
-              <Image
-                src={Logo}
-                alt="Onyx Creative Labs Logo"
-                width={300}
-                height={75}
-              />
+              <div className="onyx-live-logo" aria-label="Onyx Creative Labs">
+                <div className="onyx-logo-mark" aria-hidden="true">
+                  <img src="/logo.PNG" alt="" />
+                  <span className="onyx-logo-water" />
+                </div>
+                <span>Onyx Creative Labs</span>
+              </div>
             </div>
             <h1 className="onyx-hero-title">
               Validate Your AI Product with a 90-Day Pilot

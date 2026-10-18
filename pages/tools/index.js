@@ -10,7 +10,7 @@ const MainStyle = {
 
 const copyStyle = {
   fontSize: '22px',
-  fontFamily: 'avenir',
+  fontFamily: 'inherit',
   textAlign: 'center',
 };
 

@@ -12,7 +12,7 @@ const circleSteps = [
 const values = [
   ['Accountability through community', 'Saving can feel difficult alone. A shared circle gives every member a reason to stay consistent and a group that understands the goal.'],
   ['A tradition, made easier with technology', 'SuSu brings a long-standing community savings practice into a more organized digital experience, with clearer coordination and shared visibility.'],
-  ['Financial literacy in practice', 'The product is designed to make saving feel concrete and participatory—especially for groups learning how to build stronger financial habits together.'],
+  ['Financial literacy in practice', 'The product is designed to make saving feel concrete and participatory, especially for groups learning how to build stronger financial habits together.'],
   ['Built for trusted groups', 'SuSu is intended for small groups, families, churches, community programs, social groups, and nonprofit partners that want to strengthen saving habits together.'],
 ];
 
@@ -29,7 +29,7 @@ export default function SuSuPage() {
           <Container>
             <p className="onyx-lab-eyebrow">SuSu / A time-honored community savings tradition</p>
             <h1 className="onyx-hero-title">An old tradition. A modern circle.</h1>
-            <p className="onyx-hero-copy">SuSu brings the rotating savings circle into a more organized digital experience—a way for trusted groups to save together, support one another, and work toward real goals as a community.</p>
+            <p className="onyx-hero-copy">SuSu brings the rotating savings circle into a more organized digital experience. It gives trusted groups a way to save together, support one another, and work toward real goals as a community.</p>
           </Container>
         </section>
 
@@ -56,7 +56,7 @@ export default function SuSuPage() {
             </Col>
             <Col lg="8">
               <p className="onyx-reviews-lead">A SuSu is a rotating savings circle: a practice used in communities for generations to make saving a shared responsibility rather than a solitary task.</p>
-              <p className="mb-0">The idea for this product grew from seeing how difficult it can be to keep a consistent savings habit—especially when typical saving tools can feel passive or disconnected from community. In a SuSu circle, members contribute on a schedule and take turns receiving the pooled contribution, combining personal progress with the power of helping someone else reach their moment.</p>
+              <p className="mb-0">The idea for this product grew from seeing how difficult it can be to keep a consistent savings habit, especially when typical saving tools can feel passive or disconnected from community. In a SuSu circle, members contribute on a schedule and take turns receiving the pooled contribution, combining personal progress with the power of helping someone else reach their moment.</p>
             </Col>
           </Row>
         </Container>
@@ -108,7 +108,7 @@ export default function SuSuPage() {
               <Col lg="9">
                 <p className="onyx-lab-eyebrow">Built for communities</p>
                 <h2>Bringing a trusted tradition into the next generation.</h2>
-                <p>SuSu is being developed with community groups, families, churches, social organizations, and nonprofit partners in mind. Technology and AI can help make coordination, reminders, and program learning easier—while the heart of the experience stays human: people working together toward stronger financial habits.</p>
+                <p>SuSu is being developed with community groups, families, churches, social organizations, and nonprofit partners in mind. Technology and AI can help make coordination, reminders, and program learning easier. The heart of the experience stays human: people working together toward stronger financial habits.</p>
               </Col>
             </Row>
           </Container>

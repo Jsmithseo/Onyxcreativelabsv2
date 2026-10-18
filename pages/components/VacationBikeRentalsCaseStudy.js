@@ -29,7 +29,7 @@ export default function VacationBikeRentalsCaseStudy() {
             <h2>How do you make bike rentals more efficient without losing the demand already working?</h2>
           </Col>
           <Col lg="8">
-            <p>Vacation Bike Rentals had healthy interest in one-off rentals, but individual bookings alone were not the most efficient way to grow the business. The opportunity was to attract more rentals at a time—especially group bookings—while continuing to serve the individual customers already choosing the experience.</p>
+            <p>Vacation Bike Rentals had healthy interest in one-off rentals, but individual bookings alone were not the most efficient way to grow the business. The opportunity was to attract more rentals at a time, especially group bookings, while continuing to serve the individual customers already choosing the experience.</p>
             <p className="mb-0">The work began with market and analytics findings: which groups could benefit from the service, what they were looking for, and how the website could more directly reflect the occasions that lead to larger bookings.</p>
           </Col>
         </Row>

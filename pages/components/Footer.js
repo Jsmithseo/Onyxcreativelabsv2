@@ -9,7 +9,7 @@ const Footer = () => {
           <Col md="4">
             <h5>About Onyx Creative Labs</h5>
             <p>
-              Onyx Creative Labs helps businesses clarify their value, build meaningful momentum, and create lasting demand—so they can deepen connections, grow with confidence, and move their vision forward.
+              Onyx Creative Labs helps businesses clarify their value, build meaningful momentum, and create lasting demand. This helps them deepen connections, grow with confidence, and move their vision forward.
             </p>
           </Col>
           <Col md="4">

@@ -33,7 +33,7 @@ function LegacyVacationBikeCaseStudy() {
           <Col md="6">
             <h3 className="fw-bold">The Challenge</h3>
             <p>
-              Vacation Bike Rentals was struggling with a drop in bookings during the colder months. Their website traffic remained steady, but conversions were falling off — especially during weekdays and off-peak hours.
+              Vacation Bike Rentals was struggling with a drop in bookings during the colder months. Their website traffic remained steady, but conversions were falling off, especially during weekdays and off-peak hours.
             </p>
           </Col>
           <Col md="6">
