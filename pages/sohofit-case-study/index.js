@@ -13,8 +13,9 @@ import {
 } from "react-icons/fa";
 import BaseLayout from "../components/layouts/BaseLayouts";
 import Link from "next/link";
+import SoHoFitCaseStudy from "../components/SoHoFitCaseStudy";
 
-export default function SoHoFitTampaCaseStudy() {
+function LegacySoHoFitTampaCaseStudy() {
   return (
     <BaseLayout>
       {/* Hero Section */}
@@ -177,4 +178,8 @@ export default function SoHoFitTampaCaseStudy() {
       </Container>
     </BaseLayout>
   );
+}
+
+export default function SoHoFitTampaCaseStudy() {
+  return <SoHoFitCaseStudy />;
 }

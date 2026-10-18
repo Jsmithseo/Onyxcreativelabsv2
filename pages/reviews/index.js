@@ -3,7 +3,6 @@
 import React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import Image from "next/image";
 import BaseLayout from "../components/layouts/BaseLayouts";
 import { Container, Row, Col, Button } from "reactstrap";
 
@@ -15,104 +14,66 @@ export default function Reviews() {
       </Head>
 
       <BaseLayout>
-        <Container className="py-5">
-          {/* Hero */}
-          <Row className="align-items-center mb-5">
-            <Col md="6" className="text-center text-md-start">
-              <h1 className="display-4 fw-bold">
-                Why ask for your own reviews? Let AI do it.
-              </h1>
-              <p className="lead text-muted">
-                Asking for your own reviews can be difficult—or even come across
-                as annoying. Onyx Reviews automates the entire process so you
-                can focus on running your business.
-              </p>
-              <Link href="/early-access" passHref>
-                <Button color="primary" size="lg" className="mt-3">
-                  Sign up for early access
-                </Button>
-              </Link>
-            </Col>
-            <Col md="6" className="text-center">
-              <Image
-                src="/images/reviews-hero.png"
-                alt="Onyx Reviews App Preview"
-                width={400}
-                height={300}
-                className="img-fluid rounded shadow-sm"
-              />
-            </Col>
-          </Row>
+        <section className="onyx-hero onyx-reviews-hero">
+          <Container>
+            <p className="onyx-lab-eyebrow">Onyx Reviews / AI-assisted reputation management</p>
+            <h1 className="onyx-hero-title">More customer reviews. Less chasing.</h1>
+            <p className="onyx-hero-copy">Onyx Reviews helps you send thoughtful text-message review requests, learn from real customer feedback, and build the trust that supports local visibility and repeat business.</p>
+            <div className="onyx-hero-actions">
+              <Link href="/contact"><Button color="primary" size="lg">Talk About Onyx Reviews</Button></Link>
+            </div>
+          </Container>
+        </section>
 
-          {/* Features Block 1 */}
-          <Row className="align-items-center mb-5">
-            <Col md="6">
-              <h3 className="fw-bold">Automated Outreach</h3>
-              <p className="text-muted mb-4">
-                Our AI crafts personalized SMS and email messages on your
-                behalf, removing the awkward “please leave us a review” ask.
-              </p>
-
-              <h3 className="fw-bold">Smart Scheduling</h3>
-              <p className="text-muted">
-                Specify your preferred windows, and the system will ping
-                customers at optimal times to maximize response rates.
-              </p>
+        <Container className="onyx-reviews-section">
+          <Row className="g-5 align-items-start">
+            <Col lg="4">
+              <p className="onyx-lab-eyebrow">The opportunity</p>
+              <h2>Reviews turn good work into visible trust.</h2>
             </Col>
-            <Col md="6" className="text-center">
-              <Image
-                src="/images/reviews-outreach.png"
-                alt="Automated outreach workflow"
-                width={500}
-                height={300}
-                className="img-fluid rounded shadow-sm"
-              />
-            </Col>
-          </Row>
-
-          {/* Features Block 2 (staggered) */}
-          <Row className="align-items-center mb-5">
-            <Col
-              md="6"
-              className="order-2 order-md-1 text-center text-md-start"
-            >
-              <Image
-                src="/images/reviews-analytics.png"
-                alt="Real-time analytics dashboard"
-                width={500}
-                height={300}
-                className="img-fluid rounded shadow-sm"
-              />
-            </Col>
-            <Col md="6" className="order-1 order-md-2">
-              <h3 className="fw-bold">Real-Time Analytics</h3>
-              <p className="text-muted mb-4">
-                Monitor open-rates, response rates, and review scores all from
-                one intuitive dashboard.
-              </p>
-
-              <h3 className="fw-bold">Seamless Integrations</h3>
-              <p className="text-muted">
-                Connect with Google, Facebook, Yelp, and 100+ other platforms in
-                under a minute.
-              </p>
-            </Col>
-          </Row>
-
-          {/* Final CTA */}
-          <Row className="justify-content-center text-center">
             <Col lg="8">
-              <h2 className="fw-bold mb-4">
-                Ready to watch your reviews skyrocket?
-              </h2>
-              <Link href="/early-access" passHref>
-                <Button color="primary" size="lg">
-                  Sign up for early access
-                </Button>
-              </Link>
+              <p className="onyx-reviews-lead">Your best customers are often willing to share their experience—they just need an easy moment to do it. Onyx Reviews creates that moment without putting your team in the uncomfortable position of repeatedly asking.</p>
+              <p className="mb-0">The result is a more consistent review process that supports the way people evaluate local businesses online: through customer experiences, clear signals of trust, and a responsive reputation.</p>
             </Col>
           </Row>
         </Container>
+
+        <section className="onyx-muted-section">
+          <Container className="onyx-reviews-section">
+            <div className="onyx-reviews-heading">
+              <p className="onyx-lab-eyebrow">How it works</p>
+              <h2>Turn completed business into a clear next step.</h2>
+            </div>
+            <Row className="g-4">
+              <Col md="4"><article className="onyx-review-card h-100"><p>01</p><h3>Load your customer list</h3><span>Upload the people you have already served. There is no awkward manual chase-down process for your team.</span></article></Col>
+              <Col md="4"><article className="onyx-review-card h-100"><p>02</p><h3>Send a thoughtful request</h3><span>Onyx Reviews uses AI-assisted SMS outreach to create timely, personal review requests and make it simple for customers to respond.</span></article></Col>
+              <Col md="4"><article className="onyx-review-card h-100"><p>03</p><h3>Learn and follow up</h3><span>See customer feedback in one place, respond to concerns promptly, and use the insight to keep improving the experience.</span></article></Col>
+            </Row>
+          </Container>
+        </section>
+
+        <Container className="onyx-reviews-section">
+          <Row className="g-5">
+            <Col lg="4"><p className="onyx-lab-eyebrow">Built for the full relationship</p><h2>More than a review link.</h2></Col>
+            <Col lg="8">
+              <Row className="g-4">
+                <Col md="6"><article className="onyx-review-capability h-100"><h3>AI-assisted review requests</h3><p>Make review outreach easier to manage with text messages that feel timely and personal.</p></article></Col>
+                <Col md="6"><article className="onyx-review-capability h-100"><h3>Reputation feedback loop</h3><p>Invite honest feedback, identify concerns early, and give your team an opportunity to respond and resolve issues directly.</p></article></Col>
+                <Col md="6"><article className="onyx-review-capability h-100"><h3>Review performance dashboard</h3><p>Track requests, responses, and review activity so your team can see what is working.</p></article></Col>
+                <Col md="6"><article className="onyx-review-capability h-100"><h3>Optional managed SMS campaigns</h3><p>Extend beyond reviews with seasonal offers, return-customer campaigns, and targeted text outreach managed with the Onyx team.</p></article></Col>
+              </Row>
+            </Col>
+          </Row>
+        </Container>
+
+        <section className="onyx-reviews-sms">
+          <Container>
+            <Row className="g-5 align-items-center">
+              <Col lg="7"><p className="onyx-lab-eyebrow">Optional managed service</p><h2>Keep the conversation going with managed SMS campaigns.</h2><p>Need more than reviews? The Onyx team can help you create and manage customer text campaigns for seasonal offers, return visits, and specific services. We handle the strategy and setup with consent and opt-out practices in mind, so you do not have to build the program alone.</p></Col>
+              <Col lg="5" className="text-lg-end"><Link href="/contact"><Button color="primary" size="lg">Ask About Managed SMS</Button></Link></Col>
+            </Row>
+          </Container>
+        </section>
       </BaseLayout>
     </>
   );

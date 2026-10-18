@@ -14,29 +14,25 @@ import {
 } from 'react-icons/fa';
 import BaseLayout from '../components/layouts/BaseLayouts';
 import Link from 'next/link';
+import StretchyCaseStudy from '../components/StretchyCaseStudy';
 
-export default function StretchyCaseStudy() {
+function LegacyStretchyCaseStudy() {
   return (
     <BaseLayout>
       {/* Hero Section */}
-      <div
-        style={{
-          backgroundColor: '#f8f9fa',
-          padding: '4rem 0',
-          textAlign: 'center',
-        }}
-      >
+      <section className="onyx-hero onyx-case-study-hero">
         <Container>
-          <h1 className="fw-bold">Business Development Scale-Up for Stretchy</h1>
-          <p className="mt-3 text-muted">
+          <p className="onyx-lab-eyebrow">Case Study / Market Expansion</p>
+          <h1 className="onyx-hero-title">Business Development Scale-Up for Stretchy</h1>
+          <p className="onyx-hero-copy">
             How Onyx Creative Labs is expanding Stretchy’s footprint from a single golf club to
             multi-location partnerships—while building the staffing engine to support growth.
           </p>
-          <a href="https://stretchy.us" target="_blank" rel="noopener noreferrer">
+          <a className="onyx-case-study-site-link" href="https://stretchy.us" target="_blank" rel="noopener noreferrer">
             Visit Website ↗
           </a>
         </Container>
-      </div>
+      </section>
 
       <Container className="py-5">
         {/* Challenge / Opportunity */}
@@ -178,4 +174,8 @@ export default function StretchyCaseStudy() {
       </Container>
     </BaseLayout>
   );
+}
+
+export default function StretchyCaseStudyPage() {
+  return <StretchyCaseStudy />;
 }

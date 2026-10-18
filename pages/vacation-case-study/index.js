@@ -8,26 +8,24 @@ import {
 import { FaBicycle, FaChartLine, FaMobileAlt, FaBullhorn } from 'react-icons/fa';
 import BaseLayout from '../components/layouts/BaseLayouts';
 import Link from 'next/link';
+import VacationBikeRentalsCaseStudy from '../components/VacationBikeRentalsCaseStudy';
 
-export default function VacationBikeCaseStudy() {
+function LegacyVacationBikeCaseStudy() {
   return (
     <BaseLayout>
       {/* Hero Section */}
-      <div style={{
-        backgroundColor: '#f8f9fa',
-        padding: '4rem 0',
-        textAlign: 'center',
-      }}>
+      <section className="onyx-hero onyx-case-study-hero">
         <Container>
-          <h1 className="fw-bold">Seasonal Conversion Optimization for Vacation Bike Rentals</h1>
-          <p className="mt-3 text-muted">
+          <p className="onyx-lab-eyebrow">Case Study / Demand Generation</p>
+          <h1 className="onyx-hero-title">Seasonal Conversion Optimization for Vacation Bike Rentals</h1>
+          <p className="onyx-hero-copy">
             How we helped a local rental company stay booked in the off-season and scale for summer.
           </p>
-          <a href="https://www.vacationbikerentals.com" target="_blank" rel="noopener noreferrer">
+          <a className="onyx-case-study-site-link" href="https://www.vacationbikerentals.com" target="_blank" rel="noopener noreferrer">
             Visit Website ↗
           </a>
         </Container>
-      </div>
+      </section>
 
       {/* Challenge Section */}
       <Container className="py-5">
@@ -114,4 +112,8 @@ export default function VacationBikeCaseStudy() {
       </Container>
     </BaseLayout>
   );
+}
+
+export default function VacationBikeCaseStudy() {
+  return <VacationBikeRentalsCaseStudy />;
 }

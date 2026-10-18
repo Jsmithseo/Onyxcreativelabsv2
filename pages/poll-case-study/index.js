@@ -8,26 +8,24 @@ import {
 import { FaTools, FaBug, FaClipboardList, FaSync } from 'react-icons/fa';
 import BaseLayout from '../components/layouts/BaseLayouts';
 import Link from 'next/link';
+import PollEverywhereCaseStudy from '../components/PollEverywhereCaseStudy';
 
-export default function PollEverywhereCaseStudy() {
+function LegacyPollEverywhereCaseStudy() {
   return (
     <BaseLayout>
       {/* Hero Section */}
-      <div style={{
-        backgroundColor: '#f8f9fa',
-        padding: '4rem 0',
-        textAlign: 'center',
-      }}>
+      <section className="onyx-hero onyx-case-study-hero">
         <Container>
-          <h1 className="fw-bold">Backlog Relief for Poll Everywhere</h1>
-          <p className="mt-3 text-muted">
+          <p className="onyx-lab-eyebrow">Case Study / Product Delivery</p>
+          <h1 className="onyx-hero-title">Backlog Relief for Poll Everywhere</h1>
+          <p className="onyx-hero-copy">
             Contract engineering support to maintain product momentum during dev shortages.
           </p>
-          <a href="https://www.polleverywhere.com" target="_blank" rel="noopener noreferrer">
+          <a className="onyx-case-study-site-link" href="https://www.polleverywhere.com" target="_blank" rel="noopener noreferrer">
             Visit Website ↗
           </a>
         </Container>
-      </div>
+      </section>
 
       {/* Challenge & Opportunity Section */}
       <Container className="py-5">
@@ -102,3 +100,7 @@ export default function PollEverywhereCaseStudy() {
     </BaseLayout>
   );
 } 
+
+export default function PollEverywhereCaseStudyPage() {
+  return <PollEverywhereCaseStudy />;
+}

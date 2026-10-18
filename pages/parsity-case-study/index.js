@@ -8,26 +8,24 @@ import {
 import { FaGlobe, FaUserGraduate, FaChartLine, FaBullhorn } from 'react-icons/fa';
 import BaseLayout from '../components/layouts/BaseLayouts';
 import Link from 'next/link';
+import ParsityCaseStudy from '../components/ParsityCaseStudy';
 
-export default function ParsityCaseStudy() {
+function LegacyParsityCaseStudy() {
   return (
     <BaseLayout>
       {/* Hero Section */}
-      <div style={{
-        backgroundColor: '#f8f9fa',
-        padding: '4rem 0',
-        textAlign: 'center',
-      }}>
+      <section className="onyx-hero onyx-case-study-hero">
         <Container>
-          <h1 className="fw-bold">Building Growth for Parsity.io</h1>
-          <p className="mt-3 text-muted">
+          <p className="onyx-lab-eyebrow">Case Study / Enrollment</p>
+          <h1 className="onyx-hero-title">Building Growth for Parsity.io</h1>
+          <p className="onyx-hero-copy">
             A strategy to increase enrollment and elevate digital visibility for a modern coding school.
           </p>
-          <a href="https://parsity.io" target="_blank" rel="noopener noreferrer">
+          <a className="onyx-case-study-site-link" href="https://parsity.io" target="_blank" rel="noopener noreferrer">
             Visit Website ↗
           </a>
         </Container>
-      </div>
+      </section>
 
       {/* Challenge Section */}
       <Container className="py-5">
@@ -114,4 +112,8 @@ export default function ParsityCaseStudy() {
       </Container>
     </BaseLayout>
   );
+}
+
+export default function ParsityCaseStudyPage() {
+  return <ParsityCaseStudy />;
 }

@@ -13,21 +13,18 @@ export default function CordeliaCaseStudy() {
   return (
     <BaseLayout>
       {/* Hero Section */}
-      <div style={{
-        backgroundColor: '#f8f9fa',
-        padding: '4rem 0',
-        textAlign: 'center',
-      }}>
+      <section className="onyx-hero onyx-case-study-hero">
         <Container>
-          <h1 className="fw-bold">Bringing Cordelia ARC to the Public Market</h1>
-          <p className="mt-3 text-muted">
+          <p className="onyx-lab-eyebrow">Case Study / Market Access</p>
+          <h1 className="onyx-hero-title">Bringing Cordelia ARC to the Public Market</h1>
+          <p className="onyx-hero-copy">
             From county referrals to public visibility — a digital launch for growth.
           </p>
-          <a href="https://cordeliaarc.com" target="_blank" rel="noopener noreferrer">
+          <a className="onyx-case-study-site-link" href="https://cordeliaarc.com" target="_blank" rel="noopener noreferrer">
             Visit Website ↗
           </a>
         </Container>
-      </div>
+      </section>
 
       {/* Challenge Section */}
       <Container className="py-5">

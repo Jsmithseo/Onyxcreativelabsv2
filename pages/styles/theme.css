@@ -240,6 +240,153 @@ p {
   margin-top: 2rem;
 }
 
+.onyx-lab-hero {
+  background: var(--onyx-black);
+  color: #ffffff;
+  padding: 6rem 0;
+  text-align: center;
+}
+
+.onyx-lab-hero h1 {
+  color: #ffffff;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  margin: 1rem auto;
+  max-width: 900px;
+}
+
+.onyx-lab-hero > .container > p:not(.onyx-lab-eyebrow) {
+  color: #d4d4d8;
+  font-size: 1.15rem;
+  margin: 0 auto 2rem;
+  max-width: 760px;
+}
+
+.onyx-lab-eyebrow {
+  color: var(--onyx-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.onyx-lab-cta {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+  color: var(--onyx-black) !important;
+}
+
+.onyx-lab-cta:hover,
+.onyx-lab-cta:focus {
+  background: #e4e4e7 !important;
+  border-color: #e4e4e7 !important;
+}
+
+.onyx-lab-index {
+  padding: 5rem 0;
+}
+
+.onyx-lab-index-intro {
+  margin-bottom: 3rem;
+  max-width: 680px;
+}
+
+.onyx-lab-index-intro h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0.75rem 0;
+}
+
+.onyx-lab-index-copy {
+  color: var(--onyx-gray);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.onyx-lab-card {
+  border-radius: 0;
+}
+
+.onyx-lab-card-meta {
+  color: var(--onyx-gray);
+  display: flex;
+  font-size: 0.72rem;
+  font-weight: 700;
+  justify-content: space-between;
+  letter-spacing: 0.07em;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+}
+
+.onyx-lab-card h3 {
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem;
+}
+
+.onyx-lab-card-title {
+  color: var(--onyx-charcoal);
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+}
+
+.onyx-lab-card .card-text {
+  color: var(--onyx-gray);
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+}
+
+.onyx-lab-card-link {
+  color: var(--onyx-black);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.onyx-lab-card-link span {
+  color: var(--onyx-accent);
+  margin-left: 0.3rem;
+}
+
+.onyx-case-study-hero .onyx-lab-eyebrow,
+.onyx-case-hero .onyx-lab-eyebrow {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.onyx-case-study-site-link {
+  display: inline-block;
+  font-weight: 700;
+  margin-top: 1.5rem;
+}
+.onyx-case-section { padding: 5.5rem 0; }
+.onyx-case-section h2 { font-size: clamp(1.8rem, 3vw, 2.5rem); margin: 0; }
+.onyx-case-section > .row > [class*='col'] > p:not(.onyx-lab-eyebrow) { color: var(--onyx-charcoal); font-size: 1.1rem; }
+.onyx-case-method { background: #ffffff; border: 1px solid var(--onyx-border); padding: 1.75rem; }
+.onyx-case-method > p:first-child { color: var(--onyx-accent); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; margin: 0 0 1.5rem; text-transform: uppercase; }
+.onyx-case-method h3 { font-size: 1.35rem; margin: 0 0 0.75rem; }
+.onyx-case-method > p:last-child { color: var(--onyx-gray); margin: 0; }
+.onyx-case-learning { border-left: 3px solid var(--onyx-accent); margin-top: 2rem; padding: 0.25rem 0 0.25rem 1.25rem; }
+.onyx-case-learning h3 { font-size: 1.1rem; margin: 0 0 0.5rem; }
+.onyx-case-learning p { color: var(--onyx-charcoal); }
+
+.onyx-reviews-section { padding: 5.5rem 0; }
+.onyx-reviews-section h2,
+.onyx-reviews-sms h2 { font-size: clamp(1.9rem, 3vw, 2.6rem); margin: 0; }
+.onyx-reviews-lead { color: var(--onyx-charcoal); font-size: 1.15rem; }
+.onyx-reviews-heading { margin-bottom: 2.5rem; max-width: 680px; }
+.onyx-reviews-heading .onyx-lab-eyebrow,
+.onyx-reviews-sms .onyx-lab-eyebrow { margin-bottom: 0.85rem; }
+.onyx-review-card,
+.onyx-review-capability { background: #ffffff; border: 1px solid var(--onyx-border); padding: 1.75rem; }
+.onyx-review-card > p { color: var(--onyx-accent); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; margin: 0 0 1.5rem; }
+.onyx-review-card h3,
+.onyx-review-capability h3 { font-size: 1.3rem; margin: 0 0 0.75rem; }
+.onyx-review-card span,
+.onyx-review-capability p { color: var(--onyx-gray); line-height: 1.6; margin: 0; }
+.onyx-reviews-sms { background: var(--onyx-light-gray); padding: 5rem 0; }
+.onyx-reviews-sms h2 { margin-bottom: 1rem; }
+.onyx-reviews-sms p:not(.onyx-lab-eyebrow) { color: var(--onyx-charcoal); font-size: 1.05rem; margin: 0; }
+.onyx-data-source { color: var(--onyx-gray); font-size: 0.85rem; margin: 1.5rem 0 0; }
+
 a {
   color: var(--onyx-accent);
 }
@@ -249,29 +396,46 @@ footer.bg-dark {
   background-color: var(--onyx-black) !important;
 }
 
+.btn,
 .btn-primary,
-.btn-success {
-  background-color: var(--onyx-black) !important;
-  border-color: var(--onyx-black) !important;
+.btn-success,
+.btn-outline-primary {
+  background-color: transparent !important;
+  border: 2px solid var(--onyx-black) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--onyx-black) !important;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
+.btn:hover,
+.btn:focus,
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-success:hover,
-.btn-success:focus {
-  background-color: var(--onyx-charcoal) !important;
-  border-color: var(--onyx-charcoal) !important;
-}
-
-.btn-outline-primary {
-  color: var(--onyx-black);
-  border-color: var(--onyx-charcoal);
-}
-
+.btn-success:focus,
 .btn-outline-primary:hover,
 .btn-outline-primary:focus {
-  background-color: var(--onyx-black);
-  border-color: var(--onyx-black);
+  background-color: var(--onyx-black) !important;
+  border-color: var(--onyx-black) !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+.bg-dark .btn,
+.onyx-lab-hero .btn {
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+.bg-dark .btn:hover,
+.bg-dark .btn:focus,
+.onyx-lab-hero .btn:hover,
+.onyx-lab-hero .btn:focus {
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+  color: var(--onyx-black) !important;
 }
 
 .card {

@@ -10,52 +10,61 @@ export default function OurStoryPage() {
         <Container>
           <Row className="mb-5 text-center">
             <Col>
-              <h1 className="fw-bold">Our Story</h1>
+              <h1 className="fw-bold">Built at the Intersection of Product, People, and Market</h1>
               <p className="lead text-muted">
-                Empowering small businesses through modern digital strategy and design.
+                Onyx Creative Labs was built to help ambitious businesses turn strong ideas into meaningful market momentum.
               </p>
             </Col>
           </Row>
 
           <Row className="mb-5">
             <Col>
-              <h3 className="fw-bold">A Journey Rooted in Experience</h3>
+              <h3 className="fw-bold">A Founder’s Perspective</h3>
               <p>
-                After nearly 15 years in the market as a web developer and marketer, I’ve had the privilege
-                of working with some of the best companies in the world. Through optimizing websites and
-                apps for conversion and user experience, I’ve helped businesses achieve growth of up to 3–4x.
+                Onyx Creative Labs grew from nearly 15 years of experience working where technical understanding,
+                market reality, and human connection meet. Its founder has spent that time helping organizations
+                improve how their products are understood, how their teams work together, and how opportunities
+                become measurable business progress.
               </p>
               <p>
-                But while I was scaling success for industry giants, my heart was always with small businesses
-                and nonprofits — those with big dreams but limited resources. I wanted to bring the same
-                strategies, tools, and insights used by global companies to the grassroots level.
-              </p>
-            </Col>
-          </Row>
-
-          <Row className="mb-5">
-            <Col>
-              <h3 className="fw-bold">The Birth of Onyx Creative Labs</h3>
-              <p>
-                I founded Onyx Creative Labs on the idea that advanced strategies and technologies shouldn’t
-                be exclusive to large enterprises. If they work for Fortune 500s, they can — and should — work
-                for local businesses, too.
-              </p>
-              <p>
-                Our goal is to help small businesses grow through conversion-focused design, A/B testing,
-                and progressive web app development. We want to help the "little guys" become the leaders
-                of their local markets.
+                That experience has never been limited to a single function. It has involved understanding the
+                technical details behind a product, listening to customers and partners in real conversations,
+                leading teams, and serving as a liaison between the people building the work and the people who
+                need to believe in it. That perspective shapes how Onyx approaches every engagement.
               </p>
             </Col>
           </Row>
 
           <Row className="mb-5">
             <Col>
-              <h3 className="fw-bold">Commitment to Excellence</h3>
+              <h3 className="fw-bold">Growth Starts With Understanding</h3>
               <p>
-                At Onyx Creative Labs, we pride ourselves on delivering exceptional results and creating a
-                meaningful impact. Our clients trust us to bring modern digital solutions that are grounded in
-                real performance and strategic insight.
+                We believe growth is not a collection of disconnected activities. It begins with understanding
+                what a business truly offers, who it serves, and what people need to hear before they are ready
+                to engage. From there, the work is to create a clearer connection between the value of the
+                business and the real people it is built to help.
+              </p>
+              <p>
+                Onyx brings business development, market learning, communication, and execution into one focused
+                effort. We help teams find where opportunity exists, build stronger customer relationships, and
+                develop the practical insight leaders need to make better next decisions.
+              </p>
+            </Col>
+          </Row>
+
+          <Row className="mb-5">
+            <Col>
+              <h3 className="fw-bold">The Onyx Commitment</h3>
+              <p>
+                The Onyx commitment is to do work that is thoughtful, grounded, and useful. We stay close to the
+                market, listen carefully to the people who matter, and translate what we learn into forward motion.
+                That may mean opening new conversations, clarifying a message, strengthening a process, or helping
+                a team align around what comes next.
+              </p>
+              <p>
+                The goal is always bigger than activity for its own sake. It is to help businesses improve their
+                bottom line, build confidence in their direction, and move forward with a stronger understanding
+                of the market they are here to serve.
               </p>
             </Col>
           </Row>
@@ -63,7 +72,7 @@ export default function OurStoryPage() {
           <Row className="text-center">
             <Col>
               <Link href="/contact" passHref>
-                <Button color="primary" size="lg">Contact Us</Button>
+                <Button color="primary" size="lg">Start a Conversation</Button>
               </Link>
             </Col>
           </Row>

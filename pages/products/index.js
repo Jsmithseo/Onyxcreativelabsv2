@@ -17,13 +17,11 @@ export default function ProductsPage() {
                   <CardText className="text-muted">
                     Explore rotating savings circles and reach your financial goals together today.
                   </CardText>
-                  <Button
-                    color="primary"
-                    href="https://susuapp.vercel.app/"
-                    className="mt-auto align-self-start"
-                  >
-                    Explore SuSu
-                  </Button>
+                  <Link href="/susu" passHref legacyBehavior>
+                    <Button color="primary" className="mt-auto align-self-start">
+                      Explore SuSu
+                    </Button>
+                  </Link>
                 </CardBody>
               </Card>
             </Col>

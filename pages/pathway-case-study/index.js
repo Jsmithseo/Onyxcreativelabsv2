@@ -12,29 +12,25 @@ import {
 } from 'react-icons/fa';
 import BaseLayout from '../components/layouts/BaseLayouts';
 import Link from 'next/link';
+import PathwayHumanityCaseStudy from '../components/PathwayHumanityCaseStudy';
 
-export default function PathwayHumanityCaseStudy() {
+function LegacyPathwayHumanityCaseStudy() {
   return (
     <BaseLayout>
       {/* Hero Section */}
-      <div
-        style={{
-          backgroundColor: '#f8f9fa',
-          padding: '4rem 0',
-          textAlign: 'center',
-        }}
-      >
+      <section className="onyx-hero onyx-case-study-hero">
         <Container>
-          <h1 className="fw-bold">Holistic Website Redesign & Content Engine for Pathway Humanity</h1>
-          <p className="mt-3 text-muted">
+          <p className="onyx-lab-eyebrow">Case Study / Audience Engagement</p>
+          <h1 className="onyx-hero-title">Holistic Website Redesign & Content Engine for Pathway Humanity</h1>
+          <p className="onyx-hero-copy">
             How we modernized a social purpose organization’s web presence and set up an ongoing content program
             to drive inquiries and community engagement.
           </p>
-          <a href="https://pathwayhumanity.com" target="_blank" rel="noopener noreferrer">
+          <a className="onyx-case-study-site-link" href="https://pathwayhumanity.com" target="_blank" rel="noopener noreferrer">
             Visit Website ↗
           </a>
         </Container>
-      </div>
+      </section>
 
       <Container className="py-5">
         {/* Challenge / Opportunity */}
@@ -147,4 +143,8 @@ export default function PathwayHumanityCaseStudy() {
       </Container>
     </BaseLayout>
   );
+}
+
+export default function PathwayHumanityCaseStudyPage() {
+  return <PathwayHumanityCaseStudy />;
 }

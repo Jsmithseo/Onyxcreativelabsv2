@@ -9,7 +9,7 @@ const Footer = () => {
           <Col md="4">
             <h5>About Onyx Creative Labs</h5>
             <p>
-              Onyx Creative Labs is a full-service digital marketing and development agency focused on delivering customized solutions for businesses of all sizes. We specialize in web development, SEO, content marketing, and more.
+              Onyx Creative Labs helps businesses clarify their value, build meaningful momentum, and create lasting demand—so they can deepen connections, grow with confidence, and move their vision forward.
             </p>
           </Col>
           <Col md="4">
@@ -28,9 +28,8 @@ const Footer = () => {
           <Col md="4">
             <h5>Contact Us</h5>
             <p>
-              Onyx Creative Labs Inc<br />
-              Phone: 510-925-7174<br />
-              Email: Jeremy@onyxcreativelabs.com
+              Onyx Creative Labs<br />
+              <a href="/contact" className="text-white">Submit Information</a>
             </p>
           </Col>
         </Row>

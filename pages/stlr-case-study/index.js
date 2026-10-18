@@ -8,26 +8,24 @@ import {
 import { FaGlobe, FaBullhorn, FaPhoneAlt, FaMusic } from 'react-icons/fa';
 import BaseLayout from '../components/layouts/BaseLayouts';
 import Link from 'next/link';
+import STLREntertainmentCaseStudy from '../components/STLREntertainmentCaseStudy';
 
-export default function STLRCaseStudy() {
+function LegacySTLRCaseStudy() {
   return (
     <BaseLayout>
       {/* Hero Section */}
-      <div style={{
-        backgroundColor: '#f8f9fa',
-        padding: '4rem 0',
-        textAlign: 'center',
-      }}>
+      <section className="onyx-hero onyx-case-study-hero">
         <Container>
-          <h1 className="fw-bold">Driving Bookings for STLR Entertainment</h1>
-          <p className="mt-3 text-muted">
+          <p className="onyx-lab-eyebrow">Case Study / Revenue Systems</p>
+          <h1 className="onyx-hero-title">Driving Bookings for STLR Entertainment</h1>
+          <p className="onyx-hero-copy">
             Helping a talent agency scale bookings with digital marketing and direct outreach.
           </p>
-          <a href="https://stlrentertainment.com" target="_blank" rel="noopener noreferrer">
+          <a className="onyx-case-study-site-link" href="https://stlrentertainment.com" target="_blank" rel="noopener noreferrer">
             Visit Website ↗
           </a>
         </Container>
-      </div>
+      </section>
 
       {/* Challenge Section */}
       <Container className="py-5">
@@ -111,4 +109,8 @@ export default function STLRCaseStudy() {
       </Container>
     </BaseLayout>
   );
+}
+
+export default function STLRCaseStudy() {
+  return <STLREntertainmentCaseStudy />;
 }
