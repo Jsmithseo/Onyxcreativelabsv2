@@ -31,7 +31,7 @@ export default function FeaturedCaseStudies() {
           The Proof Is in the <span style={{ color: '#2563eb' }}>Results</span>
         </h2>
         <p className="onyx-section-copy">
-          A few examples of how focused outreach, testing, and execution create momentum.
+          Here are results from some of our clients.
         </p>
       </div>
       <Row className="justify-content-center g-4">

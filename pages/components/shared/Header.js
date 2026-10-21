@@ -43,26 +43,6 @@ const MyHeader = () => {
           </NavItem>
           <NavItem>
             <NavLink
-              href="/about"
-              style={linkStyle}
-              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
-              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
-            >
-              Our Story
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink
-              href="/products"
-              style={linkStyle}
-              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
-              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
-            >
-              Products
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink
               href="/90-day-pilot"
               style={linkStyle}
               onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
@@ -79,6 +59,26 @@ const MyHeader = () => {
               onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
             >
               Case Studies
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink
+              href="/products"
+              style={linkStyle}
+              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+            >
+              Products
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink
+              href="/about"
+              style={linkStyle}
+              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+            >
+              Our Story
             </NavLink>
           </NavItem>
           {/* <NavItem>

@@ -507,12 +507,125 @@ p {
 .onyx-case-learning p { color: var(--onyx-charcoal); }
 
 .onyx-reviews-section { padding: 5.5rem 0; }
+.onyx-review-thread {
+  background: #fff;
+  border: 1px solid #1f2329;
+  box-shadow: 7px 7px 0 rgba(37, 99, 235, 0.13);
+  max-width: 400px;
+  overflow: hidden;
+}
+.onyx-review-thread-header {
+  align-items: center;
+  background: #f2f4f7;
+  border-bottom: 1px solid #d8dde5;
+  display: flex;
+  gap: .75rem;
+  padding: .9rem 1rem;
+}
+.onyx-review-thread-mark {
+  align-items: center;
+  background: #1f2329;
+  border-radius: 50%;
+  color: #fff;
+  display: inline-flex;
+  font-size: .8rem;
+  font-weight: 700;
+  height: 1.9rem;
+  justify-content: center;
+  width: 1.9rem;
+}
+.onyx-review-thread-header p,
+.onyx-review-thread-header span { margin: 0; }
+.onyx-review-thread-header p { color: #1f2329; font-size: .92rem; font-weight: 700; }
+.onyx-review-thread-header div span { color: #697386; font-size: .72rem; }
+.onyx-review-thread-status {
+  color: #2563eb;
+  font-size: .72rem;
+  font-weight: 700;
+  margin-left: auto !important;
+  text-transform: uppercase;
+}
+.onyx-review-thread-body { min-height: 236px; padding: 1.15rem 1rem 1rem; }
+.onyx-review-thread-date { color: #697386; font-size: .7rem; margin: 0 0 1rem; text-align: center; }
+.onyx-review-thread-bubble {
+  border-radius: 0;
+  font-size: .91rem;
+  line-height: 1.45;
+  margin-bottom: .8rem;
+  max-width: 84%;
+  padding: .75rem .9rem;
+}
+.onyx-review-thread-bubble-incoming { background: #edf0f4; color: #292d35; }
+.onyx-review-thread-bubble-outgoing { background: #2563eb; color: #fff; margin-left: auto; }
+.onyx-review-thread-note { color: #697386; font-size: .72rem; margin: 1.15rem 0 0; text-align: center; }
 .onyx-reviews-section h2,
 .onyx-reviews-sms h2 { font-size: clamp(1.9rem, 3vw, 2.6rem); margin: 0; }
 .onyx-reviews-lead { color: var(--onyx-charcoal); font-size: 1.15rem; }
+.onyx-review-stats {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 2rem;
+}
+.onyx-review-stats article {
+  border-left: 3px solid #2563eb;
+  padding: .2rem 0 .2rem .9rem;
+}
+.onyx-review-stats strong {
+  color: #2563eb;
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.onyx-review-stats span { color: #4d5562; display: block; font-size: .88rem; line-height: 1.45; margin-top: .35rem; }
+.onyx-review-stats-source { color: #697386; font-size: .75rem; margin: 1rem 0 0; }
+.onyx-review-stats-source a { color: inherit; text-underline-offset: .15em; }
+@media (max-width: 575.98px) {
+  .onyx-review-stats { grid-template-columns: 1fr; }
+}
 .onyx-reviews-heading { margin-bottom: 2.5rem; max-width: 680px; }
 .onyx-reviews-heading .onyx-lab-eyebrow,
 .onyx-reviews-sms .onyx-lab-eyebrow { margin-bottom: 0.85rem; }
+.onyx-review-flow {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #d8dde5;
+  display: flex;
+  justify-content: space-between;
+  padding: 1.25rem 1rem;
+}
+.onyx-review-flow-step { min-width: 0; text-align: center; }
+.onyx-review-flow-step span {
+  align-items: center;
+  border: 1px solid #9da7b5;
+  color: #596273;
+  display: inline-flex;
+  font-size: .66rem;
+  font-weight: 700;
+  height: 1.65rem;
+  justify-content: center;
+  margin-bottom: .5rem;
+  width: 1.65rem;
+}
+.onyx-review-flow-step strong { color: #353b45; display: block; font-size: .76rem; font-weight: 600; line-height: 1.25; }
+.onyx-review-flow-step-active span { background: #2563eb; border-color: #2563eb; color: #fff; }
+.onyx-review-flow-step-active strong { color: #2563eb; }
+.onyx-review-flow-line { background: #c8ced8; height: 1px; margin: 0 .6rem; position: relative; top: -.35rem; width: 12%; }
+.onyx-review-flow-line::after {
+  border-bottom: 3px solid transparent;
+  border-left: 4px solid #c8ced8;
+  border-top: 3px solid transparent;
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -2px;
+}
+@media (max-width: 575.98px) {
+  .onyx-review-flow { padding: 1rem .6rem; }
+  .onyx-review-flow-line { margin: 0 .3rem; }
+  .onyx-review-flow-step strong { font-size: .69rem; }
+}
 .onyx-review-card,
 .onyx-review-capability { background: #ffffff; border: 1px solid var(--onyx-border); padding: 1.75rem; }
 .onyx-review-card > p { color: var(--onyx-accent); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; margin: 0 0 1.5rem; }

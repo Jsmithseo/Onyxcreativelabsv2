@@ -6,8 +6,8 @@ import BaseLayout from '../components/layouts/BaseLayouts';
 const pilotTiers = [
   {
     name: 'Focused Validation',
-    volume: '300 to 500',
-    label: 'outreach activities each week',
+    volume: '4,000',
+    label: 'outreach activities each month',
     description: 'For AI teams that need focused market feedback and a clear view of where to refine their offer.',
     features: [
       'Human-led cold calling and tailored warm-email outreach to qualified prospects or partners',
@@ -19,8 +19,8 @@ const pilotTiers = [
   },
   {
     name: 'Expanded Validation',
-    volume: '700+',
-    label: 'outreach activities each week',
+    volume: '8,000',
+    label: 'outreach activities each month',
     description: 'For AI teams that need a broader market test, higher activity volume, and faster learning loops.',
     featured: true,
     features: [
@@ -54,7 +54,7 @@ function PilotTiersSection() {
         <div className="text-center mb-4">
           <h1 className="onyx-section-heading">Choose Your Pilot</h1>
           <p className="onyx-section-copy">
-            Stress-test your AI product with disciplined, human-led business development. Each 90-day program puts your product in front of real people, creates live market conversations, and returns the evidence you need to build better.
+            Stress-test your AI product with disciplined, human-led business development. Each 90-day program puts your product in front of real people, creates live market conversations, and returns the feedback you need to build better.
           </p>
         </div>
         <Row className="justify-content-center g-4">
@@ -71,7 +71,7 @@ function PilotTiersSection() {
                     {tier.features.map((feature) => <li key={feature}>{feature}</li>)}
                   </ul>
                   <Link href="https://calendly.com/softwaresmitty/discovery">
-                    <Button color="primary" block>Schedule Onboarding</Button>
+                    <Button color="primary" block>Schedule Discovery Call</Button>
                   </Link>
                 </CardBody>
               </Card>

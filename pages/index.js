@@ -35,7 +35,7 @@ export default function Index() {
               Validate Your AI Product with a 90-Day Pilot
             </h1>
             <p className="onyx-hero-copy">
-              Stress-test your product with targeted market outreach, cold calling, inbound lead follow-up, and content to discover whether it has viable market fit.
+              Don’t waste more time wondering whether your product has market fit. Our 90-Day Pilot puts it in front of real people and shows you what the market says.
             </p>
             <div className="onyx-hero-actions">
               <Link href="/90-day-pilot">
@@ -50,9 +50,9 @@ export default function Index() {
           <section className="onyx-intro">
             <Row>
               <Col md={{ size: 12 }}>
-                  <h2>Build a Growth Engine, Not a Patchwork.</h2>
+                  <h2>The Onyx Creative Labs Way.</h2>
                   <p className="onyx-intro-copy">
-                  We connect strategy, outreach, and execution to help businesses create demand, strengthen their sales pipeline, and make informed growth decisions.
+                  We help businesses understand their market, build momentum, and grow with confidence.
                   </p>
               </Col>
             </Row>
@@ -63,6 +63,8 @@ export default function Index() {
         </section>
         <section className="onyx-content-section">
           <FeaturedCaseStudies/>
+        </section>
+        <section className="onyx-muted-section">
           <Approach/>
         </section>
       </div>

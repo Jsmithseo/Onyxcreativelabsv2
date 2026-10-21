@@ -10,9 +10,9 @@ export default function ProductsPage() {
         <Container className="text-center">
           <div className="onyx-products-intro">
             <p className="onyx-products-eyebrow">Onyx Products</p>
-            <h1>Tools built from practical market insight.</h1>
+            <h1>Products built to move real results.</h1>
             <p>
-              Our products are crafted in the lab to solve practical customer problems. We use market research and real-world learning to turn recurring needs into clear, useful tools.
+              Onyx products start with the problems that keep businesses and communities from moving forward. We build practical tools that create momentum, strengthen trust, and make it easier to take the next right step.
             </p>
           </div>
           <Row className="justify-content-center g-4">

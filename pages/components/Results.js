@@ -11,7 +11,7 @@ export default function EarlyResultsSection() {
     },
     {
       value: 'Targeted Outreach',
-      label: 'cold calling, content, and lead follow-up',
+      label: 'outreach, follow-up, and curated content',
       color: '#3f3f46',
     },
     {
@@ -21,7 +21,7 @@ export default function EarlyResultsSection() {
     },
     {
       value: 'Clear Next Steps',
-      label: 'use evidence to guide what comes next',
+      label: 'use learnings to guide informed decisions',
       color: '#3f3f46',
     },
   ];
@@ -29,7 +29,7 @@ export default function EarlyResultsSection() {
   return (
     <Container className="text-center py-5">
       <h2 className="onyx-section-heading">
-        The 90-Day Pilot <span style={{ color: '#2563eb' }}>in Action</span>
+        Our 90-Day Pilot <span style={{ color: '#2563eb' }}>in Action</span>
       </h2>
       <Row className="mt-5 justify-content-center">
         {metrics.map((item, idx) => (

@@ -34,16 +34,42 @@ export default function Reviews() {
             <Col lg="8">
               <p className="onyx-reviews-lead">Your best customers are often willing to share their experience. They just need an easy moment to do it. Onyx Reviews creates that moment without putting your team in the uncomfortable position of repeatedly asking.</p>
               <p className="mb-0">The result is a more consistent review process that supports the way people evaluate local businesses online: through customer experiences, clear signals of trust, and a responsive reputation.</p>
+              <div className="onyx-review-stats" aria-label="Consumer review statistics">
+                <article>
+                  <strong>96%</strong>
+                  <span>of consumers are open to writing a business review.</span>
+                </article>
+                <article>
+                  <strong>63%</strong>
+                  <span>expect a review response within two to seven days.</span>
+                </article>
+              </div>
+              <p className="onyx-review-stats-source">
+                Source: <a href="https://www.brightlocal.com/research/local-consumer-review-survey-2025/" target="_blank" rel="noreferrer">BrightLocal Local Consumer Review Survey 2025</a>
+              </p>
             </Col>
           </Row>
         </Container>
 
         <section className="onyx-muted-section">
           <Container className="onyx-reviews-section">
-            <div className="onyx-reviews-heading">
-              <p className="onyx-lab-eyebrow">How it works</p>
-              <h2>Turn completed business into a clear next step.</h2>
-            </div>
+            <Row className="g-4 align-items-center mb-5">
+              <Col lg="6">
+                <div className="onyx-reviews-heading mb-0">
+                  <p className="onyx-lab-eyebrow">How it works</p>
+                  <h2>Turn completed business into a clear next step.</h2>
+                </div>
+              </Col>
+              <Col lg="6">
+                <div className="onyx-review-flow" aria-label="Onyx Reviews process: customer list, review request, feedback loop">
+                  <div className="onyx-review-flow-step"><span>01</span><strong>Customer list</strong></div>
+                  <div className="onyx-review-flow-line" aria-hidden="true" />
+                  <div className="onyx-review-flow-step onyx-review-flow-step-active"><span>02</span><strong>Text request</strong></div>
+                  <div className="onyx-review-flow-line" aria-hidden="true" />
+                  <div className="onyx-review-flow-step"><span>03</span><strong>Feedback loop</strong></div>
+                </div>
+              </Col>
+            </Row>
             <Row className="g-4">
               <Col md="4"><article className="onyx-review-card h-100"><p>01</p><h3>Load your customer list</h3><span>Upload the people you have already served. There is no awkward manual chase-down process for your team.</span></article></Col>
               <Col md="4"><article className="onyx-review-card h-100"><p>02</p><h3>Send a thoughtful request</h3><span>Onyx Reviews uses AI-assisted SMS outreach to create timely, personal review requests and make it simple for customers to respond.</span></article></Col>
