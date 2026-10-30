@@ -32,6 +32,14 @@ const focusAreas = [
   },
 ];
 
+const storyExamples = [
+  {
+    title: 'Storytelling in action',
+    copy: 'An Onyx Reel selected as an example of how a clear story can help people connect with the work behind a product.',
+    url: 'https://www.instagram.com/reel/Dc_5pKcBr4_/',
+  },
+];
+
 export default function ContentMarketingPage() {
   return (
     <BaseLayout>
@@ -104,6 +112,60 @@ export default function ContentMarketingPage() {
               <p className="mb-0">{area.copy}</p>
             </Col>
           ))}
+        </Row>
+
+        <Row className="justify-content-center mb-5">
+          <Col lg="10">
+            <div className="text-center mb-4">
+              <p
+                className="text-uppercase fw-semibold mb-2"
+                style={{ color: '#198754', letterSpacing: '0.08em' }}
+              >
+                Storytelling examples
+              </p>
+              <h2 className="fw-bold">See the story in motion.</h2>
+              <p className="text-muted mx-auto mb-0" style={{ maxWidth: '680px' }}>
+                Good content gives people a feeling for the people, purpose, and
+                perspective behind the product. Here is one example of that work
+                in action.
+              </p>
+            </div>
+
+            <Row className="justify-content-center">
+              {storyExamples.map((example) => (
+                <Col md="7" lg="6" key={example.url}>
+                  <div className="border rounded overflow-hidden bg-white h-100">
+                    <div
+                      className="bg-light"
+                      style={{ aspectRatio: '9 / 16', minHeight: '480px' }}
+                    >
+                      <iframe
+                        title={example.title}
+                        src={`${example.url}embed/`}
+                        loading="lazy"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                        allowFullScreen
+                        style={{ border: 0, height: '100%', width: '100%' }}
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="h5 fw-bold">{example.title}</h3>
+                      <p className="mb-3">{example.copy}</p>
+                      <Button
+                        tag="a"
+                        color="outline-dark"
+                        href={example.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Watch on Instagram
+                      </Button>
+                    </div>
+                  </div>
+                </Col>
+              ))}
+            </Row>
+          </Col>
         </Row>
 
         <Row className="justify-content-center">
