@@ -98,7 +98,7 @@ export default function Index() {
                 >
                   Content marketing through storytelling
                 </p>
-                <h2 className="fw-bold">Give people a reason to care.</h2>
+                <h2 className="fw-bold">Content is King.</h2>
                 <p className="lead text-muted mb-0">
                   The story behind your product helps customers understand what
                   you do, why it matters, and why they should remember you. We
