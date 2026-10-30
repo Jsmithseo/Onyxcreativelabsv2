@@ -43,6 +43,11 @@ const storyExamples = [
     copy: 'A commercial example that pairs a focused message with a memorable point of view.',
     url: 'https://www.instagram.com/reel/DCsM8xiSbi_/',
   },
+  {
+    title: 'Featured storytelling Reel',
+    copy: 'A Reel selected to show how a clear story can make an idea easier to recognize and remember.',
+    url: 'https://www.instagram.com/reel/C9xxO33y9JY/',
+  },
 ];
 
 export default function ContentMarketingPage() {
@@ -138,7 +143,7 @@ export default function ContentMarketingPage() {
 
             <Row className="justify-content-center">
               {storyExamples.map((example) => (
-                <Col md="6" key={example.url}>
+                <Col md="6" lg="4" key={example.url}>
                   <div className="border rounded overflow-hidden bg-white h-100">
                     <div
                       className="bg-light"
