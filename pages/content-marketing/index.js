@@ -38,6 +38,11 @@ const storyExamples = [
     copy: 'An Onyx Reel selected as an example of how a clear story can help people connect with the work behind a product.',
     url: 'https://www.instagram.com/reel/Dc_5pKcBr4_/',
   },
+  {
+    title: 'STLR Entertainment commercial',
+    copy: 'A commercial example that pairs a focused message with a memorable point of view.',
+    url: 'https://www.instagram.com/reel/DCsM8xiSbi_/',
+  },
 ];
 
 export default function ContentMarketingPage() {
@@ -133,7 +138,7 @@ export default function ContentMarketingPage() {
 
             <Row className="justify-content-center">
               {storyExamples.map((example) => (
-                <Col md="7" lg="6" key={example.url}>
+                <Col md="6" key={example.url}>
                   <div className="border rounded overflow-hidden bg-white h-100">
                     <div
                       className="bg-light"
