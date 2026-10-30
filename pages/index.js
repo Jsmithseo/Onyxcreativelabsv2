@@ -111,16 +111,19 @@ export default function Index() {
               {storytellingReels.map((reel) => (
                 <Col md="6" lg="4" className="mb-4" key={reel.videoSrc}>
                   <div className="border rounded overflow-hidden bg-white shadow-sm">
-                    <video
-                      aria-label={reel.title}
-                      className="d-block w-100 bg-dark"
-                      controls
-                      playsInline
-                      preload="metadata"
-                    >
-                      <source src={reel.videoSrc} type="video/mp4" />
-                      Your browser does not support video playback.
-                    </video>
+                    <div className="bg-dark" style={{ aspectRatio: '16 / 9' }}>
+                      <video
+                        aria-label={reel.title}
+                        className="d-block w-100"
+                        controls
+                        playsInline
+                        preload="metadata"
+                        style={{ height: '100%', objectFit: 'contain' }}
+                      >
+                        <source src={reel.videoSrc} type="video/mp4" />
+                        Your browser does not support video playback.
+                      </video>
+                    </div>
                     <div className="p-3">
                       <h3 className="h5 fw-bold mb-0">{reel.title}</h3>
                     </div>
