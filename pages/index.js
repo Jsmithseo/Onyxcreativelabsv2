@@ -60,6 +60,21 @@ export default function Index() {
             </div>
           </Container>
         </section>
+        <Container maxWidth="lg">
+          <section className="onyx-intro">
+            <Row>
+              <Col md={{ size: 12 }}>
+                  <h2>The Onyx Creative Labs Way.</h2>
+                  <p className="onyx-intro-copy">
+                  We help businesses understand their market, build momentum, and grow with confidence.
+                  </p>
+              </Col>
+            </Row>
+          </section>
+        </Container>
+        <section className="onyx-muted-section">
+          <Results/>
+        </section>
         <section style={{ backgroundColor: '#f8f9fa', padding: '5rem 0' }}>
           <Container maxWidth="lg">
             <Row className="justify-content-center text-center mb-4">
@@ -121,21 +136,6 @@ export default function Index() {
               </Link>
             </div>
           </Container>
-        </section>
-        <Container maxWidth="lg">
-          <section className="onyx-intro">
-            <Row>
-              <Col md={{ size: 12 }}>
-                  <h2>The Onyx Creative Labs Way.</h2>
-                  <p className="onyx-intro-copy">
-                  We help businesses understand their market, build momentum, and grow with confidence.
-                  </p>
-              </Col>
-            </Row>
-          </section>
-        </Container>
-        <section className="onyx-muted-section">
-          <Results/>
         </section>
         <section className="onyx-content-section">
           <FeaturedCaseStudies/>
