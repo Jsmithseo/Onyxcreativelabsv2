@@ -11,17 +11,15 @@ import FeaturedCaseStudies from './components/FeaturedCaseStudies';
 const storytellingReels = [
   {
     title: 'Storytelling in action',
-    url: 'https://www.instagram.com/reel/Dc_5pKcBr4_/',
-    embedAspectRatio: '4 / 5',
-    minHeight: 0,
+    videoSrc: '/videos/storytelling-in-action.mp4',
   },
   {
     title: 'STLR Entertainment commercial',
-    url: 'https://www.instagram.com/reel/DCsM8xiSbi_/',
+    videoSrc: '/videos/stlr-entertainment-commercial.mp4',
   },
   {
-    title: 'Featured storytelling Reel',
-    url: 'https://www.instagram.com/reel/C9xxO33y9JY/',
+    title: 'Vacation Bike Rentals story',
+    videoSrc: '/videos/vacation-bike-rentals-story.mp4',
   },
 ];
 
@@ -111,35 +109,20 @@ export default function Index() {
 
             <Row className="justify-content-center">
               {storytellingReels.map((reel) => (
-                <Col md="6" lg="4" className="mb-4" key={reel.url}>
+                <Col md="6" lg="4" className="mb-4" key={reel.videoSrc}>
                   <div className="border rounded overflow-hidden bg-white shadow-sm">
-                    <div
-                      className="bg-light"
-                      style={{
-                        aspectRatio: reel.embedAspectRatio || '9 / 16',
-                        minHeight: reel.minHeight ?? '440px',
-                      }}
+                    <video
+                      aria-label={reel.title}
+                      className="d-block w-100 bg-dark"
+                      controls
+                      playsInline
+                      preload="metadata"
                     >
-                      <iframe
-                        title={reel.title}
-                        src={`${reel.url}embed/`}
-                        loading="lazy"
-                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                        allowFullScreen
-                        style={{ border: 0, height: '100%', width: '100%' }}
-                      />
-                    </div>
+                      <source src={reel.videoSrc} type="video/mp4" />
+                      Your browser does not support video playback.
+                    </video>
                     <div className="p-3">
-                      <h3 className="h5 fw-bold mb-3">{reel.title}</h3>
-                      <Button
-                        tag="a"
-                        color="outline-dark"
-                        href={reel.url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Watch on Instagram
-                      </Button>
+                      <h3 className="h5 fw-bold mb-0">{reel.title}</h3>
                     </div>
                   </div>
                 </Col>

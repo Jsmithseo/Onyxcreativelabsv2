@@ -36,17 +36,17 @@ const storyExamples = [
   {
     title: 'Storytelling in action',
     copy: 'An Onyx Reel selected as an example of how a clear story can help people connect with the work behind a product.',
-    url: 'https://www.instagram.com/reel/Dc_5pKcBr4_/',
+    videoSrc: '/videos/storytelling-in-action.mp4',
   },
   {
     title: 'STLR Entertainment commercial',
     copy: 'A commercial example that pairs a focused message with a memorable point of view.',
-    url: 'https://www.instagram.com/reel/DCsM8xiSbi_/',
+    videoSrc: '/videos/stlr-entertainment-commercial.mp4',
   },
   {
-    title: 'Featured storytelling Reel',
+    title: 'Vacation Bike Rentals story',
     copy: 'A Reel selected to show how a clear story can make an idea easier to recognize and remember.',
-    url: 'https://www.instagram.com/reel/C9xxO33y9JY/',
+    videoSrc: '/videos/vacation-bike-rentals-story.mp4',
   },
 ];
 
@@ -143,33 +143,21 @@ export default function ContentMarketingPage() {
 
             <Row className="justify-content-center">
               {storyExamples.map((example) => (
-                <Col md="6" lg="4" key={example.url}>
-                  <div className="border rounded overflow-hidden bg-white h-100">
-                    <div
-                      className="bg-light"
-                      style={{ aspectRatio: '9 / 16', minHeight: '480px' }}
+                <Col md="6" lg="4" key={example.videoSrc}>
+                  <div className="border rounded overflow-hidden bg-white">
+                    <video
+                      aria-label={example.title}
+                      className="d-block w-100 bg-dark"
+                      controls
+                      playsInline
+                      preload="metadata"
                     >
-                      <iframe
-                        title={example.title}
-                        src={`${example.url}embed/`}
-                        loading="lazy"
-                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                        allowFullScreen
-                        style={{ border: 0, height: '100%', width: '100%' }}
-                      />
-                    </div>
+                      <source src={example.videoSrc} type="video/mp4" />
+                      Your browser does not support video playback.
+                    </video>
                     <div className="p-4">
                       <h3 className="h5 fw-bold">{example.title}</h3>
-                      <p className="mb-3">{example.copy}</p>
-                      <Button
-                        tag="a"
-                        color="outline-dark"
-                        href={example.url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Watch on Instagram
-                      </Button>
+                      <p className="mb-0">{example.copy}</p>
                     </div>
                   </div>
                 </Col>
