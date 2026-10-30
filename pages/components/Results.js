@@ -41,9 +41,9 @@ export default function EarlyResultsSection() {
           </Col>
         ))}
       </Row>
-      <Link href="https://calendly.com/softwaresmitty/discovery">
+      <Link href="/90-day-pilot">
       <Button color="primary" size="lg" style={{ marginTop: '2rem', fontWeight: '600' }}>
-        Book Time to Talk
+        Test Your Market
       </Button>
       </Link>
     </Container>

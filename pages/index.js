@@ -12,6 +12,8 @@ const storytellingReels = [
   {
     title: 'Storytelling in action',
     url: 'https://www.instagram.com/reel/Dc_5pKcBr4_/',
+    embedAspectRatio: '4 / 5',
+    minHeight: 0,
   },
   {
     title: 'STLR Entertainment commercial',
@@ -46,18 +48,31 @@ export default function Index() {
               </div>
             </div>
             <h1 className="onyx-hero-title">
-              Validate Your AI Product with a 90-Day Pilot
+              Find your market. Tell your story. Grow with confidence.
             </h1>
             <p className="onyx-hero-copy">
-              Don’t waste more time wondering whether your product has market fit. Our 90-Day Pilot puts it in front of real people and shows you what the market says.
+              Onyx helps you create demand in two ways: test the market with
+              human-led business development, or turn your value into
+              story-led content that gives people a reason to care.
             </p>
-            <div className="onyx-hero-actions">
+            <div className="onyx-hero-actions" style={{ flexWrap: 'wrap', gap: '1rem' }}>
               <Link href="/90-day-pilot">
                 <Button color="success" style={{ fontWeight: '600' }}>
-                  Explore the 90-Day Pilot
+                  Test Your Market
+                </Button>
+              </Link>
+              <Link href="/content-marketing">
+                <Button color="outline-dark" style={{ fontWeight: '600' }}>
+                  Tell Your Story
                 </Button>
               </Link>
             </div>
+            <p className="mt-3 mb-0 text-center">
+              Need both?{' '}
+              <Link href="/growth-plan" style={{ color: '#198754', fontWeight: '600' }}>
+                See how a Growth Plan brings them together.
+              </Link>
+            </p>
           </Container>
         </section>
         <Container maxWidth="lg">
@@ -97,10 +112,13 @@ export default function Index() {
             <Row className="justify-content-center">
               {storytellingReels.map((reel) => (
                 <Col md="6" lg="4" className="mb-4" key={reel.url}>
-                  <div className="border rounded overflow-hidden bg-white h-100 shadow-sm">
+                  <div className="border rounded overflow-hidden bg-white shadow-sm">
                     <div
                       className="bg-light"
-                      style={{ aspectRatio: '9 / 16', minHeight: '440px' }}
+                      style={{
+                        aspectRatio: reel.embedAspectRatio || '9 / 16',
+                        minHeight: reel.minHeight ?? '440px',
+                      }}
                     >
                       <iframe
                         title={reel.title}
@@ -129,9 +147,9 @@ export default function Index() {
             </Row>
 
             <div className="text-center mt-2">
-              <Link href="/contact">
+              <Link href="/content-marketing">
                 <Button color="success" size="lg">
-                  Start a Conversation
+                  Tell Your Story
                 </Button>
               </Link>
             </div>
