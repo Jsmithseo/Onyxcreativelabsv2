@@ -16,7 +16,7 @@ const focusAreas = [
     copy: 'We get clear on why your product exists, who it is for, and what makes it worth paying attention to.',
   },
   {
-    icon: <FaPenNib size={34} color="#198754" />,
+    icon: <FaPenNib size={34} color="#2563eb" />,
     title: 'Shape the message',
     copy: 'We turn that insight into a focused narrative that sounds like your brand and speaks to the people you want to reach.',
   },
@@ -63,7 +63,7 @@ export default function ContentMarketingPage() {
         <Container>
           <p
             className="text-uppercase fw-semibold mb-3"
-            style={{ color: '#198754', letterSpacing: '0.08em' }}
+            style={{ color: '#2563eb', letterSpacing: '0.08em' }}
           >
             Content Marketing
           </p>
@@ -129,7 +129,7 @@ export default function ContentMarketingPage() {
             <div className="text-center mb-4">
               <p
                 className="text-uppercase fw-semibold mb-2"
-                style={{ color: '#198754', letterSpacing: '0.08em' }}
+                style={{ color: '#2563eb', letterSpacing: '0.08em' }}
               >
                 Storytelling examples
               </p>
@@ -173,7 +173,7 @@ export default function ContentMarketingPage() {
           <Col lg="9">
             <div
               className="rounded p-4 p-md-5 text-center"
-              style={{ backgroundColor: '#e9f7ef' }}
+              style={{ backgroundColor: '#eff6ff' }}
             >
               <h2 className="fw-bold pt-0">Content that builds connection.</h2>
               <p
