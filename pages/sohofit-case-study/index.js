@@ -75,7 +75,7 @@ function LegacySoHoFitTampaCaseStudy() {
           </Col>
 
           <Col md="3" className="mb-4">
-            <FaImages size={40} color="#198754" />
+            <FaImages size={40} color="#2563eb" />
             <h6 className="mt-3 fw-bold">Image Optimization</h6>
             <p className="mb-0">
               Compressed + resized assets, improved delivery strategy, and reduced layout shifts across key pages.
