@@ -45,7 +45,7 @@ export default function WebDesignPage() {
             <p>Tailored aesthetics and brand voice that resonate with your audience.</p>
           </Col>
           <Col md="3">
-            <FaMobileAlt size={40} color="#28a745" />
+            <FaMobileAlt size={40} color="#2563eb" />
             <h6 className="mt-3 fw-bold">Mobile-First</h6>
             <p>Built to look and perform flawlessly on smartphones and tablets.</p>
           </Col>
