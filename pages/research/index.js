@@ -45,7 +45,7 @@ export default function ResearchAnalyticsPage() {
             <p>Surveys, interviews, and feedback loops that inform experience design and messaging.</p>
           </Col>
           <Col md="3">
-            <FaChartPie size={40} color="#28a745" />
+            <FaChartPie size={40} color="#2563eb" />
             <h6 className="mt-3 fw-bold">Analytics Setup</h6>
             <p>Google Analytics, GA4, Tag Manager, and dashboards that track what matters most.</p>
           </Col>
