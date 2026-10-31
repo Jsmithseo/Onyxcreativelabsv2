@@ -59,7 +59,7 @@ function LegacyPollEverywhereCaseStudy() {
             <p>Addressed both critical and minor platform issues.</p>
           </Col>
           <Col md="3">
-            <FaTools size={40} color="#28a745" />
+            <FaTools size={40} color="#2563eb" />
             <h6 className="mt-3 fw-bold">Support Coverage</h6>
             <p>Helped support teams resolve user-impacting issues faster.</p>
           </Col>
