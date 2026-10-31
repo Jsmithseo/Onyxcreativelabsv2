@@ -68,7 +68,7 @@ function LegacyParsityCaseStudy() {
             <p>Optimized for conversion with a focus on value props, testimonials, and CTAs.</p>
           </Col>
           <Col md="3">
-            <FaUserGraduate size={40} color="#28a745" />
+            <FaUserGraduate size={40} color="#2563eb" />
             <h6 className="mt-3 fw-bold">Enrollment Strategy</h6>
             <p>Built a top-of-funnel plan using cold outreach and follow-up flows.</p>
           </Col>
