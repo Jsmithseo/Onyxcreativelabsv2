@@ -16,7 +16,7 @@ const growthSteps = [
     copy: 'Research, targeting, and direct outreach help you understand where demand is strongest and what buyers need to hear.',
   },
   {
-    icon: <FaUsers size={34} color="#198754" />,
+    icon: <FaUsers size={34} color="#2563eb" />,
     title: 'Learn from real conversations',
     copy: 'The questions, objections, and signals you hear in the market become useful direction for your message and next move.',
   },
@@ -45,7 +45,7 @@ export default function GrowthPlanPage() {
         <Container>
           <p
             className="text-uppercase fw-semibold mb-3"
-            style={{ color: '#198754', letterSpacing: '0.08em' }}
+            style={{ color: '#2563eb', letterSpacing: '0.08em' }}
           >
             Business Development + Content Marketing
           </p>
@@ -96,7 +96,7 @@ export default function GrowthPlanPage() {
           <Col lg="9">
             <div
               className="rounded p-4 p-md-5 text-center"
-              style={{ backgroundColor: '#e9f7ef' }}
+              style={{ backgroundColor: '#eff6ff' }}
             >
               <h2 className="fw-bold pt-0">For teams ready to connect the dots.</h2>
               <p className="mx-auto mb-4" style={{ maxWidth: '700px', textAlign: 'center' }}>
