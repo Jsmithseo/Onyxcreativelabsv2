@@ -63,7 +63,7 @@ function LegacyVacationBikeCaseStudy() {
         {/* Solution Section */}
         <Row className="mb-5 text-center">
           <Col md="3">
-            <FaBicycle size={40} color="#28a745" />
+            <FaBicycle size={40} color="#2563eb" />
             <h6 className="mt-3 fw-bold">Seasonal Offers</h6>
             <p>Redesigned homepage to feature limited-time packages and seasonal group bundles.</p>
           </Col>
