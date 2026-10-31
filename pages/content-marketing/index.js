@@ -145,16 +145,19 @@ export default function ContentMarketingPage() {
               {storyExamples.map((example) => (
                 <Col md="6" lg="4" key={example.videoSrc}>
                   <div className="border rounded overflow-hidden bg-white">
-                    <video
-                      aria-label={example.title}
-                      className="d-block w-100 bg-dark"
-                      controls
-                      playsInline
-                      preload="metadata"
-                    >
-                      <source src={example.videoSrc} type="video/mp4" />
-                      Your browser does not support video playback.
-                    </video>
+                    <div className="bg-dark" style={{ aspectRatio: '16 / 9' }}>
+                      <video
+                        aria-label={example.title}
+                        className="d-block w-100"
+                        controls
+                        playsInline
+                        preload="metadata"
+                        style={{ height: '100%', objectFit: 'contain' }}
+                      >
+                        <source src={example.videoSrc} type="video/mp4" />
+                        Your browser does not support video playback.
+                      </video>
+                    </div>
                     <div className="p-4">
                       <h3 className="h5 fw-bold">{example.title}</h3>
                       <p className="mb-0">{example.copy}</p>
