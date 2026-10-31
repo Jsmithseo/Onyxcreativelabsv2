@@ -67,7 +67,7 @@ function LegacyStretchyCaseStudy() {
             </p>
           </Col>
           <Col md="3" className="mb-4">
-            <FaEnvelopeOpenText size={40} color="#198754" />
+            <FaEnvelopeOpenText size={40} color="#2563eb" />
             <h6 className="mt-3 fw-bold">Email Sequences</h6>
             <p className="mb-0">
               Brief, benefits-led emails with optional pilot offers and clear next steps.
