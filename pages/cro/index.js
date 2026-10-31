@@ -50,7 +50,7 @@ export default function CROServicesPage() {
             <p>We run A/B tests, multivariate tests, and user flows to identify performance opportunities.</p>
           </Col>
           <Col md="3">
-            <FaChartLine size={40} color="#28a745" />
+            <FaChartLine size={40} color="#2563eb" />
             <h6 className="mt-3 fw-bold">Data-Driven Design</h6>
             <p>We redesign elements based on analytics and heatmaps to drive better engagement.</p>
           </Col>
