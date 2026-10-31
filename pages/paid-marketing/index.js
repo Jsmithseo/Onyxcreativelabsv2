@@ -55,7 +55,7 @@ export default function PaidMarketingPage() {
             <p>Facebook, Instagram, and Meta platforms for awareness, engagement, and retargeting.</p>
           </Col>
           <Col md="4">
-            <FaBullseye size={40} color="#28a745" />
+            <FaBullseye size={40} color="#2563eb" />
             <h6 className="mt-3 fw-bold">Campaign Strategy</h6>
             <p>Messaging, segmentation, and offer design tailored to your audience and goals.</p>
           </Col>
