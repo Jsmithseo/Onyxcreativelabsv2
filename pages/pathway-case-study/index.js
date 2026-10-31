@@ -67,7 +67,7 @@ function LegacyPathwayHumanityCaseStudy() {
             </p>
           </Col>
           <Col md="3">
-            <FaBolt size={40} color="#198754" />
+            <FaBolt size={40} color="#2563eb" />
             <h6 className="mt-3 fw-bold">Performance & Accessibility</h6>
             <p>
               Optimized assets, improved Lighthouse scores, and tightened color contrast and semantics for WCAG-friendly UX.
