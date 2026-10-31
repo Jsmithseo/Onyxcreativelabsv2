@@ -1,4 +1,6 @@
 import React from 'react';
+import Image from 'next/image';
+import Logo from '../public/logo.PNG';
 import Link from 'next/link';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
@@ -37,13 +39,12 @@ export default function Index() {
         <section className="onyx-hero">
           <Container>
             <div className="onyx-hero-logo">
-              <div className="onyx-live-logo" aria-label="Onyx Creative Labs">
-                <div className="onyx-logo-mark" aria-hidden="true">
-                  <img src="/logo.PNG" alt="" />
-                  <span className="onyx-logo-water" />
-                </div>
-                <span>Onyx Creative Labs</span>
-              </div>
+              <Image
+              src={Logo}
+              alt="Onyx Creative Labs Logo"
+              width={300}
+              height={75}
+            />
             </div>
             <h1 className="onyx-hero-title">
               Find your market. Tell your story. Grow with confidence.
@@ -67,7 +68,7 @@ export default function Index() {
             </div>
             <p className="mt-3 mb-0 text-center">
               Need both?{' '}
-              <Link href="/growth-plan" style={{ color: '#198754', fontWeight: '600' }}>
+              <Link href="/growth-plan" style={{ color: '#2563eb', fontWeight: '600' }}>
                 See how a Growth Plan brings them together.
               </Link>
             </p>
@@ -94,7 +95,7 @@ export default function Index() {
               <Col lg="9">
                 <p
                   className="text-uppercase fw-semibold mb-2"
-                  style={{ color: '#198754', letterSpacing: '0.08em' }}
+                  style={{ color: '#2563eb', letterSpacing: '0.08em' }}
                 >
                   Content marketing through storytelling
                 </p>
