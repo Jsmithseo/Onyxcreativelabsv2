@@ -51,7 +51,7 @@ export default function LifecycleEmailsPage() {
             <p>We design a full-funnel lifecycle framework based on your customer journey and KPIs.</p>
           </Col>
           <Col md="3">
-            <FaUserClock size={40} color="#28a745" />
+            <FaUserClock size={40} color="#2563eb" />
             <h6 className="mt-3 fw-bold">Automated Timing</h6>
             <p>Emails are triggered by behavior and time, not guesses, to increase open and conversion rates.</p>
           </Col>
