@@ -70,7 +70,7 @@ function LegacySTLRCaseStudy() {
             <p>Developed scripts, contact lists, and a process for ongoing lead generation.</p>
           </Col>
           <Col md="3">
-            <FaBullhorn size={40} color="#28a745" />
+            <FaBullhorn size={40} color="#2563eb" />
             <h6 className="mt-3 fw-bold">Google Ads Campaign</h6>
             <p>Targeted campaigns to attract event bookings for artists and DJs.</p>
           </Col>
