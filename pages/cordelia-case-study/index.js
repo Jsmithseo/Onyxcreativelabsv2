@@ -66,7 +66,7 @@ export default function CordeliaCaseStudy() {
             <p>Designed and developed a clean, responsive site with service info and contact forms.</p>
           </Col>
           <Col md="3">
-            <FaBullhorn size={40} color="#28a745" />
+            <FaBullhorn size={40} color="#2563eb" />
             <h6 className="mt-3 fw-bold">Google Ads Campaign</h6>
             <p>Launched targeted campaigns focused on local families and private referrals.</p>
           </Col>
