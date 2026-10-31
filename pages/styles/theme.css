@@ -7,6 +7,7 @@
   --onyx-light-gray: #f4f4f5;
   --onyx-border: #e4e4e7;
   --onyx-accent: #2563eb;
+  --onyx-accent-soft: #eff6ff;
   --onyx-font: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -54,89 +55,6 @@ p {
   text-align: center;
 }
 
-.onyx-live-logo {
-  align-items: center;
-  display: inline-flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.onyx-logo-mark {
-  height: 60px;
-  overflow: hidden;
-  position: relative;
-  width: 165px;
-}
-
-.onyx-logo-mark img {
-  height: 103px;
-  left: -143px;
-  max-width: none;
-  position: absolute;
-  top: -2px;
-  width: 452px;
-}
-
-.onyx-logo-water {
-  background:
-    linear-gradient(165deg, rgba(186, 230, 253, 0.1) 0 25%, rgba(56, 189, 248, 0.42) 26% 40%, rgba(14, 116, 144, 0.58) 41% 100%);
-  border-radius: 50%;
-  height: 48px;
-  left: 29px;
-  mix-blend-mode: screen;
-  opacity: 0.42;
-  overflow: hidden;
-  pointer-events: none;
-  position: absolute;
-  top: 7px;
-  width: 48px;
-  z-index: 1;
-}
-
-.onyx-logo-water::before,
-.onyx-logo-water::after {
-  background: rgba(255, 255, 255, 0.38);
-  border-radius: 48% 52% 45% 55%;
-  content: '';
-  height: 28px;
-  left: -24px;
-  position: absolute;
-  top: 8px;
-  transform: rotate(-7deg);
-  width: 100px;
-}
-
-.onyx-logo-water::before {
-  animation: onyx-water-wave 7s ease-in-out infinite alternate;
-}
-
-.onyx-logo-water::after {
-  animation: onyx-water-wave 8.5s ease-in-out infinite alternate-reverse;
-  opacity: 0.3;
-  top: 16px;
-}
-
-@keyframes onyx-water-wave {
-  from { transform: translateX(-10px) rotate(-7deg); }
-  to { transform: translateX(18px) rotate(7deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .onyx-logo-water::before,
-  .onyx-logo-water::after {
-    animation: none;
-  }
-}
-
-.onyx-live-logo span {
-  color: var(--onyx-black);
-  font-size: clamp(0.95rem, 1.7vw, 1.2rem);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  line-height: 1;
-  text-transform: uppercase;
-  transform: translateX(-10px);
-}
 
 .onyx-hero-title {
   font-size: clamp(2.25rem, 5vw, 3.5rem);
