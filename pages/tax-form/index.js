@@ -11,7 +11,7 @@ import {
   Alert,
   Collapse,
 } from 'reactstrap';
-import axios from 'axios';
+
 import BaseLayout from '../components/layouts/BaseLayouts';
 
 const TaxInfoRequestForm = () => {
@@ -26,6 +26,7 @@ const TaxInfoRequestForm = () => {
     numberOfLaptops: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -37,44 +38,38 @@ const TaxInfoRequestForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
 
-    const [firstName, ...lastName] = formData.name.split(' ');
+    const details = [
+      `Donation date: ${formData.donationDate}`,
+      `Donation amount: ${formData.donationAmount}`,
+      `Donated laptops: ${formData.donatedLaptops ? 'Yes' : 'No'}`,
+      formData.numberOfLaptops && `Number of laptops: ${formData.numberOfLaptops}`,
+      formData.laptopDetails && `Laptop details: ${formData.laptopDetails}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
 
     try {
-      const hubspotData = {
-        fields: [
-          { name: 'firstname', value: firstName },
-          { name: 'lastname', value: lastName.join(' ') },
-          { name: 'company', value: formData.organizationName },
-          { name: 'email', value: formData.email },
-          { name: 'donation_date', value: formData.donationDate },
-          { name: 'donation_amount', value: formData.donationAmount },
-          {
-            name: 'donated_laptops',
-            value: formData.donatedLaptops ? 'Yes' : 'No',
-          },
-          { name: 'laptop_details', value: formData.laptopDetails },
-          { name: 'number_of_laptops', value: formData.numberOfLaptops },
-        ],
-      };
+      const response = await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          company: formData.organizationName,
+          source: 'Donation tax information request',
+          interest: 'Donation Tax Information',
+          details,
+          pageUri: window.location.href,
+          pageName: document.title,
+        }),
+      });
 
-      const response = await axios.post(
-        `https://api.hsforms.com/submissions/v3/integration/submit/${process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID}/${process.env.NEXT_PUBLIC_HUBSPOT_FORM_GUID}`,
-        hubspotData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        setSubmitted(true);
-      } else {
-        console.error('Error submitting to HubSpot:', response.data);
-      }
+      if (!response.ok) throw new Error('Lead submission failed');
+      setSubmitted(true);
     } catch (error) {
-      console.error('Error submitting form:', error);
+      setError('We could not queue that request. Please try again in a moment.');
     }
   };
 
@@ -134,6 +129,7 @@ const TaxInfoRequestForm = () => {
         <Container>
           <Row>
             <Col md={{ size: 6, offset: 3 }}>
+              {error && <Alert color="danger" style={styles.alert}>{error}</Alert>}
               {submitted ? (
                 <Alert color="success" style={styles.alert}>
                   Your request has been submitted. We will send you the
