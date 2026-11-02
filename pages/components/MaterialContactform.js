@@ -16,32 +16,31 @@ const MaterialContactform = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log(`Form submitted:`, formData);
 
-    const response = await fetch('./api/sendMail', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
-    if (response.status === 200) {
-      console.log('Email sent successfully');
+    try {
+      const response = await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          source: 'Website contact form',
+          interest: 'General Inquiry',
+          details: formData.message,
+          pageUri: window.location.href,
+          pageName: document.title,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Lead submission failed');
       window.location.href = '/thankyou';
-    } else {
-      console.error('Error sending email');
+    } catch (error) {
+      window.alert('We could not submit your message. Please try again in a moment.');
     }
-
-    setFormData({
-      name: '',
-      email: '',
-      message: '',
-    });
   };
 
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <TextField
         label="Name"
         variant="outlined"
