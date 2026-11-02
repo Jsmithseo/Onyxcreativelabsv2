@@ -18,21 +18,45 @@ import {
 } from 'reactstrap';
 
 const OptIn = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [consent, setConsent] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!consent) {
-      alert('You must agree to receive messages before submitting.');
+      setError('Please agree to receive the requested messages before submitting.');
       return;
     }
 
-    // Replace with actual CRM/HubSpot integration logic
-    console.log('Phone:', phone);
-    console.log('Consent:', consent);
-    setSubmitted(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          source: 'Feedback opt-in',
+          interest: 'Feedback Opt-In',
+          details:
+            'SMS consent recorded for feedback and review-request messages. No promotional-message consent was requested.',
+          pageUri: window.location.href,
+          pageName: document.title,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Lead submission failed');
+      setSubmitted(true);
+    } catch (submissionError) {
+      setError('We could not record that opt-in. Please try again in a moment.');
+    }
   };
 
   return (
@@ -57,9 +81,32 @@ const OptIn = () => {
                 </CardText>
 
                 {submitted ? (
-                  <Alert color="success">Thank you! You've been added.</Alert>
+                  <Alert color="success">Thanks—your opt-in is queued.</Alert>
                 ) : (
                   <Form onSubmit={handleSubmit}>
+                    {error && <Alert color="danger">{error}</Alert>}
+                    <FormGroup>
+                      <Label for="optin-name">Full Name</Label>
+                      <Input
+                        type="text"
+                        id="optin-name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Enter your full name"
+                        required
+                      />
+                    </FormGroup>
+                    <FormGroup>
+                      <Label for="optin-email">Email Address</Label>
+                      <Input
+                        type="email"
+                        id="optin-email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Enter your email address"
+                        required
+                      />
+                    </FormGroup>
                     <FormGroup>
                       <Label for="phone">Phone Number</Label>
                       <Input
