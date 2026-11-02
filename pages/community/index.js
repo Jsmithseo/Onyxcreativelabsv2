@@ -11,7 +11,6 @@ import {
   Button,
   Alert,
 } from 'reactstrap';
-import axios from 'axios';
 
 const CommunityPage = () => {
   const [formData, setFormData] = useState({
@@ -20,6 +19,7 @@ const CommunityPage = () => {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -27,31 +27,27 @@ const CommunityPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const hubspotFormData = {
-      fields: [
-        { name: 'email', value: formData.email },
-        { name: 'firstname', value: formData.fullName },
-      ],
-      context: {
-        pageUri: window.location.href,
-        pageName: document.title,
-      },
-    };
+    setError('');
 
     try {
-      await axios.post(
-        'https://api.hsforms.com/submissions/v3/integration/submit/your-portal-id/your-form-id',
-        hubspotFormData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.fullName,
+          email: formData.email,
+          source: 'Community request',
+          interest: 'Slack Community',
+          details: 'Requested an invitation to the Onyx Creative Labs community.',
+          pageUri: window.location.href,
+          pageName: document.title,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Lead submission failed');
       setSubmitted(true);
     } catch (error) {
-      console.error('There was an error submitting the form:', error);
+      setError('We could not queue that request. Please try again in a moment.');
     }
   };
 
@@ -115,10 +111,11 @@ const CommunityPage = () => {
               Fill out the form below to join our Slack community and start
               connecting with other professionals today.
             </p>
+            {error && <Alert color="danger">{error}</Alert>}
             {submitted ? (
               <Alert color="success">
-                Thank you for joining our community! Check your email for the
-                Slack invite.
+                Thanks—your community request is queued. We will follow up with
+                the next step.
               </Alert>
             ) : (
               <Form onSubmit={handleSubmit}>
