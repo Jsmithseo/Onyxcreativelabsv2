@@ -1,12 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button, Col, Container, Row } from 'reactstrap';
-import {
-  FaBookOpen,
-  FaBullhorn,
-  FaPenNib,
-  FaVideo,
-} from 'react-icons/fa';
+import { FaBookOpen, FaBullhorn, FaPenNib, FaVideo } from 'react-icons/fa';
 import BaseLayout from '../components/layouts/BaseLayouts';
 
 const focusAreas = [
@@ -32,23 +27,146 @@ const focusAreas = [
   },
 ];
 
+
 const storyExamples = [
   {
     title: 'Storytelling in action',
-    copy: 'An Onyx Reel selected as an example of how a clear story can help people connect with the work behind a product.',
+    category: 'Storytelling example',
+    copy: 'A look at the people and real moments behind the work.',
     videoSrc: '/videos/storytelling-in-action.mp4',
+    poster: '/storytelling-in-action-still.jpg',
+    posterPosition: '50% 50%',
   },
   {
     title: 'STLR Entertainment commercial',
-    copy: 'A commercial example that pairs a focused message with a memorable point of view.',
+    category: 'Commercial',
+    copy: 'Bringing the energy and personality of an entertainment brand to life.',
     videoSrc: '/videos/stlr-entertainment-commercial.mp4',
+    poster: '/stlr-entertainment-commercial-still.jpg',
+    posterPosition: '50% 50%',
   },
   {
     title: 'Vacation Bike Rentals story',
-    copy: 'A Reel selected to show how a clear story can make an idea easier to recognize and remember.',
+    category: 'Brand story',
+    copy: 'Showing the experience behind the product and what it feels like to be there.',
     videoSrc: '/videos/vacation-bike-rentals-story.mp4',
+    poster: '/vacation-bike-rentals-still.jpg',
+    posterPosition: '50% 24%',
   },
 ];
+
+function StorytellingCard({ reel }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  return (
+    <article className="storytelling-card h-100 overflow-hidden bg-white">
+      <div className="position-relative" style={{ aspectRatio: '16 / 9', background: '#101828' }}>
+        {isPlaying ? (
+          <video
+            aria-label={reel.title}
+            className="d-block w-100 h-100"
+            controls
+            autoPlay
+            playsInline
+            preload="metadata"
+            style={{ objectFit: 'contain', background: '#101828' }}
+            onEnded={() => setIsPlaying(false)}
+          >
+            <source src={reel.videoSrc} type="video/mp4" />
+            Your browser does not support video playback.
+          </video>
+        ) : (
+          <button
+            type="button"
+            aria-label={`Play ${reel.title}`}
+            onClick={() => setIsPlaying(true)}
+            className="storytelling-poster w-100 h-100 border-0 p-0 text-start"
+          >
+            <img
+              src={reel.poster}
+              alt=""
+              className="w-100 h-100"
+              loading="lazy"
+              style={{ objectFit: 'cover', objectPosition: reel.posterPosition || '50% 50%' }}
+            />
+            <span className="storytelling-poster-shade" aria-hidden="true" />
+            <span className="storytelling-play" aria-hidden="true">▶</span>
+            <span className="storytelling-watch">Watch story</span>
+          </button>
+        )}
+      </div>
+      <div className="p-3 p-lg-4">
+        <p className="text-uppercase fw-semibold mb-2" style={{ color: '#2563eb', fontSize: '.72rem', letterSpacing: '.08em' }}>{reel.category}</p>
+        <h3 className="h5 fw-bold mb-0">{reel.title}</h3>
+        <p className="mt-3 mb-0">{reel.copy}</p>
+      </div>
+      <style jsx>{`
+        .storytelling-card {
+          border: 1px solid #e5e7eb;
+          border-radius: 1rem;
+          box-shadow: 0 14px 32px rgba(15, 23, 42, .08);
+          transition: transform .2s ease, box-shadow .2s ease;
+        }
+        .storytelling-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 20px 40px rgba(15, 23, 42, .14);
+        }
+        .storytelling-poster {
+          position: relative;
+          display: block;
+          overflow: hidden;
+          background: #101828;
+          cursor: pointer;
+        }
+        .storytelling-poster img {
+          display: block;
+          transition: transform .35s ease;
+        }
+        .storytelling-poster:hover img,
+        .storytelling-poster:focus-visible img {
+          transform: scale(1.04);
+        }
+        .storytelling-poster:focus-visible {
+          outline: 3px solid #2563eb;
+          outline-offset: -3px;
+        }
+        .storytelling-poster-shade {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(16, 24, 40, .04) 24%, rgba(16, 24, 40, .72) 100%);
+        }
+        .storytelling-play {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          display: grid;
+          width: 4rem;
+          height: 4rem;
+          place-items: center;
+          border: 1px solid rgba(255, 255, 255, .85);
+          border-radius: 999px;
+          background: rgba(16, 24, 40, .72);
+          color: #fff;
+          font-size: 1.25rem;
+          line-height: 1;
+          transform: translate(-50%, -50%);
+          box-shadow: 0 10px 24px rgba(0, 0, 0, .24);
+        }
+        .storytelling-watch {
+          position: absolute;
+          right: 1rem;
+          bottom: .875rem;
+          color: #fff;
+          font-size: .75rem;
+          font-weight: 700;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        }
+      `}</style>
+    </article>
+  );
+}
+
 
 export default function ContentMarketingPage() {
   return (
@@ -65,16 +183,17 @@ export default function ContentMarketingPage() {
             className="text-uppercase fw-semibold mb-3"
             style={{ color: '#2563eb', letterSpacing: '0.08em' }}
           >
-            Content Marketing
+            Content Marketing Through Storytelling
           </p>
-          <h1 className="fw-bold">Your product has a story. Let&apos;s make it resonate.</h1>
+          <h1 className="fw-bold">Content is King.</h1>
           <p
             className="text-muted mx-auto mt-3"
-            style={{ fontSize: '1.15rem', maxWidth: '720px', textAlign: 'center' }}
+            style={{ fontSize: '1.15rem', maxWidth: '760px', textAlign: 'center' }}
           >
-            At Onyx Creative Labs, content marketing is storytelling with a
-            purpose. We help you turn the reason your product exists into
-            content that customers can understand, connect with, and remember.
+            With so much AI and automation, genuine storytelling matters more
+            than ever. The story behind your business—why you started, what you
+            believe, and the people you serve—helps customers understand who
+            you are and why your product matters.
           </p>
         </Container>
       </section>
@@ -82,19 +201,20 @@ export default function ContentMarketingPage() {
       <Container className="py-5">
         <Row className="align-items-center mb-5">
           <Col md="7">
-            <h2 className="fw-bold">Make the product feel human.</h2>
+            <h2 className="fw-bold">Your story is the lifeblood of your business.</h2>
             <p>
-              People do not just buy products. They buy into the reason a
-              product exists, the problem it solves, and the feeling it creates.
-              A clear story gives people a way to see themselves in what you
-              are building.
+              Your ability to tell a genuine story is what gives people a reason
+              to connect with what you do. They want to know where your product
+              came from, what problem you set out to solve, and what it means to
+              the people using it. Those human details give your business a voice
+              that customers can recognize, remember, and trust.
             </p>
             <p className="mb-0">
-              We work with you to uncover the moments worth sharing: why you
-              started, what you believe, the people you serve, and the change
-              your product makes possible. Then we shape those moments into
-              content that helps the right customers get to know your product
-              before they are ready to buy.
+              At Onyx Creative Labs, we work with you to find those moments and
+              bring them to life. We listen to your story, get to know your
+              product, and shape it into video, photography, and written content
+              that sounds like you. The goal is to help people get to know the
+              business behind the product and feel a real connection to it.
             </p>
           </Col>
           <Col md="5" className="mt-4 mt-md-0">
@@ -102,7 +222,7 @@ export default function ContentMarketingPage() {
               className="rounded p-4 h-100"
               style={{ backgroundColor: '#212529', color: '#fff' }}
             >
-              <h3 className="h4 fw-bold">What we can create</h3>
+              <h3 className="h4 fw-bold" style={{ color: '#fff' }}>What we can create</h3>
               <ul className="mb-0 ps-3">
                 <li>Founder and brand stories</li>
                 <li>Product videos and photo content</li>
@@ -125,7 +245,7 @@ export default function ContentMarketingPage() {
         </Row>
 
         <Row className="justify-content-center mb-5">
-          <Col lg="10">
+          <Col lg="12">
             <div className="text-center mb-4">
               <p
                 className="text-uppercase fw-semibold mb-2"
@@ -135,34 +255,16 @@ export default function ContentMarketingPage() {
               </p>
               <h2 className="fw-bold">See the story in motion.</h2>
               <p className="text-muted mx-auto mb-0" style={{ maxWidth: '680px' }}>
-                Good content gives people a feeling for the people, purpose, and
-                perspective behind the product. Here is one example of that work
-                in action.
+                These three stories bring the people, purpose, and experience
+                behind a product into focus. Watch how each one gives customers
+                a way to connect.
               </p>
             </div>
 
-            <Row className="justify-content-center">
+            <Row className="justify-content-center g-4">
               {storyExamples.map((example) => (
                 <Col md="6" lg="4" key={example.videoSrc}>
-                  <div className="border rounded overflow-hidden bg-white">
-                    <div className="bg-dark" style={{ aspectRatio: '16 / 9' }}>
-                      <video
-                        aria-label={example.title}
-                        className="d-block w-100"
-                        controls
-                        playsInline
-                        preload="metadata"
-                        style={{ height: '100%', objectFit: 'contain' }}
-                      >
-                        <source src={example.videoSrc} type="video/mp4" />
-                        Your browser does not support video playback.
-                      </video>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="h5 fw-bold">{example.title}</h3>
-                      <p className="mb-0">{example.copy}</p>
-                    </div>
-                  </div>
+                  <StorytellingCard reel={example} />
                 </Col>
               ))}
             </Row>
@@ -175,20 +277,14 @@ export default function ContentMarketingPage() {
               className="rounded p-4 p-md-5 text-center"
               style={{ backgroundColor: '#eff6ff' }}
             >
-              <h2 className="fw-bold pt-0">Content that builds connection.</h2>
-              <p
-                className="mx-auto mb-4"
-                style={{ maxWidth: '700px', textAlign: 'center' }}
-              >
-                Every piece of content should do more than fill a feed. It
-                should make your product easier to know, remember, and trust.
-                Let&apos;s tell the story behind what you&apos;re building and give
-                people a reason to care.
+              <h2 className="fw-bold pt-0">Tell your story with Onyx.</h2>
+              <p className="mx-auto mb-4" style={{ maxWidth: '700px' }}>
+                There is a reason you started this business and a reason your
+                product exists. Let&apos;s turn that into content that feels real,
+                reflects your voice, and helps customers get to know you.
               </p>
               <Link href="/contact" passHref legacyBehavior>
-                <Button color="success" size="lg">
-                  Start a Conversation
-                </Button>
+                <Button color="success" size="lg">Tell Your Story</Button>
               </Link>
             </div>
           </Col>
