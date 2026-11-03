@@ -52,11 +52,6 @@ const plans = [
 
 const trialOptions = [
   {
-    id: "14",
-    label: "14-day free trial",
-    summary: "Start free for 14 days. Monthly billing begins after the trial.",
-  },
-  {
     id: "7",
     label: "7-day free trial",
     summary: "Start free for 7 days. Monthly billing begins after the trial.",
@@ -138,7 +133,7 @@ function PriceCard({ plan, trialId, termsAccepted }) {
 }
 
 export default function Reviews() {
-  const [trialId, setTrialId] = useState("14");
+  const [trialId, setTrialId] = useState("7");
   const [calculatorPlanId, setCalculatorPlanId] = useState("starter");
   const [locationCount, setLocationCount] = useState(1);
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -171,7 +166,7 @@ export default function Reviews() {
             </p>
             <div className="onyx-hero-actions" style={{ flexWrap: "wrap", gap: "1rem" }}>
               <Link href="#plans">
-                <Button color="primary" size="lg">See 14-Day Trial Plans</Button>
+                <Button color="primary" size="lg">See 7-Day Trial Plans</Button>
               </Link>
               <Link href={reviewCallHref}>
                 <Button color="outline-dark" size="lg">Book a Review Growth Call</Button>
@@ -219,7 +214,7 @@ export default function Reviews() {
                 <p className="onyx-lab-eyebrow">Simple, scalable pricing</p>
                 <h2>Start with the plan that matches your team.</h2>
                 <p className="mb-0 text-muted">
-                  The 14-day trial is selected by default. Change the enrollment timing below;
+                  The 7-day trial is selected by default. Choose Start today if you prefer no trial;
                   the plan and monthly price stay the same.
                 </p>
               </Col>
