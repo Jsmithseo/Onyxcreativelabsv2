@@ -139,8 +139,8 @@ function PriceCard({ plan, trialId, termsAccepted }) {
 
 export default function Reviews() {
   const [trialId, setTrialId] = useState("14");
-  const [calculatorPlanId, setCalculatorPlanId] = useState("growth");
-  const [locationCount, setLocationCount] = useState(2);
+  const [calculatorPlanId, setCalculatorPlanId] = useState("starter");
+  const [locationCount, setLocationCount] = useState(1);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const trial = trialOptions.find((option) => option.id === trialId);
