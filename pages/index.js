@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import Image from 'next/image';
-import Logo from '../public/logo.PNG';
 import Link from 'next/link';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
@@ -150,9 +148,8 @@ export default function Index() {
     <BaseLayout>
       <div style={{ overflowX: 'hidden' }}>
         <CssBaseline />
-        <section className="onyx-hero">
+        <section className="onyx-hero onyx-hero-inverse">
           <Container>
-            <div className="onyx-hero-logo"><Image src={Logo} alt="Onyx Creative Labs Logo" width={300} height={75} /></div>
             <h1 className="onyx-hero-title">Find your market. Tell your story. Grow with confidence.</h1>
             <p className="onyx-hero-copy">Onyx helps you create demand in two ways: test the market with human-led business development, or turn your value into story-led content that gives people a reason to care.</p>
             <div className="onyx-hero-actions" style={{ flexWrap: 'wrap', gap: '1rem' }}>
@@ -198,6 +195,32 @@ export default function Index() {
         <section className="onyx-content-section"><FeaturedCaseStudies /></section>
         <section className="onyx-muted-section"><Approach /></section>
       </div>
+
+      <style jsx global>{`
+        .onyx-hero.onyx-hero-inverse {
+          background: #18181b;
+          color: #fff;
+          padding: 6rem 0;
+        }
+        .onyx-hero-inverse .onyx-hero-title { color: #fff; }
+        .onyx-hero-inverse .onyx-hero-copy { color: #e4e4e7; }
+        .onyx-hero-inverse .onyx-hero-actions .btn {
+          background: transparent !important;
+          border-color: #fff !important;
+          color: #fff !important;
+        }
+        .onyx-hero-inverse .onyx-hero-actions .btn:hover,
+        .onyx-hero-inverse .onyx-hero-actions .btn:focus {
+          background: #fff !important;
+          border-color: #fff !important;
+          color: #18181b !important;
+        }
+        .onyx-hero-inverse > .MuiContainer-root > p:last-child { color: #d4d4d8; }
+        .onyx-hero-inverse > .MuiContainer-root > p:last-child a { color: #93c5fd !important; }
+        @media (max-width: 575.98px) {
+          .onyx-hero.onyx-hero-inverse { padding: 4rem 0; }
+        }
+      `}</style>
     </BaseLayout>
   );
 }
