@@ -46,7 +46,7 @@ const WhyDonate = () => {
                   <Link
                     href="/laptop-donation"
                     passHref
-                    style={{ color: '#007bff', textDecoration: 'underline' }}
+                    style={{ color: 'var(--onyx-accent)', textDecoration: 'underline' }}
                   >
                     Learn more about our laptop donation program.
                   </Link>

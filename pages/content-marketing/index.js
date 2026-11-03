@@ -89,7 +89,7 @@ function StorytellingCard({ reel }) {
         )}
       </div>
       <div className="p-3 p-lg-4">
-        <p className="text-uppercase fw-semibold mb-2" style={{ color: '#2563eb', fontSize: '.72rem', letterSpacing: '.08em' }}>{reel.category}</p>
+        <p className="text-uppercase fw-semibold mb-2" style={{ color: 'var(--onyx-accent)', fontSize: '.72rem', letterSpacing: '.08em' }}>{reel.category}</p>
         <h3 className="h5 fw-bold mb-0">{reel.title}</h3>
         <p className="mt-3 mb-0">{reel.copy}</p>
       </div>
@@ -120,7 +120,7 @@ function StorytellingCard({ reel }) {
           transform: scale(1.04);
         }
         .storytelling-poster:focus-visible {
-          outline: 3px solid #2563eb;
+          outline: 3px solid var(--onyx-accent);
           outline-offset: -3px;
         }
         .storytelling-poster-shade {
@@ -225,7 +225,7 @@ export default function ContentMarketingPage() {
           text-align: center;
         }
         .onyx-marketing-eyebrow {
-          color: #2563eb;
+          color: var(--onyx-accent);
           font-size: 0.8rem;
           font-weight: 600;
           letter-spacing: 0.08em;
@@ -264,7 +264,7 @@ export default function ContentMarketingPage() {
           margin: 0 0 1.5rem;
         }
         .onyx-marketing-cta {
-          background: #eff6ff;
+          background: var(--onyx-accent-soft);
           margin: 0 auto;
           max-width: 950px;
           padding: 3rem 2rem;

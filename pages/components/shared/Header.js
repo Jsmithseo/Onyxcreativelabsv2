@@ -152,12 +152,12 @@ export default function MyHeader() {
         }
         .onyx-site-header .onyx-nav-link:hover,
         .onyx-site-header .onyx-nav-link[aria-expanded='true'] {
-          background: #eaf0fb;
-          color: #1d4ed8;
+          background: var(--onyx-accent-soft);
+          color: var(--onyx-accent);
         }
         .onyx-site-header a:focus-visible,
         .onyx-site-header button:focus-visible {
-          outline: 2px solid #2563eb;
+          outline: 2px solid var(--onyx-accent);
           outline-offset: 3px;
         }
         .onyx-nav-toggle {
@@ -202,7 +202,7 @@ export default function MyHeader() {
           padding: 0.7rem 0.85rem;
           text-decoration: none;
         }
-        .onyx-products-menu a:hover { background: #eff6ff; color: #1d4ed8; }
+        .onyx-products-menu a:hover { background: var(--onyx-accent-soft); color: var(--onyx-accent); }
         .onyx-all-products { border-top: 1px solid #e4e4e7; margin-top: 0.3rem; padding-top: 0.3rem; }
         @media (max-width: 991.98px) {
           .onyx-site-nav { flex-wrap: wrap; gap: 0; padding: 10px 20px; }

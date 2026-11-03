@@ -14,7 +14,7 @@ export default function TermsAndConditions() {
       <BaseLayout>
         <section style={{ background: "#101828", color: "#fff", padding: "4.5rem 0" }}>
           <Container>
-            <p className="text-uppercase fw-bold mb-2" style={{ color: "#9ec5ff", fontSize: ".75rem", letterSpacing: ".08em" }}>Onyx Reviews</p>
+            <p className="text-uppercase fw-bold mb-2" style={{ color: "var(--onyx-accent)", fontSize: ".75rem", letterSpacing: ".08em" }}>Onyx Reviews</p>
             <h1 className="mb-0">Terms &amp; Conditions</h1>
           </Container>
         </section>

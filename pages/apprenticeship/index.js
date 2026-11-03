@@ -490,7 +490,7 @@ const styles = {
   button: {
     width: '100%',
     padding: '12px 20px',
-    backgroundColor: '#007bff',
+    backgroundColor: 'var(--onyx-accent)',
     color: '#fff',
     border: 'none',
     borderRadius: '5px',

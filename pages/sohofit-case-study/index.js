@@ -67,7 +67,7 @@ function LegacySoHoFitTampaCaseStudy() {
         {/* Program Overview */}
         <Row className="mb-4 text-center">
           <Col md="3" className="mb-4">
-            <FaTachometerAlt size={40} color="#0d6efd" />
+            <FaTachometerAlt size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Speed Optimization</h6>
             <p className="mb-0">
               Cleaned up unnecessary JS/CSS, reduced payload, and improved load performance, especially on mobile.
@@ -75,7 +75,7 @@ function LegacySoHoFitTampaCaseStudy() {
           </Col>
 
           <Col md="3" className="mb-4">
-            <FaImages size={40} color="#2563eb" />
+            <FaImages size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Image Optimization</h6>
             <p className="mb-0">
               Compressed + resized assets, improved delivery strategy, and reduced layout shifts across key pages.

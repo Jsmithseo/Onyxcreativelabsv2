@@ -59,7 +59,7 @@ function LegacyStretchyCaseStudy() {
         {/* Go-To-Market Approach */}
         <Row className="mb-4 text-center">
           <Col md="3" className="mb-4">
-            <FaPhone size={40} color="#0d6efd" />
+            <FaPhone size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Outbound Calling</h6>
             <p className="mb-0">
               Daily call blocks to GMs and wellness directors with concise value props and
@@ -67,7 +67,7 @@ function LegacyStretchyCaseStudy() {
             </p>
           </Col>
           <Col md="3" className="mb-4">
-            <FaEnvelopeOpenText size={40} color="#2563eb" />
+            <FaEnvelopeOpenText size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Email Sequences</h6>
             <p className="mb-0">
               Brief, benefits-led emails with optional pilot offers and clear next steps.

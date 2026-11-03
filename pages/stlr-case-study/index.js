@@ -60,17 +60,17 @@ function LegacySTLRCaseStudy() {
         {/* Solution Icons */}
         <Row className="mb-5 text-center">
           <Col md="3">
-            <FaGlobe size={40} color="#007bff" />
+            <FaGlobe size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Website Redesign</h6>
             <p>Refreshed the online presence with booking forms, artist showcases, and mobile-friendly design.</p>
           </Col>
           <Col md="3">
-            <FaPhoneAlt size={40} color="#17a2b8" />
+            <FaPhoneAlt size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Cold Calling Strategy</h6>
             <p>Developed scripts, contact lists, and a process for ongoing lead generation.</p>
           </Col>
           <Col md="3">
-            <FaBullhorn size={40} color="#2563eb" />
+            <FaBullhorn size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Google Ads Campaign</h6>
             <p>Targeted campaigns to attract event bookings for artists and DJs.</p>
           </Col>

@@ -267,8 +267,8 @@ const ContactForm = () => {
             type="submit"
             style={{
               padding: '12px 20px',
-              backgroundColor: '#0C6DFD',
-              color: '#fff',
+              backgroundColor: 'var(--onyx-accent)',
+              color: '#18181b',
               border: 'none',
               borderRadius: '5px',
               cursor: 'pointer',

@@ -59,7 +59,7 @@ function LegacyPathwayHumanityCaseStudy() {
         {/* Solution */}
         <Row className="mb-5 text-center">
           <Col md="3">
-            <FaSitemap size={40} color="#0d6efd" />
+            <FaSitemap size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Website Redesign</h6>
             <p>
               Rebuilt IA and page templates to spotlight core services: Recovery, Transitional Housing, and Job Support.
@@ -67,7 +67,7 @@ function LegacyPathwayHumanityCaseStudy() {
             </p>
           </Col>
           <Col md="3">
-            <FaBolt size={40} color="#2563eb" />
+            <FaBolt size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Performance & Accessibility</h6>
             <p>
               Optimized assets, improved Lighthouse scores, and tightened color contrast and semantics for WCAG-friendly UX.

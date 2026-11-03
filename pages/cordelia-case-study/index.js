@@ -61,12 +61,12 @@ export default function CordeliaCaseStudy() {
         {/* Solution Icons */}
         <Row className="mb-5 text-center">
           <Col md="3">
-            <FaGlobe size={40} color="#007bff" />
+            <FaGlobe size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Website Build</h6>
             <p>Designed and developed a clean, responsive site with service info and contact forms.</p>
           </Col>
           <Col md="3">
-            <FaBullhorn size={40} color="#2563eb" />
+            <FaBullhorn size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Google Ads Campaign</h6>
             <p>Launched targeted campaigns focused on local families and private referrals.</p>
           </Col>

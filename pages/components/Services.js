@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 const services = [
   {
-    icon: <FaChartBar size={32} color="#007bff" />,
+    icon: <FaChartBar size={32} color="var(--onyx-accent)" />,
     title: 'Conversion Rate Optimization',
     description: 'Increase conversion metrics and make a bigger impact.',
     link: '/cro',

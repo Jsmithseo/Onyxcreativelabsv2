@@ -6,8 +6,9 @@
   --onyx-gray: #71717a;
   --onyx-light-gray: #f4f4f5;
   --onyx-border: #e4e4e7;
-  --onyx-accent: #2563eb;
-  --onyx-accent-soft: #eff6ff;
+  --onyx-accent: #93c5fd;
+  --onyx-accent-rgb: 147, 197, 253;
+  --onyx-accent-soft: rgba(var(--onyx-accent-rgb), 0.14);
   --onyx-font: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -428,7 +429,7 @@ p {
 .onyx-review-thread {
   background: #fff;
   border: 1px solid #1f2329;
-  box-shadow: 7px 7px 0 rgba(37, 99, 235, 0.13);
+  box-shadow: 7px 7px 0 rgba(var(--onyx-accent-rgb), 0.13);
   max-width: 400px;
   overflow: hidden;
 }
@@ -457,7 +458,7 @@ p {
 .onyx-review-thread-header p { color: #1f2329; font-size: .92rem; font-weight: 700; }
 .onyx-review-thread-header div span { color: #697386; font-size: .72rem; }
 .onyx-review-thread-status {
-  color: #2563eb;
+  color: var(--onyx-accent);
   font-size: .72rem;
   font-weight: 700;
   margin-left: auto !important;
@@ -474,7 +475,7 @@ p {
   padding: .75rem .9rem;
 }
 .onyx-review-thread-bubble-incoming { background: #edf0f4; color: #292d35; }
-.onyx-review-thread-bubble-outgoing { background: #2563eb; color: #fff; margin-left: auto; }
+.onyx-review-thread-bubble-outgoing { background: var(--onyx-accent); color: var(--onyx-black); margin-left: auto; }
 .onyx-review-thread-note { color: #697386; font-size: .72rem; margin: 1.15rem 0 0; text-align: center; }
 .onyx-reviews-section h2,
 .onyx-reviews-sms h2 { font-size: clamp(1.9rem, 3vw, 2.6rem); margin: 0; }
@@ -486,11 +487,11 @@ p {
   margin-top: 2rem;
 }
 .onyx-review-stats article {
-  border-left: 3px solid #2563eb;
+  border-left: 3px solid var(--onyx-accent);
   padding: .2rem 0 .2rem .9rem;
 }
 .onyx-review-stats strong {
-  color: #2563eb;
+  color: var(--onyx-accent);
   display: block;
   font-size: 2rem;
   font-weight: 700;
@@ -527,8 +528,8 @@ p {
   width: 1.65rem;
 }
 .onyx-review-flow-step strong { color: #353b45; display: block; font-size: .76rem; font-weight: 600; line-height: 1.25; }
-.onyx-review-flow-step-active span { background: #2563eb; border-color: #2563eb; color: #fff; }
-.onyx-review-flow-step-active strong { color: #2563eb; }
+.onyx-review-flow-step-active span { background: var(--onyx-accent); border-color: var(--onyx-accent); color: var(--onyx-black); }
+.onyx-review-flow-step-active strong { color: var(--onyx-accent); }
 .onyx-review-flow-line { background: #c8ced8; height: 1px; margin: 0 .6rem; position: relative; top: -.35rem; width: 12%; }
 .onyx-review-flow-line::after {
   border-bottom: 3px solid transparent;
@@ -614,4 +615,46 @@ footer.bg-dark {
 
 .text-muted {
   color: var(--onyx-gray) !important;
+}
+
+
+/* Shared Onyx accent, including framework-provided controls. */
+html:root {
+  --bs-primary: var(--onyx-accent);
+  --bs-primary-rgb: var(--onyx-accent-rgb);
+  --bs-link-color: var(--onyx-accent);
+  --bs-link-color-rgb: var(--onyx-accent-rgb);
+  --bs-link-hover-color: var(--onyx-accent);
+  --bs-link-hover-color-rgb: var(--onyx-accent-rgb);
+  --bs-primary-text-emphasis: var(--onyx-black);
+  --bs-primary-bg-subtle: var(--onyx-accent-soft);
+  --bs-primary-border-subtle: var(--onyx-accent);
+  --bs-focus-ring-color: rgba(var(--onyx-accent-rgb), 0.25);
+}
+a:hover,
+a:focus { color: var(--onyx-accent); }
+input,
+textarea,
+select { accent-color: var(--onyx-accent); }
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--onyx-accent);
+  box-shadow: 0 0 0 0.25rem rgba(var(--onyx-accent-rgb), 0.25);
+}
+.form-check-input:checked {
+  background-color: var(--onyx-accent);
+  border-color: var(--onyx-accent);
+}
+.onyx-pilot-badge { color: var(--onyx-black) !important; }
+.MuiInputLabel-root.Mui-focused,
+.MuiButton-textPrimary,
+.MuiCheckbox-root.Mui-checked,
+.MuiRadio-root.Mui-checked { color: var(--onyx-accent) !important; }
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+.MuiButton-outlinedPrimary { border-color: var(--onyx-accent) !important; }
+.MuiButton-outlinedPrimary { color: var(--onyx-accent) !important; }
+.MuiButton-containedPrimary,
+.MuiButton-containedPrimary:hover {
+  background-color: var(--onyx-accent) !important;
+  color: var(--onyx-black) !important;
 }

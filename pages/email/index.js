@@ -46,12 +46,12 @@ export default function LifecycleEmailsPage() {
         {/* Solutions Icons */}
         <Row className="text-center mb-5">
           <Col md="3">
-            <FaEnvelope size={40} color="#007bff" />
+            <FaEnvelope size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Email Strategy</h6>
             <p>We design a full-funnel lifecycle framework based on your customer journey and KPIs.</p>
           </Col>
           <Col md="3">
-            <FaUserClock size={40} color="#2563eb" />
+            <FaUserClock size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Automated Timing</h6>
             <p>Emails are triggered by behavior and time, not guesses, to increase open and conversion rates.</p>
           </Col>

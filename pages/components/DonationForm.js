@@ -168,7 +168,7 @@ const styles = {
   selectedButton: {
     flex: 1,
     marginRight: '10px',
-    backgroundColor: '#007bff',
+    backgroundColor: 'var(--onyx-accent)',
     color: '#fff',
   },
   customAmountInput: {

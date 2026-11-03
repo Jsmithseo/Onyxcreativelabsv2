@@ -63,12 +63,12 @@ function LegacyParsityCaseStudy() {
         {/* Solution Icons */}
         <Row className="mb-5 text-center">
           <Col md="3">
-            <FaGlobe size={40} color="#007bff" />
+            <FaGlobe size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Landing Page Design</h6>
             <p>Optimized for conversion with a focus on value props, testimonials, and CTAs.</p>
           </Col>
           <Col md="3">
-            <FaUserGraduate size={40} color="#2563eb" />
+            <FaUserGraduate size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Enrollment Strategy</h6>
             <p>Built a top-of-funnel plan using cold outreach and follow-up flows.</p>
           </Col>
