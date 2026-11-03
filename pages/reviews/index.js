@@ -256,12 +256,12 @@ export default function Reviews() {
                   onChange={(event) => setTermsAccepted(event.target.checked)}
                 />
                 <span>
-                  I agree to the <Link href="/terms-and-conditions">Terms &amp; Conditions</Link>, <Link href="/refund-policy">Refund Policy</Link>, and <Link href="/privacy-policy">Privacy Policy</Link> for my selected Onyx Reviews plan.
+                  I have reviewed the <Link href="/terms-and-conditions">Terms &amp; Conditions</Link>, <Link href="/refund-policy">Refund Policy</Link>, and <Link href="/privacy-policy">Privacy Policy</Link> for my selected Onyx Reviews plan.
                 </span>
               </label>
             </div>
             <p className="text-center mt-4 mb-0 text-muted">
-              {trial.summary} Checkout links will appear here once your plan setup is activated.
+              {trial.summary} This inquiry does not enroll you or collect payment. Before direct checkout is activated, Onyx Reviews will show the selected plan, monthly price, trial timing, cancellation route, and a separate required recurring-charge authorization.
             </p>
           </Container>
         </section>
