@@ -184,7 +184,8 @@ export default function MyHeader() {
           border: 1px solid #e4e4e7;
           border-radius: 8px;
           box-shadow: 0 15px 35px rgba(24, 24, 27, 0.12);
-          left: 0;
+          left: auto;
+          right: 0;
           list-style: none;
           margin: 0;
           min-width: 230px;
