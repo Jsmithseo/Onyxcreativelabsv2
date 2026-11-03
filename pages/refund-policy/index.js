@@ -25,7 +25,7 @@ export default function RefundPolicy() {
           <p>If you enroll in a free-trial plan and cancel before the trial ends, no subscription charge is due for that trial. The specific trial length and first billing date appear at enrollment.</p>
 
           <h2 className="h4 mt-4">Monthly subscriptions and cancellations</h2>
-          <p>You may cancel immediately at any time. We will stop future recurring charges and refund the unused portion of the current monthly subscription on a pro-rated basis from the effective cancellation date.</p>
+          <p>You may cancel at any time. We will stop future recurring charges and refund the unused portion of the current monthly subscription on a pro-rated basis from the date your cancellation request is received.</p>
 
           <h2 className="h4 mt-4">How pro-rated refunds work</h2>
           <p>The refund is calculated from the date cancellation takes effect because message-delivery and related service costs are incurred as the service is used and cannot always be reversed. If a billing situation needs special attention, Onyx Reviews will take a flexible, good-faith approach to resolving it.</p>
