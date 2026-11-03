@@ -1,7 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
 import BaseLayout from '../components/layouts/BaseLayouts';
-import Link from 'next/link';
 
 export default function OurStoryPage() {
   return (
@@ -84,9 +83,9 @@ export default function OurStoryPage() {
 
           <footer className="onyx-founder-story-footer">
             <p><strong>Jeremy Smith</strong><br />Founder, Onyx Creative Labs</p>
-            <Link href="/contact">
-              <a className="onyx-founder-story-link">Let&apos;s talk about your business <span aria-hidden="true">↗</span></a>
-            </Link>
+            <a href="/contact" className="onyx-founder-story-link">
+              Let&apos;s talk about your business <span aria-hidden="true">↗</span>
+            </a>
           </footer>
         </article>
       </section>
