@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import Image from 'next/image';
 import Logo from '../../../public/logo.PNG';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const products = [
   { label: 'Onyx Reviews', href: '/reviews' },
