@@ -1,32 +1,25 @@
 import React, { useState } from 'react';
+import Head from 'next/head';
 import Link from 'next/link';
 import { Button, Col, Container, Row } from 'reactstrap';
-import { FaBookOpen, FaBullhorn, FaPenNib, FaVideo } from 'react-icons/fa';
 import BaseLayout from '../components/layouts/BaseLayouts';
 
-const focusAreas = [
+const contentSections = [
   {
-    icon: <FaBookOpen size={34} color="#0d6efd" />,
-    title: 'Find the story',
-    copy: 'We get clear on why your product exists, who it is for, and what makes it worth paying attention to.',
+    "heading": "A small content engine for your business.",
+    "paragraphs": [
+      "At Onyx Creative Labs, we bring together the people and skills to keep your story moving. We film, curate, edit, write, and produce content for your business, then set up an affordable program that keeps it rolling out consistently.",
+      "Your content should reflect your values as a business owner, why your company started, and the product or service you believe in. We work with you to bring those things to life in genuine stories that help people get to know your business."
+    ]
   },
   {
-    icon: <FaPenNib size={34} color="#2563eb" />,
-    title: 'Shape the message',
-    copy: 'We turn that insight into a focused narrative that sounds like your brand and speaks to the people you want to reach.',
-  },
-  {
-    icon: <FaVideo size={34} color="#fd7e14" />,
-    title: 'Create the content',
-    copy: 'From video and photography to website copy and social content, we make the story feel real and easy to understand.',
-  },
-  {
-    icon: <FaBullhorn size={34} color="#6f42c1" />,
-    title: 'Keep it moving',
-    copy: 'We help you use the story consistently so every touchpoint builds recognition, trust, and demand over time.',
-  },
+    "heading": "Tell the story. Test what connects. Keep improving.",
+    "paragraphs": [
+      "We test content based on engagement and use that feedback to improve it over time. We look at what resonates with your core audience, learn which stories and messages connect, and keep focusing the content around those insights.",
+      "That gives us a feedback loop: create, share, listen, and refine. Your story stays true to who you are while the content becomes more relevant to the people you want to reach. The goal is stronger engagement, a clearer connection to your product, and more opportunities to grow your business."
+    ]
+  }
 ];
-
 
 const storyExamples = [
   {
@@ -168,128 +161,123 @@ function StorytellingCard({ reel }) {
 }
 
 
+
 export default function ContentMarketingPage() {
   return (
     <BaseLayout>
-      <section
-        style={{
-          backgroundColor: '#f8f9fa',
-          padding: '4.5rem 0',
-          textAlign: 'center',
-        }}
-      >
+      <Head>
+        <title>Content Marketing Through Storytelling | Onyx Creative Labs</title>
+        <meta name="description" content="A small content engine for your business. Onyx films, curates, edits, writes, and produces genuine stories, then tests engagement to keep improving your content." />
+      </Head>
+      <section className="onyx-marketing-hero">
         <Container>
-          <p
-            className="text-uppercase fw-semibold mb-3"
-            style={{ color: '#2563eb', letterSpacing: '0.08em' }}
-          >
-            Content Marketing Through Storytelling
-          </p>
-          <h1 className="fw-bold">Content is King.</h1>
-          <p
-            className="text-muted mx-auto mt-3"
-            style={{ fontSize: '1.15rem', maxWidth: '760px', textAlign: 'center' }}
-          >
-            With so much AI and automation, genuine storytelling matters more
-            than ever. The story behind your business—why you started, what you
-            believe, and the people you serve—helps customers understand who
-            you are and why your product matters.
-          </p>
+          <p className="onyx-marketing-eyebrow">Content Marketing Through Storytelling</p>
+          <h1>Content is King.</h1>
+          <p className="onyx-marketing-lead">With so much AI and automation, genuine storytelling matters more than ever. Your ability to tell a genuine story is the lifeblood of your business. We help you bring that story to life and keep it reaching the people who matter.</p>
         </Container>
       </section>
 
-      <Container className="py-5">
-        <Row className="align-items-center mb-5">
-          <Col md="7">
-            <h2 className="fw-bold">Your story is the lifeblood of your business.</h2>
-            <p>
-              Your ability to tell a genuine story is what gives people a reason
-              to connect with what you do. They want to know where your product
-              came from, what problem you set out to solve, and what it means to
-              the people using it. Those human details give your business a voice
-              that customers can recognize, remember, and trust.
-            </p>
-            <p className="mb-0">
-              At Onyx Creative Labs, we work with you to find those moments and
-              bring them to life. We listen to your story, get to know your
-              product, and shape it into video, photography, and written content
-              that sounds like you. The goal is to help people get to know the
-              business behind the product and feel a real connection to it.
-            </p>
-          </Col>
-          <Col md="5" className="mt-4 mt-md-0">
-            <div
-              className="rounded p-4 h-100"
-              style={{ backgroundColor: '#212529', color: '#fff' }}
-            >
-              <h3 className="h4 fw-bold" style={{ color: '#fff' }}>What we can create</h3>
-              <ul className="mb-0 ps-3">
-                <li>Founder and brand stories</li>
-                <li>Product videos and photo content</li>
-                <li>Customer stories and testimonials</li>
-                <li>Website messaging and landing-page copy</li>
-                <li>Social campaigns and ongoing content series</li>
-              </ul>
-            </div>
-          </Col>
-        </Row>
+      <article className="onyx-marketing-body">
+        {contentSections.map((section) => (
+          <section className="onyx-marketing-section" key={section.heading}>
+            <h2>{section.heading}</h2>
+            {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          </section>
+        ))}
+      </article>
 
-        <Row className="text-center mb-5">
-          {focusAreas.map((area) => (
-            <Col md="3" className="mb-4 mb-md-0" key={area.title}>
-              <div className="mb-3">{area.icon}</div>
-              <h3 className="h5 fw-bold">{area.title}</h3>
-              <p className="mb-0">{area.copy}</p>
+      <Container className="pb-5">
+        <div className="text-center mx-auto mb-4" style={{ maxWidth: '680px' }}>
+          <p className="onyx-marketing-eyebrow">Storytelling examples</p>
+          <h2 className="fw-bold">See the story in motion.</h2>
+          <p className="text-muted mb-0">
+            These three stories bring the people, purpose, and experience behind
+            a product into focus. Watch how each one gives customers a way to connect.
+          </p>
+        </div>
+        <Row className="justify-content-center g-4">
+          {storyExamples.map((example) => (
+            <Col md="6" lg="4" key={example.videoSrc}>
+              <StorytellingCard reel={example} />
             </Col>
           ))}
         </Row>
-
-        <Row className="justify-content-center mb-5">
-          <Col lg="12">
-            <div className="text-center mb-4">
-              <p
-                className="text-uppercase fw-semibold mb-2"
-                style={{ color: '#2563eb', letterSpacing: '0.08em' }}
-              >
-                Storytelling examples
-              </p>
-              <h2 className="fw-bold">See the story in motion.</h2>
-              <p className="text-muted mx-auto mb-0" style={{ maxWidth: '680px' }}>
-                These three stories bring the people, purpose, and experience
-                behind a product into focus. Watch how each one gives customers
-                a way to connect.
-              </p>
-            </div>
-
-            <Row className="justify-content-center g-4">
-              {storyExamples.map((example) => (
-                <Col md="6" lg="4" key={example.videoSrc}>
-                  <StorytellingCard reel={example} />
-                </Col>
-              ))}
-            </Row>
-          </Col>
-        </Row>
-
-        <Row className="justify-content-center">
-          <Col lg="9">
-            <div
-              className="rounded p-4 p-md-5 text-center"
-              style={{ backgroundColor: '#eff6ff' }}
-            >
-              <h2 className="fw-bold pt-0">Tell your story with Onyx.</h2>
-              <p className="mx-auto mb-4" style={{ maxWidth: '700px' }}>
-                There is a reason you started this business and a reason your
-                product exists. Let&apos;s turn that into content that feels real,
-                reflects your voice, and helps customers get to know you.
-              </p>
-              <Link href="/contact" passHref legacyBehavior>
-                <Button color="success" size="lg">Tell Your Story</Button>
-              </Link>
-            </div>
-          </Col>
-        </Row>
       </Container>
+
+      <Container className="pb-5">
+        <div className="onyx-marketing-cta">
+          <h2>Let&apos;s keep your story moving.</h2>
+          <p>
+            Let&apos;s build a content program that reflects your business, keeps
+            your story rolling out, and gets better as we learn what connects
+            with your audience.
+          </p>
+          <Link href="/contact" passHref legacyBehavior>
+            <Button color="success" size="lg">Tell Your Story</Button>
+          </Link>
+        </div>
+      </Container>
+
+      <style jsx global>{`
+        .onyx-marketing-hero {
+          background: #f8f9fa;
+          padding: 4.5rem 0;
+          text-align: center;
+        }
+        .onyx-marketing-eyebrow {
+          color: #2563eb;
+          font-size: 0.8rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          margin: 0 0 1rem;
+          text-transform: uppercase;
+        }
+        .onyx-marketing-hero h1 {
+          font-size: clamp(2.5rem, 5vw, 3.5rem);
+          font-weight: 700;
+          line-height: 1.12;
+          margin: 0.75rem 0 1.25rem;
+        }
+        .onyx-marketing-lead {
+          color: #52525b;
+          font-size: 1.15rem;
+          line-height: 1.7;
+          margin: 0 auto;
+          max-width: 760px;
+        }
+        .onyx-marketing-body {
+          margin: 0 auto;
+          max-width: 828px;
+          padding: 4rem 1.5rem 1rem;
+        }
+        .onyx-marketing-section { margin-bottom: 3rem; }
+        .onyx-marketing-section h2 {
+          font-size: clamp(1.75rem, 3vw, 2.375rem);
+          font-weight: 600;
+          line-height: 1.2;
+          margin: 0 0 1.5rem;
+        }
+        .onyx-marketing-section p {
+          color: #3f3f46;
+          font-size: 1.125rem;
+          line-height: 1.8;
+          margin: 0 0 1.5rem;
+        }
+        .onyx-marketing-cta {
+          background: #eff6ff;
+          margin: 0 auto;
+          max-width: 950px;
+          padding: 3rem 2rem;
+          text-align: center;
+        }
+        .onyx-marketing-cta h2 { font-size: 2rem; margin: 0 0 1rem; }
+        .onyx-marketing-cta p { line-height: 1.7; margin: 0 auto 1.5rem; max-width: 700px; }
+        @media (max-width: 575.98px) {
+          .onyx-marketing-hero { padding: 3rem 0; }
+          .onyx-marketing-body { padding-top: 3rem; }
+          .onyx-marketing-cta { padding: 2rem 1.5rem; }
+        }
+      `}</style>
     </BaseLayout>
   );
 }
