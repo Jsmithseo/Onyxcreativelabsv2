@@ -52,11 +52,6 @@ const plans = [
 
 const trialOptions = [
   {
-    id: "14",
-    label: "14-day free trial",
-    summary: "Start free for 14 days. Monthly billing begins after the trial.",
-  },
-  {
     id: "7",
     label: "7-day free trial",
     summary: "Start free for 7 days. Monthly billing begins after the trial.",
