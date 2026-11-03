@@ -1,153 +1,43 @@
 import React from 'react';
-import { Container, Row, Col, Button, Card, CardBody } from 'reactstrap';
+import { Container, Row, Col, Button } from 'reactstrap';
 import BaseLayout from '../components/layouts/BaseLayouts';
 import Link from 'next/link';
-
-const method = [
-  {
-    number: '01',
-    title: 'Listen',
-    copy: 'Start close to the people who matter: customers, prospects, operators, and owners. Their questions and objections tell us where the real problem lives.'
-  },
-  {
-    number: '02',
-    title: 'Test',
-    copy: 'Put messaging, positioning, outreach, and offers into the market. We look for signals that show what is worth building and what needs a better angle.'
-  },
-  {
-    number: '03',
-    title: 'Build',
-    copy: 'Turn what proves useful into practical services, systems, and products that make a business easier to find, understand, and choose.'
-  },
-  {
-    number: '04',
-    title: 'Improve',
-    copy: 'Keep learning from the response. We use outcomes and human feedback to make the next decision clearer and the work more effective.'
-  }
-];
-
-const expressions = [
-  {
-    title: '90-Day Pilot',
-    copy: 'Market research, outreach, and business-development testing designed to expose demand and create a clearer path forward.',
-    href: '/90-day-pilot'
-  },
-  {
-    title: 'Content Marketing',
-    copy: 'Story-led content that helps people understand the purpose, perspective, and value behind what a business offers.',
-    href: '/content-marketing'
-  },
-  {
-    title: 'Growth Plans',
-    copy: 'A connected way to turn market insight into focused next moves, stronger messaging, and better execution.',
-    href: '/growth-plan'
-  },
-  {
-    title: 'Onyx Reviews',
-    copy: 'A practical reputation workflow that helps completed work become public proof and useful customer feedback.',
-    href: '/reviews'
-  }
-];
-
-const signals = [
-  {
-    number: '01',
-    label: 'Market evidence',
-    copy: 'Live outreach, buying signals, and behavior—not assumptions.'
-  },
-  {
-    number: '02',
-    label: 'Human feedback',
-    copy: 'What people actually say when they see the offer or use the product.'
-  },
-  {
-    number: '03',
-    label: 'Technical execution',
-    copy: 'Systems and content that make the insight usable in the real world.'
-  }
-];
 
 export default function OurStoryPage() {
   return (
     <BaseLayout>
-      <section className="onyx-story-hero">
+      <section className="onyx-storybook-hero">
         <Container>
-          <p className="onyx-lab-eyebrow">Onyx Creative Labs / Market Lab</p>
-          <h1>Built in the market. Designed to move business forward.</h1>
-          <p className="onyx-story-hero-copy">
-            Onyx Creative Labs turns real market signals, human feedback, and hands-on execution into practical
-            products that help small businesses create demand and make stronger decisions.
+          <p className="onyx-lab-eyebrow">Onyx Creative Labs / Our Story</p>
+          <h1>What if a small business had a real product team on its side?</h1>
+          <p>
+            Not a big presentation. Not a pile of disconnected tactics. A team that listens to the market,
+            tests what it hears, and turns the answer into something useful.
           </p>
-          <div className="onyx-story-hero-actions">
-            <Link href="/contact" passHref>
-              <Button className="onyx-lab-cta" size="lg">Bring Us the Problem</Button>
-            </Link>
-            <span>Research · Build · Iterate</span>
-          </div>
+          <Link href="/contact" passHref>
+            <Button className="onyx-lab-cta" size="lg">Start With a Conversation</Button>
+          </Link>
         </Container>
       </section>
 
-      <section className="onyx-story-founder">
+      <section className="onyx-storybook-chapter onyx-storybook-chapter-light">
         <Container>
-          <Row className="align-items-center g-5">
-            <Col lg="5">
-              <p className="onyx-lab-eyebrow">A founder&apos;s perspective</p>
-              <h2>From the sales floor to the source code.</h2>
-              <p>
-                Onyx is shaped by years spent directly in the market: selling, marketing, listening to customers,
-                and seeing what makes people say yes, hesitate, or walk away.
-              </p>
-              <p className="mb-0">
-                That experience sits alongside a lifelong relationship with technology and software, beginning with
-                coding at twelve years old. It is the mix that makes Onyx different: technical enough to build the
-                system and close enough to the conversation to know why it needs to exist.
-              </p>
-            </Col>
-            <Col lg="7">
-              <aside className="onyx-story-signal-card">
-                <div className="onyx-story-signal-card-header">
-                  <span>Field note</span>
-                  <strong>How an Onyx idea gets its shape</strong>
-                </div>
-                {signals.map((signal) => (
-                  <div className="onyx-story-signal-item" key={signal.number}>
-                    <span>{signal.number}</span>
-                    <div>
-                      <strong>{signal.label}</strong>
-                      <p>{signal.copy}</p>
-                    </div>
-                  </div>
-                ))}
-                <div className="onyx-story-signal-result">
-                  <span>Result</span>
-                  <p>Practical products and services built around what the market is already telling us.</p>
-                </div>
-              </aside>
-            </Col>
-          </Row>
-        </Container>
-      </section>
-
-      <section className="onyx-story-gap">
-        <Container>
-          <Row className="g-5 align-items-center">
-            <Col lg="7">
-              <p className="onyx-lab-eyebrow">The small-business gap</p>
-              <h2>Small businesses deserve product-level thinking.</h2>
-              <p className="mb-0">
-                Most owners are asked to wear every hat without an in-house research team, senior growth operator,
-                creative department, and technical builder behind them. Onyx brings that kind of insight and
-                execution into practical reach: focused enough to solve the problem in front of you and grounded
-                enough to work in the real world.
-              </p>
-            </Col>
-            <Col lg="5">
-              <div className="onyx-story-quote">
-                <p className="onyx-lab-eyebrow">Our north star</p>
-                <h3>Make the next decision clearer.</h3>
+          <Row className="justify-content-center">
+            <Col lg="10">
+              <div className="onyx-storybook-chapter-mark">01</div>
+              <p className="onyx-lab-eyebrow">Where it begins</p>
+              <h2>The market is where the truth shows up.</h2>
+              <div className="onyx-storybook-copy">
                 <p>
-                  Help owners put more opportunity on the books by making demand, customer feedback, and execution
-                  more deliberate.
+                  A business can have a strong product, a good service, and a real reason to exist—and still have
+                  trouble getting the market to understand it. The gap is rarely just effort. It is the gap between
+                  what an owner knows is valuable and what a customer can see, feel, and choose.
+                </p>
+                <p className="mb-0">
+                  Onyx Creative Labs was built to work inside that gap. We look at the actual signals around a
+                  business: the conversations, the questions, the objections, the response to an offer, and the
+                  evidence in the market. Then we build around what is real, rather than what merely sounds good
+                  in a meeting.
                 </p>
               </div>
             </Col>
@@ -155,69 +45,117 @@ export default function OurStoryPage() {
         </Container>
       </section>
 
-      <section className="onyx-story-loop">
+      <section className="onyx-storybook-chapter onyx-storybook-chapter-dark">
         <Container>
-          <div className="text-center mb-5">
-            <p className="onyx-lab-eyebrow mb-3">The Onyx loop</p>
-            <h2>Research the market. Build what moves it.</h2>
-            <p className="onyx-section-copy mt-3">
-              We do not build from a whiteboard alone. The work starts with real people and stays accountable to
-              the response it earns.
-            </p>
-          </div>
-          <Row className="g-4">
-            {method.map((step) => (
-              <Col md="6" lg="3" key={step.number}>
-                <article className="onyx-story-loop-step h-100">
-                  <span>{step.number}</span>
-                  <h3>{step.title}</h3>
-                  <p>{step.copy}</p>
-                </article>
-              </Col>
-            ))}
+          <Row className="align-items-center g-5">
+            <Col lg="4">
+              <div className="onyx-storybook-chapter-mark">02</div>
+              <p className="onyx-lab-eyebrow">The founder&apos;s point of view</p>
+              <h2>From the sales floor to the source code.</h2>
+            </Col>
+            <Col lg="8">
+              <div className="onyx-storybook-copy">
+                <p>
+                  Technology has been part of the story since early on—coding and working with software from the
+                  age of twelve. But the other half of the story was built in the market: years of sales, marketing,
+                  live conversations, and learning why people move forward, hesitate, or decide not to buy.
+                </p>
+                <p className="mb-0">
+                  That combination became the foundation of Onyx. It gives us a way to see both sides of the work:
+                  the system behind the product and the human being in front of it. We can understand the build,
+                  hear the hesitation, and shape a practical solution that respects both.
+                </p>
+              </div>
+            </Col>
           </Row>
         </Container>
       </section>
 
-      <section className="onyx-story-offerings">
+      <section className="onyx-storybook-chapter onyx-storybook-chapter-signal">
         <Container>
-          <div className="mb-5">
-            <p className="onyx-lab-eyebrow">What that creates</p>
-            <h2>One way of working. Different ways to use it.</h2>
-            <p className="onyx-lab-index-copy">
-              Every Onyx offering is an expression of the same approach: find the signal, make the idea clearer,
-              and build the next move around what the market is telling us.
-            </p>
-          </div>
-          <Row className="g-4">
-            {expressions.map((item, index) => (
-              <Col md="6" key={item.title}>
-                <Card className="onyx-story-offering-card h-100">
-                  <CardBody className="p-4 d-flex flex-column">
-                    <p className="onyx-lab-eyebrow mb-3">0{index + 1} / Onyx offering</p>
-                    <h3>{item.title}</h3>
-                    <p className="mb-4">{item.copy}</p>
-                    <Link href={item.href} className="onyx-lab-card-link mt-auto">
-                      Explore the work <span>→</span>
-                    </Link>
-                  </CardBody>
-                </Card>
-              </Col>
-            ))}
+          <Row className="align-items-end g-5">
+            <Col lg="7">
+              <div className="onyx-storybook-chapter-mark">03</div>
+              <p className="onyx-lab-eyebrow">The problem worth solving</p>
+              <h2>Small businesses should not have to guess alone.</h2>
+              <div className="onyx-storybook-copy">
+                <p>
+                  Most owners do not have a dedicated research team, a senior growth lead, a creative department,
+                  and a technical builder sitting down the hall. They are responsible for serving customers,
+                  managing the work, and finding the next opportunity—all at once.
+                </p>
+                <p className="mb-0">
+                  Onyx exists to bring seasoned thinking and real execution within reach. The goal is not to make a
+                  business feel more complicated. It is to give owners a clearer next step, stronger demand, and
+                  practical ways to put more opportunity on the books.
+                </p>
+              </div>
+            </Col>
+            <Col lg="5">
+              <div className="onyx-storybook-fieldnote">
+                <span>Onyx field note</span>
+                <strong>Strong solutions do not start with more noise.</strong>
+                <p>They start with a better read on the market, then earn the right to scale.</p>
+              </div>
+            </Col>
           </Row>
         </Container>
       </section>
 
-      <section className="onyx-story-closing">
+      <section className="onyx-storybook-chapter onyx-storybook-chapter-loop">
         <Container>
-          <p className="onyx-lab-eyebrow">The reason we do it</p>
-          <h2>More signal. Better execution. More opportunity.</h2>
+          <Row className="justify-content-center text-center">
+            <Col lg="9">
+              <div className="onyx-storybook-chapter-mark">04</div>
+              <p className="onyx-lab-eyebrow">How we work</p>
+              <h2>Listen. Test. Build. Improve.</h2>
+              <p className="onyx-storybook-lead">
+                The method is simple because it is designed for the real world.
+              </p>
+            </Col>
+          </Row>
+          <div className="onyx-storybook-journey" aria-label="The Onyx working method">
+            <div>
+              <span>Listen</span>
+              <p>Get close to the people, patterns, and problems that matter.</p>
+            </div>
+            <div>
+              <span>Test</span>
+              <p>Put a message, offer, or direction into the market and watch the response.</p>
+            </div>
+            <div>
+              <span>Build</span>
+              <p>Turn what proves useful into a practical product, system, or experience.</p>
+            </div>
+            <div>
+              <span>Improve</span>
+              <p>Use the next round of feedback to make the work stronger.</p>
+            </div>
+          </div>
+          <Row className="justify-content-center">
+            <Col lg="8">
+              <p className="onyx-storybook-afterword">
+                Sometimes that work becomes a market-validation pilot. Sometimes it becomes a story-led content
+                campaign, a reputation workflow, a growth plan, or a custom product. The form changes. The reason
+                stays the same: build something that makes a business easier to understand, easier to choose, and
+                better prepared to grow.
+              </p>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
+      <section className="onyx-storybook-closing">
+        <Container>
+          <p className="onyx-lab-eyebrow">What we are building toward</p>
+          <h2>More clarity for owners. More momentum for the businesses they believe in.</h2>
           <p>
-            Onyx exists to help business owners turn lived market experience into practical momentum—without
-            requiring them to build a full internal growth department first.
+            Onyx Creative Labs is a place for market-tested ideas, real human feedback, and products shaped by
+            years of experience—not just theory. Bring us a problem worth solving, and we will start with the
+            market.
           </p>
           <Link href="/contact" passHref>
-            <Button className="onyx-lab-cta" size="lg">Start a Conversation</Button>
+            <Button className="onyx-lab-cta" size="lg">Bring Us the Problem</Button>
           </Link>
         </Container>
       </section>
