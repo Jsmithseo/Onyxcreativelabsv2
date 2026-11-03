@@ -84,7 +84,7 @@ export default function MyHeader() {
               className="onyx-nav-link onyx-products-toggle"
               aria-expanded={productsOpen}
               aria-controls="onyx-products-menu"
-              onClick={() => setProductsOpen(!productsOpen)}
+              onClick={() => setProductsOpen(supportsHover() ? true : !productsOpen)}
             >
               Products <span className={`onyx-nav-chevron ${productsOpen ? 'is-open' : ''}`} aria-hidden="true">⌄</span>
             </button>
