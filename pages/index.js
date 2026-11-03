@@ -15,19 +15,22 @@ const storytellingReels = [
     title: 'Storytelling in action',
     category: 'Storytelling example',
     videoSrc: '/videos/storytelling-in-action.mp4',
-    poster: '/work.png',
+    poster: '/storytelling-in-action-still.png',
+    posterPosition: '50% 50%',
   },
   {
     title: 'STLR Entertainment commercial',
     category: 'Commercial',
     videoSrc: '/videos/stlr-entertainment-commercial.mp4',
-    poster: '/stlr-1.png',
+    poster: '/stlr-entertainment-commercial-still.png',
+    posterPosition: '50% 50%',
   },
   {
     title: 'Vacation Bike Rentals story',
     category: 'Brand story',
     videoSrc: '/videos/vacation-bike-rentals-story.mp4',
-    poster: '/vacation-redesign.png',
+    poster: '/vacation-bike-rentals-still.png',
+    posterPosition: '50% 24%',
   },
 ];
 
@@ -63,7 +66,7 @@ function StorytellingCard({ reel }) {
               alt=""
               className="w-100 h-100"
               loading="lazy"
-              style={{ objectFit: 'cover' }}
+              style={{ objectFit: 'cover', objectPosition: reel.posterPosition || '50% 50%' }}
             />
             <span className="storytelling-poster-shade" aria-hidden="true" />
             <span className="storytelling-play" aria-hidden="true">▶</span>
