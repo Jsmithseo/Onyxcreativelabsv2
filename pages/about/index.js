@@ -10,61 +10,51 @@ export default function OurStoryPage() {
         <Container>
           <Row className="mb-5 text-center">
             <Col>
-              <h1 className="fw-bold">Built at the Intersection of Product, People, and Market</h1>
+              <h1 className="fw-bold">The Story Behind Onyx Creative Labs</h1>
               <p className="lead text-muted">
-                Onyx Creative Labs was built to help ambitious businesses turn strong ideas into meaningful market momentum.
+                Helping good businesses find their market, tell their story, and
+                grow with confidence.
               </p>
             </Col>
           </Row>
 
-          <Row className="mb-5">
-            <Col>
-              <h3 className="fw-bold">A Founder’s Perspective</h3>
-              <p>
-                Onyx Creative Labs grew from nearly 15 years of experience working where technical understanding,
-                market reality, and human connection meet. Its founder has spent that time helping organizations
-                improve how their products are understood, how their teams work together, and how opportunities
-                become measurable business progress.
+          <Row className="mb-5 justify-content-center">
+            <Col lg="9">
+              <p className="lead">
+                I built Onyx Creative Labs after nearly 15 years working where
+                strong products, real people, and the market meet. Along the
+                way, I kept seeing the same thing: businesses with real value
+                were struggling to explain it in a way people could understand,
+                trust, and act on. The problem was rarely that they had nothing
+                to offer. More often, the connection between what they did and
+                what their customers needed to hear was not clear enough.
               </p>
               <p>
-                That experience has never been limited to a single function. It has involved understanding the
-                technical details behind a product, listening to customers and partners in real conversations,
-                leading teams, and serving as a liaison between the people building the work and the people who
-                need to believe in it. That perspective shapes how Onyx approaches every engagement.
-              </p>
-            </Col>
-          </Row>
-
-          <Row className="mb-5">
-            <Col>
-              <h3 className="fw-bold">Growth Starts With Understanding</h3>
-              <p>
-                We believe growth is not a collection of disconnected activities. It begins with understanding
-                what a business truly offers, who it serves, and what people need to hear before they are ready
-                to engage. From there, the work is to create a clearer connection between the value of the
-                business and the real people it is built to help.
+                My work has never lived inside one job title. I have spent time
+                learning the technical side of a product, listening to customers
+                and partners in real conversations, leading teams, and helping
+                bridge the gap between the people building the work and the
+                people who need to believe in it. That experience taught me
+                that growth is not a collection of disconnected tactics. It
+                starts with understanding what makes a business matter, who it
+                is here to serve, and how to make that value easy to recognize.
               </p>
               <p>
-                Onyx brings business development, market learning, communication, and execution into one focused
-                effort. We help teams find where opportunity exists, build stronger customer relationships, and
-                develop the practical insight leaders need to make better next decisions.
+                That is why I started Onyx. I wanted to bring business
+                development, market learning, clear communication, and practical
+                execution into one focused effort. Whether we are testing a
+                market, opening new conversations, clarifying a message, or
+                turning a business's value into a story people remember, the
+                goal is the same: create real momentum built on a clearer view of
+                the market.
               </p>
-            </Col>
-          </Row>
-
-          <Row className="mb-5">
-            <Col>
-              <h3 className="fw-bold">The Onyx Commitment</h3>
-              <p>
-                The Onyx commitment is to do work that is thoughtful, grounded, and useful. We stay close to the
-                market, listen carefully to the people who matter, and translate what we learn into forward motion.
-                That may mean opening new conversations, clarifying a message, strengthening a process, or helping
-                a team align around what comes next.
-              </p>
-              <p>
-                The goal is always bigger than activity for its own sake. It is to help businesses improve their
-                bottom line, build confidence in their direction, and move forward with a stronger understanding
-                of the market they are here to serve.
+              <p className="mb-0">
+                I believe good growth feels grounded. It comes from staying
+                close to the people who matter, paying attention to what the
+                market is telling you, and using what you learn to make stronger
+                next decisions. Onyx is here to help businesses do exactly that:
+                improve the bottom line, build confidence in their direction, and
+                move forward with a story that is true to who they are.
               </p>
             </Col>
           </Row>
@@ -72,7 +62,9 @@ export default function OurStoryPage() {
           <Row className="text-center">
             <Col>
               <Link href="/contact" passHref>
-                <Button color="primary" size="lg">Start a Conversation</Button>
+                <Button color="primary" size="lg">
+                  Start a Conversation
+                </Button>
               </Link>
             </Col>
           </Row>
