@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Container,
   Row,
@@ -13,8 +13,32 @@ import {
 import BaseLayout from '../components/layouts/BaseLayouts';
 import { useRouter } from 'next/router';
 
+const REVIEW_INTEREST = 'Onyx Reviews';
+const REVIEW_MESSAGE = 'I’d like to learn how Onyx Reviews can help us earn more customer feedback and grow our reputation.';
+const INTEREST_OPTIONS = ['CRO', 'Web Development', 'Email Marketing', 'Research & Strategy', 'Paid Marketing', REVIEW_INTEREST];
+const REVIEW_PLAN_NAMES = { starter: 'Starter', growth: 'Growth', enterprise: 'Enterprise' };
+const REVIEW_TRIAL_NAMES = { '14': '14-day free trial', '7': '7-day free trial', now: 'start today' };
+
+function buildReviewMessage(plan, trial, locations) {
+  const planName = REVIEW_PLAN_NAMES[plan];
+  const trialName = REVIEW_TRIAL_NAMES[trial];
+  const parsedLocations = Number.parseInt(locations, 10);
+  const locationText = Number.isInteger(parsedLocations) && parsedLocations > 0
+    ? ` for ${parsedLocations} ${parsedLocations === 1 ? 'location' : 'locations'}`
+    : '';
+
+  if (!planName && !trialName) return REVIEW_MESSAGE;
+
+  return `${REVIEW_MESSAGE} I’m interested in the ${planName || 'Onyx Reviews'} plan${locationText}${trialName ? ` with the ${trialName}` : ''}.`;
+}
+
 export default function ContactFormPage() {
   const router = useRouter();
+  const product = router.query.product;
+  const isReviewsInquiry = router.isReady && product === 'reviews';
+  const selectedPlan = typeof router.query.plan === 'string' ? router.query.plan : '';
+  const selectedTrial = typeof router.query.trial === 'string' ? router.query.trial : '';
+  const selectedLocations = typeof router.query.locations === 'string' ? router.query.locations : '';
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -27,6 +51,18 @@ export default function ContactFormPage() {
   });
 
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (!isReviewsInquiry) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      interest: prev.interest.includes(REVIEW_INTEREST)
+        ? prev.interest
+        : [...prev.interest, REVIEW_INTEREST],
+      message: prev.message || buildReviewMessage(selectedPlan, selectedTrial, selectedLocations),
+    }));
+  }, [isReviewsInquiry, selectedPlan, selectedTrial, selectedLocations]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -92,9 +128,11 @@ export default function ContactFormPage() {
     <BaseLayout>
       <div style={{ backgroundColor: '#f8f9fa', padding: '4rem 0', textAlign: 'center' }}>
         <Container>
-          <h1 className="fw-bold">Let’s Talk</h1>
+          <h1 className="fw-bold">{isReviewsInquiry ? 'Book Your Review Growth Call' : 'Let’s Talk'}</h1>
           <p className="mt-3 text-muted">
-            Ready to grow? Tell us more about your project and goals.
+            {isReviewsInquiry
+              ? 'Tell us a little about your business and we will map a practical review-growth plan.'
+              : 'Ready to grow? Tell us more about your project and goals.'}
           </p>
         </Container>
       </div>
@@ -105,70 +143,32 @@ export default function ContactFormPage() {
             <Form onSubmit={handleSubmit}>
               <FormGroup>
                 <Label for="name">Full Name *</Label>
-                <Input
-                  type="text"
-                  name="full_name"
-                  id="name"
-                  value={formData.full_name}
-                  onChange={handleChange}
-                  invalid={!!errors.full_name}
-                />
+                <Input type="text" name="full_name" id="name" value={formData.full_name} onChange={handleChange} invalid={!!errors.full_name} />
                 <FormFeedback>{errors.full_name}</FormFeedback>
               </FormGroup>
               <FormGroup>
                 <Label for="email">Email *</Label>
-                <Input
-                  type="email"
-                  name="email"
-                  id="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  invalid={!!errors.email}
-                />
+                <Input type="email" name="email" id="email" value={formData.email} onChange={handleChange} invalid={!!errors.email} />
                 <FormFeedback>{errors.email}</FormFeedback>
               </FormGroup>
               <FormGroup>
                 <Label for="phone">Phone</Label>
-                <Input
-                  type="tel"
-                  name="phone"
-                  id="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
+                <Input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleChange} />
               </FormGroup>
               <FormGroup>
                 <Label for="company">Company</Label>
-                <Input
-                  type="text"
-                  name="company"
-                  id="company"
-                  value={formData.company}
-                  onChange={handleChange}
-                />
+                <Input type="text" name="company" id="company" value={formData.company} onChange={handleChange} />
               </FormGroup>
               <FormGroup>
                 <Label for="website">Website (if applicable)</Label>
-                <Input
-                  type="text"
-                  name="website"
-                  id="website"
-                  value={formData.website}
-                  onChange={handleChange}
-                />
+                <Input type="text" name="website" id="website" value={formData.website} onChange={handleChange} />
               </FormGroup>
               <FormGroup>
                 <Label>Which solutions are you interested in?</Label>
                 <div>
-                  {['CRO', 'Web Development', 'Email Marketing', 'Research & Strategy', 'Paid Marketing'].map((interest) => (
+                  {INTEREST_OPTIONS.map((interest) => (
                     <div key={interest} className="form-check">
-                      <Input
-                        type="checkbox"
-                        id={interest}
-                        value={interest}
-                        checked={formData.interest.includes(interest)}
-                        onChange={handleChange}
-                      />
+                      <Input type="checkbox" id={interest} value={interest} checked={formData.interest.includes(interest)} onChange={handleChange} />
                       <Label className="form-check-label" htmlFor={interest}>{interest}</Label>
                     </div>
                   ))}
@@ -176,20 +176,12 @@ export default function ContactFormPage() {
               </FormGroup>
               <FormGroup>
                 <Label for="message">Message *</Label>
-                <Input
-                  type="textarea"
-                  name="message"
-                  id="message"
-                  rows="5"
-                  value={formData.message}
-                  onChange={handleChange}
-                  invalid={!!errors.message}
-                />
+                <Input type="textarea" name="message" id="message" rows="5" value={formData.message} onChange={handleChange} invalid={!!errors.message} />
                 <FormFeedback>{errors.message}</FormFeedback>
               </FormGroup>
               <div className="text-center mt-4">
                 <Button color="primary" size="lg" type="submit">
-                  Submit Inquiry
+                  {isReviewsInquiry ? 'Request My Review Growth Call' : 'Submit Inquiry'}
                 </Button>
               </div>
             </Form>
