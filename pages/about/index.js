@@ -159,6 +159,170 @@ export default function OurStoryPage() {
           </Link>
         </Container>
       </section>
+
+      <style jsx global>{`
+        .onyx-storybook-hero {
+          background: #18181b;
+          color: #fff;
+          overflow: hidden;
+          padding: 7rem 0;
+          position: relative;
+          text-align: center;
+        }
+        .onyx-storybook-hero::before {
+          background:
+            linear-gradient(90deg, rgba(37, 99, 235, 0.18) 1px, transparent 1px),
+            linear-gradient(rgba(37, 99, 235, 0.12) 1px, transparent 1px);
+          background-size: 34px 34px;
+          content: '';
+          inset: 0;
+          opacity: 0.5;
+          position: absolute;
+        }
+        .onyx-storybook-hero .container { position: relative; z-index: 1; }
+        .onyx-storybook-hero h1 {
+          color: #fff;
+          font-size: clamp(2.65rem, 5.8vw, 4.65rem);
+          line-height: 1.02;
+          margin: 1rem auto 1.5rem;
+          max-width: 990px;
+        }
+        .onyx-storybook-hero > .container > p:not(.onyx-lab-eyebrow) {
+          color: #e4e4e7;
+          font-size: 1.18rem;
+          margin: 0 auto 2.25rem;
+          max-width: 720px;
+        }
+        .onyx-storybook-chapter {
+          padding: 6.75rem 0;
+          position: relative;
+        }
+        .onyx-storybook-chapter h2,
+        .onyx-storybook-closing h2 {
+          font-size: clamp(2.2rem, 4.3vw, 3.65rem);
+          margin: 0 0 1.4rem;
+        }
+        .onyx-storybook-chapter-light { background: #fff; }
+        .onyx-storybook-chapter-dark { background: #18181b; color: #fff; }
+        .onyx-storybook-chapter-dark h2 { color: #fff; }
+        .onyx-storybook-chapter-dark .onyx-storybook-copy p { color: #e4e4e7; }
+        .onyx-storybook-chapter-signal { background: #f4f4f5; }
+        .onyx-storybook-chapter-loop { background: #fff; }
+        .onyx-storybook-chapter-mark {
+          color: #2563eb;
+          font-size: clamp(4rem, 8vw, 7rem);
+          font-weight: 700;
+          letter-spacing: -0.08em;
+          line-height: 0.8;
+          margin: 0 0 2rem;
+        }
+        .onyx-storybook-chapter-dark .onyx-storybook-chapter-mark { color: #60a5fa; }
+        .onyx-storybook-copy { max-width: 760px; }
+        .onyx-storybook-copy p {
+          color: #3f3f46;
+          font-size: clamp(1.08rem, 1.9vw, 1.28rem);
+          line-height: 1.75;
+        }
+        .onyx-storybook-fieldnote {
+          background: #18181b;
+          box-shadow: 10px 10px 0 rgba(37, 99, 235, 0.16);
+          color: #fff;
+          padding: 2rem;
+        }
+        .onyx-storybook-fieldnote span {
+          color: #60a5fa;
+          display: block;
+          font-size: 0.72rem;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+        .onyx-storybook-fieldnote strong {
+          display: block;
+          font-size: 1.5rem;
+          line-height: 1.2;
+          margin: 1rem 0;
+        }
+        .onyx-storybook-fieldnote p { color: #d4d4d8; margin: 0; }
+        .onyx-storybook-lead {
+          color: #52525b;
+          font-size: 1.15rem;
+          margin: 0 auto;
+          max-width: 650px;
+        }
+        .onyx-storybook-journey {
+          border-top: 1px solid #e4e4e7;
+          display: grid;
+          gap: 0;
+          grid-template-columns: repeat(4, 1fr);
+          margin: 4rem 0 3rem;
+        }
+        .onyx-storybook-journey > div {
+          border-bottom: 1px solid #e4e4e7;
+          border-right: 1px solid #e4e4e7;
+          min-height: 190px;
+          padding: 1.6rem;
+        }
+        .onyx-storybook-journey > div:first-child { border-left: 1px solid #e4e4e7; }
+        .onyx-storybook-journey span {
+          color: #2563eb;
+          font-size: 1.2rem;
+          font-weight: 700;
+        }
+        .onyx-storybook-journey p {
+          color: #71717a;
+          font-size: 0.95rem;
+          margin: 1.2rem 0 0;
+        }
+        .onyx-storybook-afterword {
+          color: #3f3f46;
+          font-size: 1.1rem;
+          line-height: 1.75;
+          text-align: center;
+        }
+        .onyx-storybook-closing {
+          background: #18181b;
+          color: #fff;
+          padding: 6.2rem 0;
+          text-align: center;
+        }
+        .onyx-storybook-closing h2 {
+          color: #fff;
+          margin: 1rem auto 1.3rem;
+          max-width: 900px;
+        }
+        .onyx-storybook-closing > .container > p:not(.onyx-lab-eyebrow) {
+          color: #d4d4d8;
+          font-size: 1.15rem;
+          margin: 0 auto 2rem;
+          max-width: 720px;
+        }
+        .onyx-storybook-closing .btn {
+          border-color: #fff !important;
+          color: #fff !important;
+        }
+        .onyx-storybook-closing .btn:hover,
+        .onyx-storybook-closing .btn:focus {
+          background: #fff !important;
+          border-color: #fff !important;
+          color: #18181b !important;
+        }
+        @media (max-width: 767.98px) {
+          .onyx-storybook-hero,
+          .onyx-storybook-chapter,
+          .onyx-storybook-closing { padding: 4.5rem 0; }
+          .onyx-storybook-journey {
+            grid-template-columns: 1fr;
+            margin: 2.5rem 0;
+          }
+          .onyx-storybook-journey > div,
+          .onyx-storybook-journey > div:first-child {
+            border-left: 1px solid #e4e4e7;
+            border-right: 1px solid #e4e4e7;
+            min-height: 0;
+          }
+        }
+      `}</style>
     </BaseLayout>
   );
 }
