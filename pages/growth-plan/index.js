@@ -11,12 +11,12 @@ import BaseLayout from '../components/layouts/BaseLayouts';
 
 const growthSteps = [
   {
-    icon: <FaBullseye size={34} color="#0d6efd" />,
+    icon: <FaBullseye size={34} color="var(--onyx-accent)" />,
     title: 'Find the right market',
     copy: 'Research, targeting, and direct outreach help you understand where demand is strongest and what buyers need to hear.',
   },
   {
-    icon: <FaUsers size={34} color="#2563eb" />,
+    icon: <FaUsers size={34} color="var(--onyx-accent)" />,
     title: 'Learn from real conversations',
     copy: 'The questions, objections, and signals you hear in the market become useful direction for your message and next move.',
   },
@@ -45,7 +45,7 @@ export default function GrowthPlanPage() {
         <Container>
           <p
             className="text-uppercase fw-semibold mb-3"
-            style={{ color: '#2563eb', letterSpacing: '0.08em' }}
+            style={{ color: 'var(--onyx-accent)', letterSpacing: '0.08em' }}
           >
             Business Development + Content Marketing
           </p>
@@ -96,7 +96,7 @@ export default function GrowthPlanPage() {
           <Col lg="9">
             <div
               className="rounded p-4 p-md-5 text-center"
-              style={{ backgroundColor: '#eff6ff' }}
+              style={{ backgroundColor: 'var(--onyx-accent-soft)' }}
             >
               <h2 className="fw-bold pt-0">For teams ready to connect the dots.</h2>
               <p className="mx-auto mb-4" style={{ maxWidth: '700px', textAlign: 'center' }}>

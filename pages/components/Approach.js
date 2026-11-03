@@ -9,7 +9,7 @@ export default function ExperimentationApproachSection() {
         <Col md="6" className="text-center text-md-start mb-4 mb-md-0">
           <p className="onyx-products-eyebrow">Featured Product</p>
           <h2 className="onyx-section-heading">
-            More Reviews, <span style={{ color: '#2563eb' }}>Less Chasing</span>
+            More Reviews, <span style={{ color: 'var(--onyx-accent)' }}>Less Chasing</span>
           </h2>
           <p className="mt-3 text-muted" style={{ fontSize: '1.1rem', maxWidth: '34rem' }}>
             Onyx Reviews uses AI to automate thoughtful review requests, so you can keep your focus on your customers and your business.

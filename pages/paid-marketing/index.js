@@ -50,12 +50,12 @@ export default function PaidMarketingPage() {
             <p>Search, Display, Shopping, and YouTube ads to capture high-intent traffic.</p>
           </Col>
           <Col md="4">
-            <FaFacebookSquare size={40} color="#1877f2" />
+            <FaFacebookSquare size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Social Ads</h6>
             <p>Facebook, Instagram, and Meta platforms for awareness, engagement, and retargeting.</p>
           </Col>
           <Col md="4">
-            <FaBullseye size={40} color="#2563eb" />
+            <FaBullseye size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Campaign Strategy</h6>
             <p>Messaging, segmentation, and offer design tailored to your audience and goals.</p>
           </Col>

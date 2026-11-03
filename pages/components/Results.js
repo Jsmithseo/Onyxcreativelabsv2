@@ -17,7 +17,7 @@ export default function EarlyResultsSection() {
     {
       value: 'Market Signals',
       label: 'learn what prospective customers respond to',
-      color: '#2563eb',
+      color: 'var(--onyx-accent)',
     },
     {
       value: 'Clear Next Steps',
@@ -29,7 +29,7 @@ export default function EarlyResultsSection() {
   return (
     <Container className="text-center py-5">
       <h2 className="onyx-section-heading">
-        Our 90-Day Pilot <span style={{ color: '#2563eb' }}>in Action</span>
+        Our 90-Day Pilot <span style={{ color: 'var(--onyx-accent)' }}>in Action</span>
       </h2>
       <Row className="mt-5 justify-content-center">
         {metrics.map((item, idx) => (

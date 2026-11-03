@@ -40,12 +40,12 @@ export default function ResearchAnalyticsPage() {
         {/* Icon-Based Features */}
         <Row className="text-center mb-5">
           <Col md="3">
-            <FaSearch size={40} color="#007bff" />
+            <FaSearch size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">User Research</h6>
             <p>Surveys, interviews, and feedback loops that inform experience design and messaging.</p>
           </Col>
           <Col md="3">
-            <FaChartPie size={40} color="#2563eb" />
+            <FaChartPie size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Analytics Setup</h6>
             <p>Google Analytics, GA4, Tag Manager, and dashboards that track what matters most.</p>
           </Col>

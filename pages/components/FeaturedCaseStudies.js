@@ -13,7 +13,7 @@ const featuredStudies = [
     brand: 'Parsity',
     highlight: 'Created outreach and conversion paths to grow enrollment.',
     href: '/parsity-case-study',
-    color: '#2563eb',
+    color: 'var(--onyx-accent)',
   },
   {
     brand: 'SoHo Fit',
@@ -28,7 +28,7 @@ export default function FeaturedCaseStudies() {
     <Container className="py-5">
       <div className="text-center mb-4">
         <h2 className="onyx-section-heading">
-          The Proof Is in the <span style={{ color: '#2563eb' }}>Results</span>
+          The Proof Is in the <span style={{ color: 'var(--onyx-accent)' }}>Results</span>
         </h2>
         <p className="onyx-section-copy">
           Here are results from some of our clients.

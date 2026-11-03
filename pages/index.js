@@ -73,7 +73,7 @@ function StorytellingCard({ reel }) {
         )}
       </div>
       <div className="p-3 p-lg-4">
-        <p className="text-uppercase fw-semibold mb-2" style={{ color: '#2563eb', fontSize: '.72rem', letterSpacing: '.08em' }}>{reel.category}</p>
+        <p className="text-uppercase fw-semibold mb-2" style={{ color: 'var(--onyx-accent)', fontSize: '.72rem', letterSpacing: '.08em' }}>{reel.category}</p>
         <h3 className="h5 fw-bold mb-0">{reel.title}</h3>
       </div>
       <style jsx>{`
@@ -103,7 +103,7 @@ function StorytellingCard({ reel }) {
           transform: scale(1.04);
         }
         .storytelling-poster:focus-visible {
-          outline: 3px solid #2563eb;
+          outline: 3px solid var(--onyx-accent);
           outline-offset: -3px;
         }
         .storytelling-poster-shade {
@@ -156,7 +156,7 @@ export default function Index() {
               <Link href="/90-day-pilot"><Button color="success" style={{ fontWeight: '600' }}>Test Your Market</Button></Link>
               <Link href="/content-marketing"><Button color="outline-dark" style={{ fontWeight: '600' }}>Tell Your Story</Button></Link>
             </div>
-            <p className="mt-3 mb-0 text-center">Need both? <Link href="/growth-plan" style={{ color: '#2563eb', fontWeight: '600' }}>See how a Growth Plan brings them together.</Link></p>
+            <p className="mt-3 mb-0 text-center">Need both? <Link href="/growth-plan" style={{ color: 'var(--onyx-accent)', fontWeight: '600' }}>See how a Growth Plan brings them together.</Link></p>
           </Container>
         </section>
 
@@ -170,7 +170,7 @@ export default function Index() {
           <Container maxWidth="lg">
             <Row className="align-items-center g-4">
               <Col lg="8">
-                <p className="text-uppercase fw-semibold mb-2" style={{ color: '#60a5fa', letterSpacing: '0.08em' }}>Onyx Reviews</p>
+                <p className="text-uppercase fw-semibold mb-2" style={{ color: 'var(--onyx-accent)', letterSpacing: '0.08em' }}>Onyx Reviews</p>
                 <h2 className="fw-bold">Turn happy customers into public proof.</h2>
                 <p className="lead mb-0" style={{ color: '#d1d5db' }}>A simple, timely review-growth process for service businesses that want more customer feedback without making their team chase reviews.</p>
               </Col>
@@ -181,7 +181,7 @@ export default function Index() {
 
         <section style={{ backgroundColor: '#f8f9fa', padding: '5rem 0' }}>
           <Container maxWidth="lg">
-            <Row className="justify-content-center text-center mb-4"><Col lg="9"><p className="text-uppercase fw-semibold mb-2" style={{ color: '#2563eb', letterSpacing: '0.08em' }}>Content marketing through storytelling</p><h2 className="fw-bold">Content is King.</h2><p className="lead text-muted mb-0">The story behind your product helps customers understand what you do, why it matters, and why they should remember you. We shape that story into content that feels real and resonates.</p></Col></Row>
+            <Row className="justify-content-center text-center mb-4"><Col lg="9"><p className="text-uppercase fw-semibold mb-2" style={{ color: 'var(--onyx-accent)', letterSpacing: '0.08em' }}>Content marketing through storytelling</p><h2 className="fw-bold">Content is King.</h2><p className="lead text-muted mb-0">The story behind your product helps customers understand what you do, why it matters, and why they should remember you. We shape that story into content that feels real and resonates.</p></Col></Row>
             <Row className="justify-content-center g-4">
               {storytellingReels.map((reel) => (
                 <Col md="6" lg="4" key={reel.videoSrc}>
@@ -216,7 +216,7 @@ export default function Index() {
           color: #18181b !important;
         }
         .onyx-hero-inverse > .MuiContainer-root > p:last-child { color: #d4d4d8; }
-        .onyx-hero-inverse > .MuiContainer-root > p:last-child a { color: #93c5fd !important; }
+        .onyx-hero-inverse > .MuiContainer-root > p:last-child a { color: var(--onyx-accent) !important; }
         @media (max-width: 575.98px) {
           .onyx-hero.onyx-hero-inverse { padding: 4rem 0; }
         }

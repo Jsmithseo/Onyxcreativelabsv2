@@ -49,7 +49,7 @@ function LegacyPollEverywhereCaseStudy() {
         {/* Icons Section */}
         <Row className="mb-5 text-center">
           <Col md="3">
-            <FaClipboardList size={40} color="#007bff" />
+            <FaClipboardList size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Backlog Reduction</h6>
             <p>Worked through delayed internal tasks and low-priority fixes.</p>
           </Col>
@@ -59,7 +59,7 @@ function LegacyPollEverywhereCaseStudy() {
             <p>Addressed both critical and minor platform issues.</p>
           </Col>
           <Col md="3">
-            <FaTools size={40} color="#2563eb" />
+            <FaTools size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Support Coverage</h6>
             <p>Helped support teams resolve user-impacting issues faster.</p>
           </Col>

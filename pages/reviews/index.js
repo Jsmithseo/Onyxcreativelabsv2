@@ -63,7 +63,7 @@ const trialOptions = [
   },
 ];
 
-const blue = "#1677ff";
+const blue = "var(--onyx-accent)";
 const ink = "#101828";
 const reviewCallHref = "/contact?product=reviews";
 
@@ -92,7 +92,7 @@ function PriceCard({ plan, trialId, termsAccepted }) {
       }}
     >
       {plan.featured && (
-        <p className="mb-3 text-uppercase fw-bold" style={{ color: "#9ec5ff", fontSize: ".75rem", letterSpacing: ".08em" }}>
+        <p className="mb-3 text-uppercase fw-bold" style={{ color: "var(--onyx-accent)", fontSize: ".75rem", letterSpacing: ".08em" }}>
           Most hands-on
         </p>
       )}
@@ -105,7 +105,7 @@ function PriceCard({ plan, trialId, termsAccepted }) {
         <strong style={{ fontSize: "2.65rem", lineHeight: 1 }}>${plan.price}</strong>
         <span style={{ color: plan.featured ? "#cbd5e1" : "#667085" }}>/ location / month</span>
       </div>
-      <p className="fw-semibold mb-4" style={{ color: plan.featured ? "#9ec5ff" : blue }}>{trial.label}</p>
+      <p className="fw-semibold mb-4" style={{ color: plan.featured ? "var(--onyx-accent)" : blue }}>{trial.label}</p>
       <ul className="ps-3 mb-4" style={{ minHeight: "10.5rem", color: plan.featured ? "#f8fafc" : "#344054" }}>
         {plan.features.map((feature) => <li key={feature} className="mb-2">{feature}</li>)}
       </ul>
@@ -279,7 +279,7 @@ export default function Reviews() {
             </Col>
             <Col lg="6">
               <div className="rounded-4 p-4 p-lg-5" style={{ background: ink, color: "#fff" }}>
-                <p className="text-uppercase fw-bold mb-2" style={{ color: "#9ec5ff", fontSize: ".75rem", letterSpacing: ".08em" }}>Multi-location plan</p>
+                <p className="text-uppercase fw-bold mb-2" style={{ color: "var(--onyx-accent)", fontSize: ".75rem", letterSpacing: ".08em" }}>Multi-location plan</p>
                 <h3 className="mb-2">See your price and track review growth through five locations.</h3>
                 <p className="mb-4" style={{ color: "#cbd5e1" }}>
                   Every location receives the plan you select. Choose a plan and location count;

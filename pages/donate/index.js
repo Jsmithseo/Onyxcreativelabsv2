@@ -67,7 +67,7 @@ const styles = {
   linkButton: {
     fontSize: '1.2rem',
     textDecoration: 'underline',
-    color: '#007bff', // Consistent link color
+    color: 'var(--onyx-accent)', // Consistent link color
   },
 };
 

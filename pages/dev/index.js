@@ -40,12 +40,12 @@ export default function WebDesignPage() {
         {/* Features Icons */}
         <Row className="text-center mb-5">
           <Col md="3">
-            <FaPaintBrush size={40} color="#007bff" />
+            <FaPaintBrush size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Custom Design</h6>
             <p>Tailored aesthetics and brand voice that resonate with your audience.</p>
           </Col>
           <Col md="3">
-            <FaMobileAlt size={40} color="#2563eb" />
+            <FaMobileAlt size={40} color="var(--onyx-accent)" />
             <h6 className="mt-3 fw-bold">Mobile-First</h6>
             <p>Built to look and perform flawlessly on smartphones and tablets.</p>
           </Col>
