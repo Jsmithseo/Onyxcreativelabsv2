@@ -49,53 +49,92 @@ const expressions = [
   }
 ];
 
+const signals = [
+  {
+    number: '01',
+    label: 'Market evidence',
+    copy: 'Live outreach, buying signals, and behavior—not assumptions.'
+  },
+  {
+    number: '02',
+    label: 'Human feedback',
+    copy: 'What people actually say when they see the offer or use the product.'
+  },
+  {
+    number: '03',
+    label: 'Technical execution',
+    copy: 'Systems and content that make the insight usable in the real world.'
+  }
+];
+
 export default function OurStoryPage() {
   return (
     <BaseLayout>
-      <section className="onyx-lab-hero">
+      <section className="onyx-story-hero">
         <Container>
           <p className="onyx-lab-eyebrow">Onyx Creative Labs / Market Lab</p>
           <h1>Built in the market. Designed to move business forward.</h1>
-          <p>
+          <p className="onyx-story-hero-copy">
             Onyx Creative Labs turns real market signals, human feedback, and hands-on execution into practical
             products that help small businesses create demand and make stronger decisions.
           </p>
-          <Link href="/contact" passHref>
-            <Button className="onyx-lab-cta" size="lg">Bring Us the Problem</Button>
-          </Link>
+          <div className="onyx-story-hero-actions">
+            <Link href="/contact" passHref>
+              <Button className="onyx-lab-cta" size="lg">Bring Us the Problem</Button>
+            </Link>
+            <span>Research · Build · Iterate</span>
+          </div>
         </Container>
       </section>
 
-      <section className="onyx-case-section">
+      <section className="onyx-story-founder">
         <Container>
           <Row className="align-items-center g-5">
             <Col lg="5">
               <p className="onyx-lab-eyebrow">A founder&apos;s perspective</p>
               <h2>From the sales floor to the source code.</h2>
-            </Col>
-            <Col lg="7">
               <p>
                 Onyx is shaped by years spent directly in the market: selling, marketing, listening to customers,
-                and seeing what makes people say yes, hesitate, or walk away. That experience sits alongside a
-                lifelong relationship with technology and software, beginning with coding at twelve years old.
+                and seeing what makes people say yes, hesitate, or walk away.
               </p>
               <p className="mb-0">
-                The result is a point of view that connects the technical side of a product with the human side of
-                a decision. We can look at the system, hear the objection in a live conversation, and turn both
-                into a more useful next move for the business.
+                That experience sits alongside a lifelong relationship with technology and software, beginning with
+                coding at twelve years old. It is the mix that makes Onyx different: technical enough to build the
+                system and close enough to the conversation to know why it needs to exist.
               </p>
+            </Col>
+            <Col lg="7">
+              <aside className="onyx-story-signal-card">
+                <div className="onyx-story-signal-card-header">
+                  <span>Field note</span>
+                  <strong>How an Onyx idea gets its shape</strong>
+                </div>
+                {signals.map((signal) => (
+                  <div className="onyx-story-signal-item" key={signal.number}>
+                    <span>{signal.number}</span>
+                    <div>
+                      <strong>{signal.label}</strong>
+                      <p>{signal.copy}</p>
+                    </div>
+                  </div>
+                ))}
+                <div className="onyx-story-signal-result">
+                  <span>Result</span>
+                  <p>Practical products and services built around what the market is already telling us.</p>
+                </div>
+              </aside>
             </Col>
           </Row>
         </Container>
       </section>
 
-      <section className="onyx-muted-section">
-        <Container className="py-5">
+      <section className="onyx-story-gap">
+        <Container>
           <Row className="g-5 align-items-center">
             <Col lg="7">
               <p className="onyx-lab-eyebrow">The small-business gap</p>
-              <h2 className="onyx-section-heading">Small businesses deserve product-level thinking.</h2>
-              <p className="mb-0 text-muted">
+              <h2>Small businesses deserve product-level thinking.</h2>
+              <p className="mb-0">
                 Most owners are asked to wear every hat without an in-house research team, senior growth operator,
                 creative department, and technical builder behind them. Onyx brings that kind of insight and
                 execution into practical reach: focused enough to solve the problem in front of you and grounded
@@ -103,9 +142,10 @@ export default function OurStoryPage() {
               </p>
             </Col>
             <Col lg="5">
-              <div className="onyx-case-learning mt-0">
-                <h3>Our north star</h3>
-                <p className="mb-0">
+              <div className="onyx-story-quote">
+                <p className="onyx-lab-eyebrow">Our north star</p>
+                <h3>Make the next decision clearer.</h3>
+                <p>
                   Help owners put more opportunity on the books by making demand, customer feedback, and execution
                   more deliberate.
                 </p>
@@ -115,7 +155,7 @@ export default function OurStoryPage() {
         </Container>
       </section>
 
-      <section className="onyx-case-section">
+      <section className="onyx-story-loop">
         <Container>
           <div className="text-center mb-5">
             <p className="onyx-lab-eyebrow mb-3">The Onyx loop</p>
@@ -128,8 +168,8 @@ export default function OurStoryPage() {
           <Row className="g-4">
             {method.map((step) => (
               <Col md="6" lg="3" key={step.number}>
-                <article className="onyx-case-method h-100">
-                  <p>{step.number}</p>
+                <article className="onyx-story-loop-step h-100">
+                  <span>{step.number}</span>
                   <h3>{step.title}</h3>
                   <p>{step.copy}</p>
                 </article>
@@ -139,11 +179,11 @@ export default function OurStoryPage() {
         </Container>
       </section>
 
-      <section className="onyx-muted-section">
-        <Container className="py-5">
-          <div className="mb-4">
+      <section className="onyx-story-offerings">
+        <Container>
+          <div className="mb-5">
             <p className="onyx-lab-eyebrow">What that creates</p>
-            <h2 className="onyx-section-heading">One way of working. Different ways to use it.</h2>
+            <h2>One way of working. Different ways to use it.</h2>
             <p className="onyx-lab-index-copy">
               Every Onyx offering is an expression of the same approach: find the signal, make the idea clearer,
               and build the next move around what the market is telling us.
@@ -152,11 +192,11 @@ export default function OurStoryPage() {
           <Row className="g-4">
             {expressions.map((item, index) => (
               <Col md="6" key={item.title}>
-                <Card className="onyx-lab-card h-100">
+                <Card className="onyx-story-offering-card h-100">
                   <CardBody className="p-4 d-flex flex-column">
                     <p className="onyx-lab-eyebrow mb-3">0{index + 1} / Onyx offering</p>
                     <h3>{item.title}</h3>
-                    <p className="text-muted mb-4">{item.copy}</p>
+                    <p className="mb-4">{item.copy}</p>
                     <Link href={item.href} className="onyx-lab-card-link mt-auto">
                       Explore the work <span>→</span>
                     </Link>
@@ -168,7 +208,7 @@ export default function OurStoryPage() {
         </Container>
       </section>
 
-      <section className="onyx-lab-hero" style={{ padding: '4.75rem 0' }}>
+      <section className="onyx-story-closing">
         <Container>
           <p className="onyx-lab-eyebrow">The reason we do it</p>
           <h2>More signal. Better execution. More opportunity.</h2>
