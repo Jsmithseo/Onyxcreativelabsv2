@@ -113,26 +113,15 @@
       .campaign-row:last-child { border-bottom:0; } .campaign-row > span { padding:0 10px; }
       .campaign-row strong { display:block; font-size:13px; } .campaign-row small { color:var(--muted); }
       .campaign-row button { margin-right:8px; height:30px; border:1px solid var(--line); border-radius:5px; background:white; font-size:11px; font-weight:700; }
-      .sales-board-panel { margin-top:12px; }
-      .sales-board { display:grid; grid-template-columns:repeat(4,minmax(190px,1fr)); gap:10px; padding:10px; background:var(--soft); overflow-x:auto; }
-      .sales-column { min-height:190px; background:white; border:1px solid var(--line); border-radius:6px; }
-      .sales-column.is-over { outline:2px solid var(--ink); outline-offset:-2px; background:#fafafa; }
-      .sales-column-head { display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid var(--line); font-size:12px; font-weight:750; }
-      .sales-column-head small { color:var(--muted); font-weight:500; }
-      .sales-cards { display:grid; gap:7px; padding:8px; min-height:135px; }
-      .sales-card { padding:9px 10px; border:1px solid var(--line); border-radius:5px; background:white; cursor:grab; box-shadow:0 1px 2px rgba(0,0,0,.04); }
-      .sales-card:active { cursor:grabbing; }
-      .sales-card strong { display:block; font-size:12px; }
-      .sales-card span { display:block; margin-top:2px; color:var(--muted); font-size:11px; }
       .sales-empty { padding:14px 8px; color:var(--muted); font-size:11px; text-align:center; }
-      @media (max-width:900px) { .sales-board { grid-template-columns:repeat(4,220px); } }
-      .shared-pipeline-panel { margin-top:12px; }
-      .shared-pipeline-board { display:grid; grid-template-columns:repeat(5,minmax(175px,1fr)); gap:10px; padding:10px; overflow-x:auto; background:var(--soft); }
-      .shared-pipeline-column { min-height:150px; border:1px solid var(--line); border-radius:6px; background:white; }
+      .shared-pipeline-board { display:grid; grid-template-columns:repeat(6,minmax(180px,1fr)); gap:10px; padding:10px; overflow-x:auto; background:var(--soft); }
+      .shared-pipeline-column { min-height:190px; border:1px solid var(--line); border-radius:6px; background:white; transition:background .15s, outline .15s; }
+      .shared-pipeline-column.is-over { outline:2px solid var(--ink); outline-offset:-2px; background:#fafafa; }
       .shared-pipeline-column-head { display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--line); font-size:12px; font-weight:750; }
       .shared-pipeline-column-head small { color:var(--muted); font-weight:500; }
-      .shared-pipeline-cards { display:grid; gap:7px; padding:8px; }
-      .shared-lead-card { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:5px; background:white; color:var(--ink); text-align:left; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+      .shared-pipeline-cards { display:grid; gap:7px; padding:8px; min-height:135px; }
+      .shared-lead-card { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:5px; background:white; color:var(--ink); text-align:left; cursor:grab; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+      .shared-lead-card:active { cursor:grabbing; }
       .shared-lead-card:hover, .shared-lead-card:focus-visible { border-color:var(--ink); outline:none; }
       .shared-lead-card strong, .shared-lead-card span { display:block; }
       .shared-lead-card strong { font-size:12px; }
@@ -147,7 +136,7 @@
       .shared-activity:last-child { border-bottom:0; }
       .shared-activity small { display:block; margin-top:2px; color:var(--muted); }
       .commission-form { display:grid; grid-template-columns:minmax(0,1fr) 130px auto; gap:8px; align-items:end; padding:12px; }
-      @media (max-width:900px) { .shared-pipeline-board { grid-template-columns:repeat(5,210px); } }
+      @media (max-width:900px) { .shared-pipeline-board { grid-template-columns:repeat(6,220px); } }
       .workspace { border:1px solid var(--line); min-height:680px; }
       .table-pane { min-width:0; }
       .table-title { height:49px; display:flex; align-items:center; padding:0 14px; border-bottom:1px solid var(--line); font-size:14px; font-weight:700; }
@@ -289,17 +278,8 @@
         </section>
       </section>
       <section class="view" id="boardView">
-        <div class="page-head"><h1>Prospecting board</h1><button class="primary" id="addProspect">Add prospect</button></div>
-        <form class="control-box" id="prospectForm" hidden>
-          <label>Name<input id="prospectName" required maxlength="150"></label>
-          <label>Campaign<select id="prospectCampaign"><option value="">Unassigned</option><option>Parsity School</option><option>Warm Parsity School Leads</option><option>Parsity Business</option><option>Onyx Reviews</option><option>Quantum Bom</option></select></label>
-          <label>Appointment date and time (your local time, optional)<input id="prospectDate" type="datetime-local"></label>
-          <label>Notes<input id="prospectNotes" maxlength="500"></label>
-          <label>Stage<select id="prospectStage"><option value="appointments">Appointments</option><option value="followup">Follow-up</option><option value="closed">Closed</option><option value="not-closed">Not closed</option></select></label>
-          <button class="primary" type="submit">Save prospect</button> <button class="secondary" type="button" id="cancelProspect">Cancel</button>
-        </form>
-        <section class="panel sales-board-panel"><div class="panel-head"><span>Sales pipeline</span><span>Drag cards to update stage</span></div><div id="salesBoard" class="sales-board"></div></section>
-        <section class="panel shared-pipeline-panel"><div class="panel-head"><span>Shared campaign pipeline</span><button class="secondary" id="refreshSharedPipeline" type="button">Refresh shared data</button></div><div class="tool-body"><p>Calls, notes, status, and commission are shared across each campaign. Only administrators can close a deal.</p></div><div id="sharedPipelineBoard" class="shared-pipeline-board"></div></section>
+        <div class="page-head"><h1>Pipeline</h1><span class="count">Shared campaign workflow</span></div>
+        <section class="panel shared-pipeline-panel"><div class="panel-head"><span>Pipeline</span><button class="secondary" id="refreshSharedPipeline" type="button">Refresh</button></div><div class="tool-body"><p>Drag a lead to update its stage. Changes are shared immediately with the assigned contractor; only administrators can move a lead to Won or Lost.</p></div><div id="sharedPipelineBoard" class="shared-pipeline-board"></div></section>
         <section class="panel shared-lead-detail" id="sharedLeadDetail" hidden><div class="panel-head"><span id="sharedLeadTitle">Lead details</span><button class="secondary" id="closeSharedLead" type="button">Close</button></div><div class="tool-body"><div id="sharedLeadSummary" class="shared-lead-summary"></div><form class="commission-form" id="sharedDealForm"><label>Deal status<select id="sharedDealStatus"><option value="open">Open</option><option value="won">Won</option><option value="lost">Lost</option></select></label><label>Potential commission<input id="sharedDealCommission" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" /></label><button class="primary" type="submit">Save deal</button></form><div class="section"><div class="section-head"><h3>Shared activity</h3><span class="saved" id="sharedLeadActivityCount"></span></div><div id="sharedLeadActivities" class="shared-activity-list"></div></div></div></section>
       </section>
       <section class="view" id="leadsView">

@@ -166,13 +166,8 @@ let voipProvider = activityState.voipProvider || "";
 let goals = { callGoals: { school: 120, business: 120, "quantum-bom": 120, reviews: 120 }, appointmentGoals: { school: 3, business: 3, "quantum-bom": 3, reviews: 0 }, closeRatios: {}, ...(activityState.goals || {}) };
 let contractors = [];
 let editingContractorEmail = "";
-let salesBoardCards = Array.isArray(activityState.salesBoardCards) ? activityState.salesBoardCards : [
-  { id:"muhammad", name:"Muhammad", stage:"followup", detail:"Appointment completed · follow-up needed", day:"" },
-  { id:"aaron", name:"Aaron", stage:"followup", detail:"Appointment completed · follow-up needed", day:"" },
-  { id:"seth", name:"Seth", stage:"not-closed", detail:"Appointment completed · outcome pending", day:"" },
-  { id:"joseph", name:"Joseph", stage:"appointments", detail:"New prospect · appointment to execute", day:"" },
-  { id:"alex", name:"Alex", stage:"appointments", detail:"Upcoming appointment", day:"Tuesday" }
-];
+const legacyBoardRemoved = Array.isArray(activityState.salesBoardCards);
+if (legacyBoardRemoved) delete activityState.salesBoardCards;
 let celebrationClipUrl = "";
 const callScripts = {
   school: { opener: "Hi, this is [Rep] with Parsity. I’m calling to learn how your school currently supports career-ready technology training.", questions: "What programs are you offering today? Who owns curriculum decisions? What outcomes matter most this term?", objections: "If timing is the concern, offer a short follow-up. If budget is the concern, ask about the next planning cycle." },
@@ -250,7 +245,7 @@ function persistActivity() {
     attempts: lead.attempts || 0, stage: lead.stage, wonAt: lead.wonAt || null, dnc: Boolean(lead.dnc), lastContact: lead.lastContact || "",
   }]));
   const importedLeads = leads.filter((lead) => lead.source === "CSV import").map(({id,followAt,attempts,called,dnc,lastContact,disposition,...lead}) => lead);
-    localStorage.setItem(activityStorageKey, JSON.stringify({ campaigns: campaignData, leads: leadData, callLog, appointments, voipProvider, goals, salesBoardCards, statsResetAt, statsResetVersion, appointmentResetVersion, followupResetVersion, importedLeads }));
+    localStorage.setItem(activityStorageKey, JSON.stringify({ campaigns: campaignData, leads: leadData, callLog, appointments, voipProvider, goals, statsResetAt, statsResetVersion, appointmentResetVersion, followupResetVersion, importedLeads }));
 }
 
 function refreshActivityViews() {
@@ -522,83 +517,16 @@ function escapeHtml(value) {
   return element.innerHTML;
 }
 
-function addAppointmentToBoard(appointment) {
-  let card = salesBoardCards.find((item) => item.leadId === appointment.leadId && item.campaign === appointment.campaign);
-  if (!card) {
-    card = { id: crypto.randomUUID(), leadId: appointment.leadId, name: appointment.name, campaign: appointment.campaign };
-    salesBoardCards.push(card);
-  }
-  Object.assign(card, { stage: "appointments", detail: appointment.type, startsAt: appointment.startsAt, day: appointment.startsAt ? "" : "Confirmed in Calendly · time unavailable" });
-  renderSalesBoard();
-}
-
-let editingProspectId = null;
-document.getElementById("addProspect").onclick = () => {
-  editingProspectId = null;
-  document.getElementById("prospectForm").reset();
-  document.getElementById("prospectForm").hidden = false;
-  document.getElementById("prospectName").focus();
-};
-document.getElementById("cancelProspect").onclick = () => { document.getElementById("prospectForm").hidden = true; };
-document.getElementById("prospectForm").onsubmit = (event) => {
-  event.preventDefault();
-  const name = document.getElementById("prospectName").value.trim();
-  if (!name) return;
-  const existing = salesBoardCards.find((card) => card.id === editingProspectId);
-  const values = { name, campaign: document.getElementById("prospectCampaign").value, startsAt: document.getElementById("prospectDate").value, detail: document.getElementById("prospectNotes").value.trim(), stage: document.getElementById("prospectStage").value };
-  if (existing) Object.assign(existing, values, { day: values.startsAt ? "" : existing.day });
-  else salesBoardCards.push({ id: crypto.randomUUID(), ...values });
-  persistActivity();
-  renderSalesBoard();
-  event.target.reset();
-  event.target.hidden = true;
-  notify(existing ? "Prospect updated" : "Prospect added");
-  editingProspectId = null;
-};
-
-function renderSalesBoard() {
-  const board = document.getElementById("salesBoard");
-  if (!board) return;
-  const columns = [
-    ["appointments", "Appointments"], ["followup", "Follow-up"], ["closed", "Closed"], ["not-closed", "Not closed"]
-  ];
-  board.innerHTML = columns.map(([stage, label]) => {
-    const cards = salesBoardCards.filter((card) => card.stage === stage);
-    return `<div class="sales-column" data-board-stage="${stage}"><div class="sales-column-head"><span>${label}</span><small>${cards.length}</small></div><div class="sales-cards">${cards.length ? cards.map((card) => `<div class="sales-card" draggable="true" data-board-card="${escapeHtml(card.id)}"><strong>${escapeHtml(card.name)}</strong><span>${escapeHtml(card.campaign || "")}</span><span>${escapeHtml(card.detail)}</span><span>${escapeHtml(card.startsAt ? new Date(card.startsAt).toLocaleString([], { weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit" }) : card.day || "Appointment time not set")}</span></div>`).join("") : '<div class="sales-empty">Drop prospects here</div>'}</div></div>`;
-  }).join("");
-  board.querySelectorAll(".sales-card").forEach((card) => card.addEventListener("dragstart", (event) => event.dataTransfer.setData("text/plain", card.dataset.boardCard)));
-  board.querySelectorAll(".sales-card").forEach((element) => {
-    element.tabIndex = 0;
-    element.setAttribute("role", "button");
-    element.setAttribute("aria-label", `Edit ${salesBoardCards.find((card) => card.id === element.dataset.boardCard)?.name || "prospect"}`);
-    const edit = () => {
-      const card = salesBoardCards.find((item) => item.id === element.dataset.boardCard);
-      editingProspectId = card.id;
-      document.getElementById("prospectName").value = card.name || "";
-      document.getElementById("prospectCampaign").value = card.campaign || "";
-      let date = "";
-      if (card.startsAt && !Number.isNaN(new Date(card.startsAt).getTime())) {
-        const local = new Date(card.startsAt);
-        date = new Date(local.getTime() - local.getTimezoneOffset() * 60000).toISOString().slice(0,16);
-      }
-      document.getElementById("prospectDate").value = date;
-      document.getElementById("prospectNotes").value = card.detail || "";
-      document.getElementById("prospectStage").value = card.stage;
-      document.getElementById("prospectForm").hidden = false;
-      document.getElementById("prospectName").focus();
-    };
-    element.onclick = edit;
-    element.onkeydown = (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); edit(); } };
-  });
-  board.querySelectorAll(".sales-column").forEach((column) => {
-    column.addEventListener("dragover", (event) => { event.preventDefault(); column.classList.add("is-over"); });
-    column.addEventListener("dragleave", () => column.classList.remove("is-over"));
-    column.addEventListener("drop", (event) => { event.preventDefault(); column.classList.remove("is-over"); const card = salesBoardCards.find((item) => item.id === event.dataTransfer.getData("text/plain")); if (!card) return; card.stage = column.dataset.boardStage; persistActivity(); renderSalesBoard(); notify(`${card.name} moved to ${column.querySelector(".sales-column-head span").textContent}`); });
-  });
-}
-
 let sharedWorkspace = { campaigns: [], leads: [] };
 let selectedSharedLeadId = "";
+const sharedPipelineColumns = [
+  ["appointments", "Appointments"],
+  ["followups", "Follow-ups"],
+  ["open", "Open"],
+  ["pitched", "Pitched"],
+  ["won", "Won"],
+  ["lost", "Lost"],
+];
 
 function formatCommission(cents) {
   return new Intl.NumberFormat("en-US", {
@@ -612,7 +540,8 @@ function sharedPipelineLane(lead) {
   if (lead.deal_status === "won" || lead.stage === "Won") return "won";
   if (lead.deal_status === "lost" || lead.stage === "Lost") return "lost";
   if (lead.stage === "Appointment Set") return "appointments";
-  if (lead.disposition === "Connected — follow up" || lead.next_follow_up_at) return "followups";
+  if (lead.stage === "Pitched" || lead.stage === "Qualified") return "pitched";
+  if (lead.stage === "Contacted" && (lead.disposition === "Connected — follow up" || lead.next_follow_up_at)) return "followups";
   return "open";
 }
 
@@ -624,15 +553,91 @@ function activityDate(value) {
 function renderSharedPipeline() {
   const board = document.getElementById("sharedPipelineBoard");
   if (!board) return;
-  const lanes = [["appointments", "Appointments"], ["followups", "Follow-ups"], ["open", "Open"], ["won", "Won"], ["lost", "Lost"]];
   const leads = Array.isArray(sharedWorkspace.leads) ? sharedWorkspace.leads : [];
-  board.innerHTML = lanes.map(([id, label]) => {
+  board.innerHTML = sharedPipelineColumns.map(([id, label]) => {
     const laneLeads = leads.filter((lead) => sharedPipelineLane(lead) === id);
-    return `<section class="shared-pipeline-column"><div class="shared-pipeline-column-head"><span>${label}</span><small>${laneLeads.length}</small></div><div class="shared-pipeline-cards">${laneLeads.length ? laneLeads.map((lead) => `<button type="button" class="shared-lead-card" data-shared-lead="${escapeHtml(lead.id)}"><strong>${escapeHtml(lead.name || "Unnamed lead")}</strong><span>${escapeHtml(lead.campaign_name || "")}</span><span>${escapeHtml(lead.last_activity_by ? `Last updated by ${lead.last_activity_by}` : "No activity yet")}</span><span class="commission">Potential ${formatCommission(lead.potential_commission_cents)}</span></button>`).join("") : '<div class="sales-empty">No leads</div>'}</div></section>`;
+    return `<section class="shared-pipeline-column" data-shared-pipeline-stage="${id}"><div class="shared-pipeline-column-head"><span>${label}</span><small>${laneLeads.length}</small></div><div class="shared-pipeline-cards">${laneLeads.length ? laneLeads.map((lead) => `<button type="button" class="shared-lead-card" draggable="true" data-shared-lead="${escapeHtml(lead.id)}"><strong>${escapeHtml(lead.name || "Unnamed lead")}</strong><span>${escapeHtml(lead.campaign_name || "")}</span><span>${escapeHtml(lead.last_activity_by ? `Last updated by ${lead.last_activity_by}` : "No activity yet")}</span><span class="commission">Potential ${formatCommission(lead.potential_commission_cents)}</span></button>`).join("") : '<div class="sales-empty">Drop leads here</div>'}</div></section>`;
   }).join("");
   board.querySelectorAll("[data-shared-lead]").forEach((button) => {
+    button.addEventListener("dragstart", (event) => {
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", button.dataset.sharedLead);
+    });
     button.onclick = () => openSharedLead(button.dataset.sharedLead);
   });
+  board.querySelectorAll("[data-shared-pipeline-stage]").forEach((column) => {
+    column.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+      column.classList.add("is-over");
+    });
+    column.addEventListener("dragleave", () => column.classList.remove("is-over"));
+    column.addEventListener("drop", (event) => {
+      event.preventDefault();
+      column.classList.remove("is-over");
+      moveSharedLead(event.dataTransfer.getData("text/plain"), column.dataset.sharedPipelineStage);
+    });
+  });
+}
+
+async function requestSharedPipelineUpdate(url, body) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || "Unable to update lead stage");
+  return payload;
+}
+
+async function moveSharedLead(leadId, lane) {
+  const lead = sharedWorkspace.leads.find((item) => item.id === leadId);
+  const next = sharedPipelineColumns.find(([id]) => id === lane);
+  if (!lead || !next || sharedPipelineLane(lead) === lane) return;
+
+  const [laneId, laneLabel] = next;
+  const stageByLane = {
+    appointments: "Appointment Set",
+    followups: "Contacted",
+    open: "New",
+    pitched: "Pitched",
+  };
+
+  try {
+    if (laneId === "won" || laneId === "lost") {
+      await requestSharedPipelineUpdate("/api/operations/deals", {
+        leadId,
+        status: laneId,
+      });
+    } else {
+      const nextStage = stageByLane[laneId];
+      const wasClosed = lead.deal_status === "won" || lead.deal_status === "lost";
+      if (wasClosed) {
+        await requestSharedPipelineUpdate("/api/operations/deals", {
+          leadId,
+          status: "open",
+          reopenStage: nextStage,
+        });
+      }
+      if (!wasClosed || laneId === "followups") {
+        await requestSharedPipelineUpdate("/api/operations/activities", {
+          leadId,
+          activityType: "stage_change",
+          disposition: laneId === "followups" ? "Connected — follow up" : "",
+          note: `Moved to ${laneLabel} from the admin pipeline.`,
+          durationSeconds: 0,
+          scheduledFor: null,
+          nextStage,
+        });
+      }
+    }
+    notify(`${lead.name || "Lead"} moved to ${laneLabel}`);
+    await loadSharedPipeline({ quiet: true });
+    if (selectedSharedLeadId === leadId) await openSharedLead(leadId);
+  } catch (error) {
+    notify(error.message || "Unable to move lead");
+  }
 }
 
 function syncCampaignCommissionInputs() {
@@ -742,7 +747,7 @@ async function openSharedLead(leadId) {
     document.getElementById("sharedDealStatus").value = lead.deal_status || "open";
     document.getElementById("sharedDealCommission").value = ((Number(lead.potential_commission_cents) || 0) / 100).toFixed(2);
     document.getElementById("sharedLeadActivityCount").textContent = `${payload.activities.length} activities`;
-    document.getElementById("sharedLeadActivities").innerHTML = payload.activities.length ? payload.activities.map((activity) => `<div class="shared-activity"><strong>${escapeHtml(activity.activity_type.replace("_", " "))}</strong> · ${escapeHtml(activity.actor_email || "System")}${activity.note ? `<div>${escapeHtml(activity.note)}</div>` : ""}<small>${activityDate(activity.created_at)}${activity.resulting_stage ? ` · ${escapeHtml(activity.resulting_stage)}` : ""}</small></div>`).join("") : '<div class="sales-empty">No shared activity yet.</div>';
+    document.getElementById("sharedLeadActivities").innerHTML = payload.activities.length ? payload.activities.map((activity) => `<div class="shared-activity"><strong>${escapeHtml(activity.activity_type.replace("_", " "))}</strong> · ${escapeHtml(activity.actor_email || "System")}${activity.note ? `<div>${escapeHtml(activity.note)}</div>` : ""}<small>${activityDate(activity.created_at)}${activity.scheduled_for ? ` · Scheduled ${activityDate(activity.scheduled_for)}` : ""}${activity.resulting_stage ? ` · ${escapeHtml(activity.resulting_stage)}` : ""}</small></div>`).join("") : '<div class="sales-empty">No shared activity yet.</div>';
     panel.hidden = false;
     panel.scrollIntoView({ behavior:"smooth", block:"start" });
   } catch (error) {
@@ -811,7 +816,7 @@ function showView(viewId) {
   document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active", view.id === viewId));
   document.querySelectorAll(".nav-button").forEach((button) => button.classList.toggle("active", button.dataset.view === viewId));
   if (viewId === "homeView") closeDetail();
-  if (viewId === "boardView") { renderSalesBoard(); loadSharedPipeline({ quiet:true }); }
+  if (viewId === "boardView") loadSharedPipeline({ quiet:true });
   if (viewId === "settingsView") loadSharedPipeline({ quiet:true });
 }
 
@@ -1211,12 +1216,18 @@ window.addEventListener("message", (event) => {
   lead.stage = "Appointment Set";
   campaign.appointments += 1;
   appointments.push({ leadId:lead.id, name:lead.name, campaign:campaign.name, type:"Calendly appointment", startsAt:null, createdAt:new Date().toISOString(), calendlyEvent });
-  addAppointmentToBoard(appointments[appointments.length - 1]);
   const latest = [...callLog].reverse().find((entry) => entry.leadId === lead.id);
   if (latest) { latest.disposition = lead.disposition; latest.appointment = "Confirmed in Calendly"; }
   updateConnectRate(campaign);
   persistActivity();
   refreshActivityViews();
+  recordSharedAdminActivity(lead, {
+    activityType:"appointment",
+    disposition:lead.disposition,
+    note:"Calendly appointment confirmed",
+    scheduledFor:null,
+    nextStage:"Appointment Set"
+  }).then(() => loadSharedPipeline({ quiet:true })).catch(() => {});
   closeCalendlyScheduler();
   notify("Appointment confirmed in Calendly");
 });
@@ -1239,7 +1250,6 @@ document.getElementById("bookAppointment").onclick = () => {
   lead.disposition = "Connected — follow up";
   lead.stage = "Appointment Set";
   appointments.push({ leadId: lead.id, name: lead.name, campaign: campaign.name, type, startsAt, duration, createdAt: new Date().toISOString() });
-  addAppointmentToBoard(appointments[appointments.length - 1]);
   const latest = [...callLog].reverse().find((entry) => entry.leadId === lead.id);
   if (latest) { latest.appointment = `${type} · ${formatted}`; latest.disposition = lead.disposition; }
   updateConnectRate(campaign);
@@ -1631,7 +1641,7 @@ async function syncSharedOperations() {
 }
 
 campaigns.forEach((campaign) => { updateConnectRate(campaign); updateFollowups(campaign); });
-if (removedNonDialableLeadCount || statsWereReset || appointmentWasCleared || quantumBomFollowupWasCleared) persistActivity();
+if (removedNonDialableLeadCount || statsWereReset || appointmentWasCleared || quantumBomFollowupWasCleared || legacyBoardRemoved) persistActivity();
 renderCampaigns();
 updateMetrics(activeCampaign);
 renderMiningProfile(document.getElementById("settingsGoalCampaign").value);
@@ -1644,7 +1654,6 @@ renderComparison();
 renderGoals();
 renderContractors();
 loadContractors();
-renderSalesBoard();
 loadCelebrationClip();
 setInterval(renderRows, 60000);
 setInterval(() => loadSharedPipeline({ quiet:true }), 30000);
