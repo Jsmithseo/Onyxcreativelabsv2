@@ -21,7 +21,7 @@ export default async function workspace(req, res) {
     const campaignIds = allowedCampaignIds(principal, allCampaigns);
     const campaigns = allCampaigns.filter((campaign) => campaignIds.includes(campaign.id));
     const [leads, campaignSummaries] = await Promise.all([
-      listPipeline(campaignIds),
+      listPipeline(campaignIds, principal.email),
       listCampaignSummaries(campaignIds, principal.email),
     ]);
 
