@@ -1,5 +1,9 @@
 import { allowedCampaignIds, currentOperationsPrincipal } from '../../../lib/operationsAccess';
-import { listCampaigns, listPipeline } from '../../../lib/operationsStore';
+import {
+  listCampaigns,
+  listCampaignSummaries,
+  listPipeline,
+} from '../../../lib/operationsStore';
 
 export default async function workspace(req, res) {
   if (req.method !== 'GET') {
@@ -16,11 +20,15 @@ export default async function workspace(req, res) {
     const allCampaigns = await listCampaigns();
     const campaignIds = allowedCampaignIds(principal, allCampaigns);
     const campaigns = allCampaigns.filter((campaign) => campaignIds.includes(campaign.id));
-    const leads = await listPipeline(campaignIds);
+    const [leads, campaignSummaries] = await Promise.all([
+      listPipeline(campaignIds),
+      listCampaignSummaries(campaignIds, principal.email),
+    ]);
 
     return res.status(200).json({
       principal: { email: principal.email, role: principal.role },
       campaigns,
+      campaignSummaries,
       leads,
       readOnlyPipeline: principal.role === 'contractor',
     });
