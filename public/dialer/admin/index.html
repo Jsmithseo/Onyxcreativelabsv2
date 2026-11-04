@@ -114,8 +114,7 @@
       .campaign-row strong { display:block; font-size:13px; } .campaign-row small { color:var(--muted); }
       .campaign-row button { margin-right:8px; height:30px; border:1px solid var(--line); border-radius:5px; background:white; font-size:11px; font-weight:700; }
       .sales-empty { padding:14px 8px; color:var(--muted); font-size:11px; text-align:center; }
-      .shared-pipeline-board { display:grid; grid-template-columns:repeat(6,minmax(180px,1fr)); gap:10px; padding:10px; overflow-x:auto; background:var(--soft); }
-      .shared-pipeline-board.appointments-only { grid-template-columns:minmax(0,1fr); }
+      .shared-pipeline-board { display:grid; grid-template-columns:repeat(5,minmax(180px,1fr)); gap:10px; padding:10px; overflow-x:auto; background:var(--soft); }
       .shared-pipeline-column { min-height:190px; border:1px solid var(--line); border-radius:6px; background:white; transition:background .15s, outline .15s; }
       .shared-pipeline-column.is-over { outline:2px solid var(--ink); outline-offset:-2px; background:#fafafa; }
       .shared-pipeline-column-head { display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--line); font-size:12px; font-weight:750; }
@@ -137,7 +136,7 @@
       .shared-activity:last-child { border-bottom:0; }
       .shared-activity small { display:block; margin-top:2px; color:var(--muted); }
       .commission-form { display:grid; grid-template-columns:minmax(0,1fr) 130px auto; gap:8px; align-items:end; padding:12px; }
-      @media (max-width:900px) { .shared-pipeline-board:not(.appointments-only) { grid-template-columns:repeat(6,220px); } }
+      @media (max-width:900px) { .shared-pipeline-board { grid-template-columns:repeat(5,220px); } }
       .workspace { border:1px solid var(--line); min-height:680px; }
       .table-pane { min-width:0; }
       .table-title { height:49px; display:flex; align-items:center; padding:0 14px; border-bottom:1px solid var(--line); font-size:14px; font-weight:700; }
@@ -279,8 +278,8 @@
         </section>
       </section>
       <section class="view" id="boardView">
-        <div class="page-head"><h1>Pipeline</h1><span class="count">Booked appointments</span></div>
-        <section class="panel shared-pipeline-panel"><div class="panel-head"><span>Appointments</span><button class="secondary" id="refreshSharedPipeline" type="button">Refresh</button></div><div class="tool-body"><p>Booked appointments from the shared campaign workflow appear here. Select an appointment to view its details.</p></div><div id="sharedPipelineBoard" class="shared-pipeline-board appointments-only"></div></section>
+        <div class="page-head"><h1>Pipeline</h1><span class="count">Shared campaign workflow</span></div>
+        <section class="panel shared-pipeline-panel"><div class="panel-head"><span>Pipeline</span><button class="secondary" id="refreshSharedPipeline" type="button">Refresh</button></div><div class="tool-body"><p>Drag a card to update its stage. Changes are shared immediately with the assigned contractor; select a card to edit its deal details.</p></div><div id="sharedPipelineBoard" class="shared-pipeline-board"></div></section>
         <section class="panel shared-lead-detail" id="sharedLeadDetail" hidden><div class="panel-head"><span id="sharedLeadTitle">Lead details</span><button class="secondary" id="closeSharedLead" type="button">Close</button></div><div class="tool-body"><div id="sharedLeadSummary" class="shared-lead-summary"></div><form class="commission-form" id="sharedDealForm"><label>Deal status<select id="sharedDealStatus"><option value="open">Open</option><option value="won">Won</option><option value="lost">Lost</option></select></label><label>Potential commission<input id="sharedDealCommission" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" /></label><button class="primary" type="submit">Save deal</button></form><div class="section"><div class="section-head"><h3>Shared activity</h3><span class="saved" id="sharedLeadActivityCount"></span></div><div id="sharedLeadActivities" class="shared-activity-list"></div></div></div></section>
       </section>
       <section class="view" id="leadsView">
@@ -364,6 +363,6 @@
     <script src="../business-nontechnical-research.js"></script>
     <script src="../parsity-school-import-1042.js"></script>
     <script src="../parsity-school-import-17.js"></script>
-    <script src="./app.js?v=admin-functional-4"></script>
+    <script src="./app.js?v=admin-functional-5"></script>
   </body>
 </html>

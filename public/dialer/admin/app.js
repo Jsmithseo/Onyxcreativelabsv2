@@ -521,14 +521,12 @@ function escapeHtml(value) {
 let sharedWorkspace = { campaigns: [], leads: [] };
 let selectedSharedLeadId = "";
 const sharedPipelineColumns = [
-  ["appointments", "Appointments"],
+  ["appointments", "Booked appointments"],
   ["followups", "Follow-ups"],
-  ["open", "Open"],
   ["pitched", "Pitched"],
   ["won", "Won"],
   ["lost", "Lost"],
 ];
-const sharedPipelineVisibleColumns = [["appointments", "Booked appointments"]];
 
 function formatCommission(cents) {
   return new Intl.NumberFormat("en-US", {
@@ -556,12 +554,29 @@ function renderSharedPipeline() {
   const board = document.getElementById("sharedPipelineBoard");
   if (!board) return;
   const leads = Array.isArray(sharedWorkspace.leads) ? sharedWorkspace.leads : [];
-  board.innerHTML = sharedPipelineVisibleColumns.map(([id, label]) => {
+  board.innerHTML = sharedPipelineColumns.map(([id, label]) => {
     const laneLeads = leads.filter((lead) => sharedPipelineLane(lead) === id);
-    return `<section class="shared-pipeline-column"><div class="shared-pipeline-column-head"><span>${label}</span><small>${laneLeads.length}</small></div><div class="shared-pipeline-cards">${laneLeads.length ? laneLeads.map((lead) => `<button type="button" class="shared-lead-card" data-shared-lead="${escapeHtml(lead.id)}"><strong>${escapeHtml(lead.name || "Unnamed lead")}</strong><span>${escapeHtml(lead.campaign_name || "")}</span><span>${escapeHtml(lead.last_activity_by ? `Last updated by ${lead.last_activity_by}` : "No activity yet")}</span><span class="commission">Potential ${formatCommission(lead.potential_commission_cents)}</span></button>`).join("") : '<div class="sales-empty">No booked appointments yet</div>'}</div></section>`;
+    return `<section class="shared-pipeline-column" data-shared-pipeline-stage="${id}"><div class="shared-pipeline-column-head"><span>${label}</span><small>${laneLeads.length}</small></div><div class="shared-pipeline-cards">${laneLeads.length ? laneLeads.map((lead) => `<button type="button" class="shared-lead-card" draggable="true" data-shared-lead="${escapeHtml(lead.id)}"><strong>${escapeHtml(lead.name || "Unnamed lead")}</strong><span>${escapeHtml(lead.campaign_name || "")}</span><span>${escapeHtml(lead.last_activity_by ? `Last updated by ${lead.last_activity_by}` : "No activity yet")}</span><span class="commission">Potential ${formatCommission(lead.potential_commission_cents)}</span></button>`).join("") : '<div class="sales-empty">Drop leads here</div>'}</div></section>`;
   }).join("");
   board.querySelectorAll("[data-shared-lead]").forEach((button) => {
+    button.addEventListener("dragstart", (event) => {
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", button.dataset.sharedLead);
+    });
     button.onclick = () => openSharedLead(button.dataset.sharedLead);
+  });
+  board.querySelectorAll("[data-shared-pipeline-stage]").forEach((column) => {
+    column.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+      column.classList.add("is-over");
+    });
+    column.addEventListener("dragleave", () => column.classList.remove("is-over"));
+    column.addEventListener("drop", (event) => {
+      event.preventDefault();
+      column.classList.remove("is-over");
+      moveSharedLead(event.dataTransfer.getData("text/plain"), column.dataset.sharedPipelineStage);
+    });
   });
 }
 
@@ -585,7 +600,6 @@ async function moveSharedLead(leadId, lane) {
   const stageByLane = {
     appointments: "Appointment Set",
     followups: "Contacted",
-    open: "New",
     pitched: "Pitched",
   };
 
