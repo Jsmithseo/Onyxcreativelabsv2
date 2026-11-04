@@ -164,6 +164,7 @@ if (quantumBomFollowupWasCleared) activityState.followupResetVersion = followupR
 let voipProvider = activityState.voipProvider || "";
 let goals = { callGoals: { school: 120, business: 120, "quantum-bom": 120, reviews: 120 }, appointmentGoals: { school: 3, business: 3, "quantum-bom": 3, reviews: 0 }, closeRatios: {}, ...(activityState.goals || {}) };
 let contractors = [];
+let editingContractorEmail = "";
 let salesBoardCards = Array.isArray(activityState.salesBoardCards) ? activityState.salesBoardCards : [
   { id:"muhammad", name:"Muhammad", stage:"followup", detail:"Appointment completed · follow-up needed", day:"" },
   { id:"aaron", name:"Aaron", stage:"followup", detail:"Appointment completed · follow-up needed", day:"" },
@@ -283,8 +284,31 @@ function renderContractors() {
   rows.innerHTML = contractors.map((contractor) => {
     const campaignNames = contractor.campaigns.map((id) => campaigns.find((campaign) => campaign.id === id)?.name).filter(Boolean);
     const status = contractor.status === "invite_failed" ? "Invite failed" : "Invite sent";
-    return `<div class="contractor-row"><span><strong>${escapeHtml(contractor.name)}</strong><small>${escapeHtml(contractor.email)}</small></span><span><strong>${escapeHtml(contractor.phone || "No phone on file")}</strong><small>Caller contact</small></span><span><strong>${escapeHtml(campaignNames.join(", ") || "No campaigns assigned")}</strong><small>Campaign access</small></span><span class="contractor-status">${status}</span></div>`;
+    return `<div class="contractor-row"><span><strong>${escapeHtml(contractor.name)}</strong><small>${escapeHtml(contractor.email)}</small></span><span><strong>${escapeHtml(contractor.phone || "No phone on file")}</strong><small>Caller contact</small></span><span><strong>${escapeHtml(campaignNames.join(", ") || "No campaigns assigned")}</strong><small>Campaign access</small></span><span><i class="contractor-status">${status}</i><button type="button" class="secondary contractor-edit" data-contractor-email="${escapeHtml(contractor.email)}">Edit</button></span></div>`;
   }).join("");
+  rows.querySelectorAll(".contractor-edit").forEach((button) => {
+    button.onclick = () => openContractorForm(contractors.find((contractor) => contractor.email === button.dataset.contractorEmail));
+  });
+}
+
+function openContractorForm(contractor = null) {
+  const form = document.getElementById("contractorForm");
+  editingContractorEmail = contractor?.email || "";
+  form.hidden = false;
+  document.getElementById("contractorName").value = contractor?.name || "";
+  const email = document.getElementById("contractorEmail");
+  email.value = contractor?.email || "";
+  email.disabled = Boolean(contractor);
+  document.getElementById("contractorPhone").value = contractor?.phone || "";
+  document.getElementById("contractorNotes").value = contractor?.notes || "";
+  document.querySelectorAll('input[name="contractorCampaign"]').forEach((input) => {
+    input.checked = Boolean(contractor?.campaigns.includes(input.value));
+  });
+  document.getElementById("sendContractorInvite").textContent = contractor ? "Save changes" : "Send invite";
+  document.getElementById("contractorFormHelp").textContent = contractor
+    ? "Adding a new campaign sends a campaign-access email. Other updates do not resend the invitation."
+    : "An invitation email with a secure sign-in link will be sent immediately.";
+  document.getElementById("contractorName").focus();
 }
 
 async function loadContractors() {
@@ -570,11 +594,202 @@ function renderSalesBoard() {
   });
 }
 
+let sharedWorkspace = { campaigns: [], leads: [] };
+let selectedSharedLeadId = "";
+
+function formatCommission(cents) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0
+  }).format((Number(cents) || 0) / 100);
+}
+
+function sharedPipelineLane(lead) {
+  if (lead.deal_status === "won" || lead.stage === "Won") return "won";
+  if (lead.deal_status === "lost" || lead.stage === "Lost") return "lost";
+  if (lead.stage === "Appointment Set") return "appointments";
+  if (lead.disposition === "Connected — follow up" || lead.next_follow_up_at) return "followups";
+  return "open";
+}
+
+function activityDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString([], { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
+}
+
+function renderSharedPipeline() {
+  const board = document.getElementById("sharedPipelineBoard");
+  if (!board) return;
+  const lanes = [["appointments", "Appointments"], ["followups", "Follow-ups"], ["open", "Open"], ["won", "Won"], ["lost", "Lost"]];
+  const leads = Array.isArray(sharedWorkspace.leads) ? sharedWorkspace.leads : [];
+  board.innerHTML = lanes.map(([id, label]) => {
+    const laneLeads = leads.filter((lead) => sharedPipelineLane(lead) === id);
+    return `<section class="shared-pipeline-column"><div class="shared-pipeline-column-head"><span>${label}</span><small>${laneLeads.length}</small></div><div class="shared-pipeline-cards">${laneLeads.length ? laneLeads.map((lead) => `<button type="button" class="shared-lead-card" data-shared-lead="${escapeHtml(lead.id)}"><strong>${escapeHtml(lead.name || "Unnamed lead")}</strong><span>${escapeHtml(lead.campaign_name || "")}</span><span>${escapeHtml(lead.last_activity_by ? `Last updated by ${lead.last_activity_by}` : "No activity yet")}</span><span class="commission">Potential ${formatCommission(lead.potential_commission_cents)}</span></button>`).join("") : '<div class="sales-empty">No leads</div>'}</div></section>`;
+  }).join("");
+  board.querySelectorAll("[data-shared-lead]").forEach((button) => {
+    button.onclick = () => openSharedLead(button.dataset.sharedLead);
+  });
+}
+
+function syncCampaignCommissionInputs() {
+  const select = document.getElementById("commissionCampaign");
+  const input = document.getElementById("campaignCommission");
+  if (!select || !input) return;
+  const campaign = sharedWorkspace.campaigns.find((item) => item.id === select.value);
+  input.value = campaign ? ((Number(campaign.default_commission_cents) || 0) / 100).toFixed(2) : "";
+}
+
+function sharedLegacyLead(lead) {
+  return {
+    campaign: lead.campaign,
+    name: lead.name,
+    company: lead.company,
+    title: lead.title,
+    phone: lead.phone,
+    email: lead.email,
+    linkedin: lead.linkedin,
+    location: lead.location,
+    zone: lead.zone,
+    source: lead.source,
+    stage: lead.stage,
+    disposition: lead.disposition,
+    notes: lead.notes,
+    followAt: lead.followAt ? new Date(lead.followAt).toISOString() : null
+  };
+}
+
+async function recordSharedAdminActivity(lead, activity = {}) {
+  const response = await fetch("/api/operations/admin-legacy-activity", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ lead:sharedLegacyLead(lead), ...activity })
+  });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || "Unable to share lead activity");
+  return payload;
+}
+
+async function saveSharedAdminDeal(lead, status, reopenStage = "") {
+  const resolved = await recordSharedAdminActivity(lead);
+  const response = await fetch("/api/operations/deals", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ leadId:resolved.lead.id, status, reopenStage })
+  });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || "Unable to update shared deal");
+  return payload;
+}
+
+async function loadSharedPipeline({ quiet = false } = {}) {
+  try {
+    const response = await fetch("/api/operations/workspace", { cache:"no-store" });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || "Unable to load shared pipeline");
+    sharedWorkspace = payload;
+    renderSharedPipeline();
+    syncCampaignCommissionInputs();
+    if (!quiet) notify("Shared pipeline refreshed");
+  } catch (error) {
+    const board = document.getElementById("sharedPipelineBoard");
+    if (board) board.innerHTML = '<div class="sales-empty">Shared campaign data is temporarily unavailable.</div>';
+    if (!quiet) notify(error.message || "Unable to load shared pipeline");
+  }
+}
+
+async function openSharedLead(leadId) {
+  if (!leadId) return;
+  try {
+    const response = await fetch(`/api/operations/leads/${encodeURIComponent(leadId)}`, { cache:"no-store" });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || "Unable to load lead details");
+    selectedSharedLeadId = leadId;
+    const lead = payload.lead;
+    const panel = document.getElementById("sharedLeadDetail");
+    document.getElementById("sharedLeadTitle").textContent = `${lead.name || "Lead"} · shared record`;
+    document.getElementById("sharedLeadSummary").innerHTML = [
+      ["Campaign", lead.campaign_name || "—"],
+      ["Deal status", lead.deal_status || "open"],
+      ["Potential commission", formatCommission(lead.potential_commission_cents)],
+      ["Contact", lead.email || lead.phone || "—"],
+      ["Follow-up", lead.next_follow_up_at ? activityDate(lead.next_follow_up_at) : "None scheduled"],
+      ["Current stage", lead.stage || "New"]
+    ].map(([label, value]) => `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join("");
+    document.getElementById("sharedDealStatus").value = lead.deal_status || "open";
+    document.getElementById("sharedDealCommission").value = ((Number(lead.potential_commission_cents) || 0) / 100).toFixed(2);
+    document.getElementById("sharedLeadActivityCount").textContent = `${payload.activities.length} activities`;
+    document.getElementById("sharedLeadActivities").innerHTML = payload.activities.length ? payload.activities.map((activity) => `<div class="shared-activity"><strong>${escapeHtml(activity.activity_type.replace("_", " "))}</strong> · ${escapeHtml(activity.actor_email || "System")}${activity.note ? `<div>${escapeHtml(activity.note)}</div>` : ""}<small>${activityDate(activity.created_at)}${activity.resulting_stage ? ` · ${escapeHtml(activity.resulting_stage)}` : ""}</small></div>`).join("") : '<div class="sales-empty">No shared activity yet.</div>';
+    panel.hidden = false;
+    panel.scrollIntoView({ behavior:"smooth", block:"start" });
+  } catch (error) {
+    notify(error.message || "Unable to load lead details");
+  }
+}
+
+document.getElementById("refreshSharedPipeline").onclick = () => loadSharedPipeline();
+document.getElementById("closeSharedLead").onclick = () => {
+  selectedSharedLeadId = "";
+  document.getElementById("sharedLeadDetail").hidden = true;
+};
+document.getElementById("sharedDealForm").onsubmit = async (event) => {
+  event.preventDefault();
+  if (!selectedSharedLeadId) return;
+  const amount = document.getElementById("sharedDealCommission").value.trim();
+  const potentialCommissionCents = amount === "" ? null : Math.round(Number(amount) * 100);
+  if (potentialCommissionCents !== null && (!Number.isFinite(potentialCommissionCents) || potentialCommissionCents < 0)) {
+    notify("Enter a valid potential commission");
+    return;
+  }
+  const response = await fetch("/api/operations/deals", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      leadId:selectedSharedLeadId,
+      status:document.getElementById("sharedDealStatus").value,
+      potentialCommissionCents
+    })
+  });
+  const payload = await response.json();
+  if (!response.ok) {
+    notify(payload.error || "Unable to save deal");
+    return;
+  }
+  notify("Deal updated");
+  await loadSharedPipeline({ quiet:true });
+  await openSharedLead(selectedSharedLeadId);
+};
+document.getElementById("commissionCampaign").onchange = syncCampaignCommissionInputs;
+document.getElementById("campaignCommissionForm").onsubmit = async (event) => {
+  event.preventDefault();
+  const campaignId = document.getElementById("commissionCampaign").value;
+  const amount = document.getElementById("campaignCommission").value.trim();
+  const commissionCents = Math.round(Number(amount) * 100);
+  if (!Number.isFinite(commissionCents) || commissionCents < 0) {
+    notify("Enter a valid commission default");
+    return;
+  }
+  const response = await fetch(`/api/operations/campaigns/${encodeURIComponent(campaignId)}`, {
+    method:"PATCH",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ defaultCommissionCents:commissionCents })
+  });
+  const payload = await response.json();
+  if (!response.ok) {
+    notify(payload.error || "Unable to save commission default");
+    return;
+  }
+  sharedWorkspace.campaigns = sharedWorkspace.campaigns.map((campaign) => campaign.id === payload.campaign.id ? { ...campaign, ...payload.campaign } : campaign);
+  syncCampaignCommissionInputs();
+  notify("Campaign commission default saved");
+};
+
 function showView(viewId) {
   document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active", view.id === viewId));
   document.querySelectorAll(".nav-button").forEach((button) => button.classList.toggle("active", button.dataset.view === viewId));
   if (viewId === "homeView") closeDetail();
-  if (viewId === "boardView") renderSalesBoard();
+  if (viewId === "boardView") { renderSalesBoard(); loadSharedPipeline({ quiet:true }); }
+  if (viewId === "settingsView") loadSharedPipeline({ quiet:true });
 }
 
 function updateTimezoneMap() {
@@ -890,6 +1105,14 @@ document.getElementById("endCall").onclick = () => {
     if (latest) latest.duration = callSeconds;
     persistActivity();
     refreshActivityViews();
+    recordSharedAdminActivity(lead, {
+      activityType:"call",
+      disposition:lead.disposition,
+      note:latest?.note || "",
+      durationSeconds:callSeconds,
+      scheduledFor:lead.followAt ? new Date(lead.followAt).toISOString() : null,
+      nextStage:lead.stage
+    }).then(() => loadSharedPipeline({ quiet:true })).catch(() => {});
   }
   activeCallLeadId = null;
   document.getElementById("callState").classList.remove("show");
@@ -996,6 +1219,13 @@ document.getElementById("bookAppointment").onclick = () => {
   updateConnectRate(campaign);
   persistActivity();
   refreshActivityViews();
+  recordSharedAdminActivity(lead, {
+    activityType:"appointment",
+    disposition:lead.disposition,
+    note:`${type} booked`,
+    scheduledFor:new Date(startsAt).toISOString(),
+    nextStage:"Appointment Set"
+  }).then(() => loadSharedPipeline({ quiet:true })).catch(() => {});
   notify("Appointment booked");
 };
 let noteTimer;
@@ -1019,6 +1249,7 @@ document.getElementById("saveLead").onclick = () => {
   lead.industry = document.getElementById("detailIndustry").value.trim();
   const campaign = campaigns.find((item) => item.id === lead.campaign);
   const wasWon = lead.stage === "Won";
+  const wasClosedDeal = lead.stage === "Won" || lead.stage === "Lost";
   const disposition = document.getElementById("disposition").value;
   if (disposition && disposition !== lead.disposition) {
     lead.disposition = disposition;
@@ -1036,18 +1267,28 @@ document.getElementById("saveLead").onclick = () => {
   updateFollowups(campaign);
   persistActivity();
   refreshActivityViews();
+  const sharedSave = lead.stage === "Won" || lead.stage === "Lost"
+    ? saveSharedAdminDeal(lead, lead.stage === "Won" ? "won" : "lost")
+    : wasClosedDeal
+      ? saveSharedAdminDeal(lead, "open", lead.stage)
+      : recordSharedAdminActivity(lead, {
+        activityType:"stage_change",
+        disposition:lead.disposition,
+        note:lead.notes,
+        scheduledFor:lead.followAt ? new Date(lead.followAt).toISOString() : null,
+        nextStage:lead.stage
+      });
+  sharedSave.then(() => loadSharedPipeline({ quiet:true })).catch(() => {});
   closeDetail();
   notify(`${lead.name} saved`);
 };
 document.querySelectorAll(".nav-button").forEach((button) => { button.onclick = () => showView(button.dataset.view); });
-document.getElementById("showContractorForm").onclick = () => {
-  const form = document.getElementById("contractorForm");
-  form.hidden = !form.hidden;
-  if (!form.hidden) document.getElementById("contractorName").focus();
-};
+document.getElementById("showContractorForm").onclick = () => openContractorForm();
 document.getElementById("cancelContractor").onclick = () => {
   const form = document.getElementById("contractorForm");
   form.reset();
+  document.getElementById("contractorEmail").disabled = false;
+  editingContractorEmail = "";
   form.hidden = true;
 };
 document.getElementById("contractorForm").onsubmit = async (event) => {
@@ -1056,6 +1297,7 @@ document.getElementById("contractorForm").onsubmit = async (event) => {
   const name = document.getElementById("contractorName").value.trim();
   const email = document.getElementById("contractorEmail").value.trim().toLowerCase();
   const phone = document.getElementById("contractorPhone").value.trim();
+  const notes = document.getElementById("contractorNotes").value.trim();
   const selectedCampaigns = [...document.querySelectorAll('input[name="contractorCampaign"]:checked')].map((input) => input.value);
   const inviteButton = document.getElementById("sendContractorInvite");
   if (!selectedCampaigns.length) { notify("Choose at least one campaign"); return; }
@@ -1063,23 +1305,28 @@ document.getElementById("contractorForm").onsubmit = async (event) => {
   inviteButton.textContent = "Sending invite…";
   try {
     const response = await fetch("/api/admin/contractors", {
-      method: "POST",
+      method: editingContractorEmail ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, phone, campaigns: selectedCampaigns }),
+      body: JSON.stringify({ name, email: editingContractorEmail || email, phone, notes, campaigns: selectedCampaigns }),
     });
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Unable to send the invitation");
     contractors = [payload.contractor, ...contractors.filter((contractor) => contractor.email !== payload.contractor.email)];
     renderContractors();
     form.reset();
+    document.getElementById("contractorEmail").disabled = false;
+    const updatedExisting = Boolean(editingContractorEmail);
+    editingContractorEmail = "";
     form.hidden = true;
-    notify(`${name} invited — secure sign-in link sent`);
+    notify(updatedExisting
+      ? (payload.campaignNoticeSent ? `${name} updated — campaign-access email sent` : `${name} updated`)
+      : `${name} invited — secure sign-in link sent`);
   } catch (error) {
     notify(error.message || "Unable to send the invitation");
     await loadContractors();
   } finally {
     inviteButton.disabled = false;
-    inviteButton.textContent = "Send invite";
+    inviteButton.textContent = editingContractorEmail ? "Save changes" : "Send invite";
   }
 };
 document.getElementById("campaignSelect").onchange = (event) => { updateMetrics(event.target.value); renderGoals(); };
@@ -1319,6 +1566,42 @@ document.getElementById("saveGoals").onclick = () => {
   notify("Goals saved");
 };
 
+// The established admin workspace remains the source for the current campaign
+// queue. Mirror its existing lead data into the shared service in small batches
+// so contractors and admins can read the same campaign records without
+// changing this interface or touching browser-local activity history.
+async function syncSharedOperations() {
+  const sharedCampaigns = campaigns.map(({ id, name }) => ({ id, name }));
+  const sharedLeads = leads.map((lead) => ({
+    campaign: lead.campaign,
+    name: lead.name,
+    company: lead.company,
+    title: lead.title,
+    phone: lead.phone,
+    email: lead.email,
+    linkedin: lead.linkedin,
+    location: lead.location,
+    zone: lead.zone,
+    source: lead.source,
+    stage: lead.stage,
+    disposition: lead.disposition,
+    notes: lead.notes,
+    followAt: lead.followAt ? new Date(lead.followAt).toISOString() : null,
+  }));
+  const batchSize = 250;
+  for (let start = 0; start < sharedLeads.length; start += batchSize) {
+    const response = await fetch("/api/operations/bootstrap", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        campaigns: sharedCampaigns,
+        leads: sharedLeads.slice(start, start + batchSize),
+      }),
+    });
+    if (!response.ok) throw new Error("Unable to sync shared campaign data");
+  }
+}
+
 campaigns.forEach((campaign) => { updateConnectRate(campaign); updateFollowups(campaign); });
 if (removedNonDialableLeadCount || statsWereReset || appointmentWasCleared || quantumBomFollowupWasCleared) persistActivity();
 renderCampaigns();
@@ -1336,3 +1619,6 @@ loadContractors();
 renderSalesBoard();
 loadCelebrationClip();
 setInterval(renderRows, 60000);
+syncSharedOperations()
+  .then(() => loadSharedPipeline({ quiet:true }))
+  .catch(() => {});

@@ -1,6 +1,7 @@
 import {
   createMagicLinkToken,
   normaliseEmail,
+  safeBdrReturnTo,
 } from '../../../lib/bdrAuth';
 import { isActiveContractor } from '../../../lib/contractorStore';
 import { sendMagicLinkEmail } from '../../../lib/bdrMail';
@@ -29,7 +30,9 @@ export default async function requestMagicLink(req, res) {
   try {
     await sendMagicLinkEmail({
       email,
-      token: createMagicLinkToken(email, 'contractor'),
+      token: createMagicLinkToken(email, 'contractor', {
+        returnTo: safeBdrReturnTo(req.body?.returnTo),
+      }),
     });
     return res.status(202).json({ accepted: true });
   } catch (error) {

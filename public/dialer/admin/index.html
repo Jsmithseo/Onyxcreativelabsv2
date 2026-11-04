@@ -126,6 +126,28 @@
       .sales-card span { display:block; margin-top:2px; color:var(--muted); font-size:11px; }
       .sales-empty { padding:14px 8px; color:var(--muted); font-size:11px; text-align:center; }
       @media (max-width:900px) { .sales-board { grid-template-columns:repeat(4,220px); } }
+      .shared-pipeline-panel { margin-top:12px; }
+      .shared-pipeline-board { display:grid; grid-template-columns:repeat(5,minmax(175px,1fr)); gap:10px; padding:10px; overflow-x:auto; background:var(--soft); }
+      .shared-pipeline-column { min-height:150px; border:1px solid var(--line); border-radius:6px; background:white; }
+      .shared-pipeline-column-head { display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--line); font-size:12px; font-weight:750; }
+      .shared-pipeline-column-head small { color:var(--muted); font-weight:500; }
+      .shared-pipeline-cards { display:grid; gap:7px; padding:8px; }
+      .shared-lead-card { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:5px; background:white; color:var(--ink); text-align:left; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+      .shared-lead-card:hover, .shared-lead-card:focus-visible { border-color:var(--ink); outline:none; }
+      .shared-lead-card strong, .shared-lead-card span { display:block; }
+      .shared-lead-card strong { font-size:12px; }
+      .shared-lead-card span { margin-top:2px; color:var(--muted); font-size:11px; }
+      .shared-lead-card .commission { color:var(--green); font-weight:700; }
+      .shared-lead-detail { margin-top:12px; }
+      .shared-lead-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+      .shared-lead-summary div { padding:9px; border:1px solid var(--line); border-radius:5px; font-size:12px; }
+      .shared-lead-summary span { display:block; margin-bottom:2px; color:var(--muted); font-size:11px; }
+      .shared-activity-list { display:grid; gap:8px; margin-top:12px; }
+      .shared-activity { padding:9px 0; border-bottom:1px solid var(--line); font-size:12px; line-height:1.4; }
+      .shared-activity:last-child { border-bottom:0; }
+      .shared-activity small { display:block; margin-top:2px; color:var(--muted); }
+      .commission-form { display:grid; grid-template-columns:minmax(0,1fr) 130px auto; gap:8px; align-items:end; padding:12px; }
+      @media (max-width:900px) { .shared-pipeline-board { grid-template-columns:repeat(5,210px); } }
       .workspace { border:1px solid var(--line); min-height:680px; }
       .table-pane { min-width:0; }
       .table-title { height:49px; display:flex; align-items:center; padding:0 14px; border-bottom:1px solid var(--line); font-size:14px; font-weight:700; }
@@ -209,24 +231,10 @@
     </style>
   </head>
   <body data-experience="admin">
-    <header><div class="header-left"><div class="brand"><img class="logo" src="../onyx-creative-labs-logo.webp" alt="Onyx Creative Labs" width="150" height="36"></div><nav><button class="nav-button active" data-view="homeView">Operations</button><button class="nav-button" data-view="boardView">Pipeline</button><button class="nav-button" data-view="leadsView">Lead operations</button><button class="nav-button" data-view="settingsView">Configuration</button></nav></div><a class="workspace-switch" href="/bdr">Contractor login</a></header>
+    <header><div class="header-left"><div class="brand"><img class="logo" src="../onyx-creative-labs-logo.webp" alt="Onyx Creative Labs" width="150" height="36"></div><nav><button class="nav-button active" data-view="homeView">Operations</button><button class="nav-button" data-view="contractorsView">Contractors</button><button class="nav-button" data-view="boardView">Pipeline</button><button class="nav-button" data-view="leadsView">Lead operations</button><button class="nav-button" data-view="settingsView">Configuration</button></nav></div><a class="workspace-switch" href="/bdr">Contractor login</a></header>
     <main>
       <section class="view active" id="homeView">
         <div class="page-head"><h1>Revenue operations</h1><span class="count">Admin workspace</span></div>
-        <section class="panel contractor-panel" aria-labelledby="contractorsTitle">
-          <div class="panel-head"><span id="contractorsTitle">Contractors</span><button id="showContractorForm">Invite contractor</button></div>
-          <div class="tool-body">
-            <div class="contractor-intro"><div><strong>Manage BDR access</strong><p>Add a caller, keep their phone on file, and choose the campaigns they can work. New campaigns will appear here automatically.</p></div><span class="count" id="contractorCount">0 contractors</span></div>
-            <form class="contractor-form" id="contractorForm" hidden>
-              <div class="form-field"><label for="contractorName">Name</label><input id="contractorName" required maxlength="120" placeholder="Sierra Johnson" /></div>
-              <div class="form-field"><label for="contractorEmail">Email</label><input id="contractorEmail" required type="email" maxlength="160" placeholder="sierra@example.com" /></div>
-              <div class="form-field"><label for="contractorPhone">Phone</label><input id="contractorPhone" type="tel" maxlength="32" placeholder="555-555-5555" /></div>
-              <div class="form-field wide"><label>Campaign access</label><div class="campaign-access" id="contractorCampaignAccess"></div></div>
-              <div class="contractor-actions"><small>An invitation email with a secure sign-in link will be sent immediately.</small><div class="button-row"><button type="button" class="secondary" id="cancelContractor">Cancel</button><button type="submit" class="primary" id="sendContractorInvite">Send invite</button></div></div>
-            </form>
-          </div>
-          <div class="contractor-list" id="contractorRows"></div>
-        </section>
         <div class="home-controls">
           <div class="control-box"><label for="campaignSelect">Campaign</label><div class="campaign-control"><select id="campaignSelect"><option value="school">Parsity School</option><option value="warm-parsity-school">Warm Parsity School Leads</option><option value="business">Parsity Business</option><option value="reviews">Onyx Reviews</option><option value="quantum-bom">Quantum Bom</option></select><button class="primary" id="openCampaign">Open campaign</button></div></div>
           <section class="timezone-map" aria-label="United States calling time zones">
@@ -260,6 +268,24 @@
           </div>
         </div>
       </section>
+      <section class="view" id="contractorsView">
+        <div class="page-head"><h1>Contractors</h1><button class="primary" id="showContractorForm">Invite contractor</button></div>
+        <section class="panel contractor-panel" aria-labelledby="contractorsTitle">
+          <div class="panel-head"><span id="contractorsTitle">BDR access</span><span class="count" id="contractorCount">0 contractors</span></div>
+          <div class="tool-body">
+            <div class="contractor-intro"><div><strong>Manage BDR access</strong><p>Invite callers, update their details, and assign campaigns. Adding a new campaign sends a campaign-access email.</p></div></div>
+            <form class="contractor-form" id="contractorForm" hidden>
+              <div class="form-field"><label for="contractorName">Name</label><input id="contractorName" required maxlength="120" placeholder="Sierra Johnson" /></div>
+              <div class="form-field"><label for="contractorEmail">Email</label><input id="contractorEmail" required type="email" maxlength="160" placeholder="sierra@example.com" /></div>
+              <div class="form-field"><label for="contractorPhone">Phone <small>(optional)</small></label><input id="contractorPhone" type="tel" maxlength="32" placeholder="555-555-5555" /></div>
+              <div class="form-field wide"><label for="contractorNotes">Internal notes <small>(optional)</small></label><textarea id="contractorNotes" maxlength="4000" placeholder="Working preferences, onboarding notes, or future deal-system reference."></textarea></div>
+              <div class="form-field wide"><label>Campaign access</label><div class="campaign-access" id="contractorCampaignAccess"></div></div>
+              <div class="contractor-actions"><small id="contractorFormHelp">An invitation email with a secure sign-in link will be sent immediately.</small><div class="button-row"><button type="button" class="secondary" id="cancelContractor">Cancel</button><button type="submit" class="primary" id="sendContractorInvite">Send invite</button></div></div>
+            </form>
+          </div>
+          <div class="contractor-list" id="contractorRows"></div>
+        </section>
+      </section>
       <section class="view" id="boardView">
         <div class="page-head"><h1>Prospecting board</h1><button class="primary" id="addProspect">Add prospect</button></div>
         <form class="control-box" id="prospectForm" hidden>
@@ -271,6 +297,8 @@
           <button class="primary" type="submit">Save prospect</button> <button class="secondary" type="button" id="cancelProspect">Cancel</button>
         </form>
         <section class="panel sales-board-panel"><div class="panel-head"><span>Sales pipeline</span><span>Drag cards to update stage</span></div><div id="salesBoard" class="sales-board"></div></section>
+        <section class="panel shared-pipeline-panel"><div class="panel-head"><span>Shared campaign pipeline</span><button class="secondary" id="refreshSharedPipeline" type="button">Refresh shared data</button></div><div class="tool-body"><p>Calls, notes, status, and commission are shared across each campaign. Only administrators can close a deal.</p></div><div id="sharedPipelineBoard" class="shared-pipeline-board"></div></section>
+        <section class="panel shared-lead-detail" id="sharedLeadDetail" hidden><div class="panel-head"><span id="sharedLeadTitle">Lead details</span><button class="secondary" id="closeSharedLead" type="button">Close</button></div><div class="tool-body"><div id="sharedLeadSummary" class="shared-lead-summary"></div><form class="commission-form" id="sharedDealForm"><label>Deal status<select id="sharedDealStatus"><option value="open">Open</option><option value="won">Won</option><option value="lost">Lost</option></select></label><label>Potential commission<input id="sharedDealCommission" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" /></label><button class="primary" type="submit">Save deal</button></form><div class="section"><div class="section-head"><h3>Shared activity</h3><span class="saved" id="sharedLeadActivityCount"></span></div><div id="sharedLeadActivities" class="shared-activity-list"></div></div></div></section>
       </section>
       <section class="view" id="leadsView">
       <div class="page-head"><h1>Call queue</h1><span class="count" id="queueSummary"></span></div>
@@ -315,7 +343,7 @@
       </section>
       <section class="view" id="settingsView">
         <div class="page-head"><h1>Settings</h1><span class="count">Dialer configuration</span></div>
-        <div class="settings-layout"><section class="panel"><div class="panel-head"><span>Campaign goals</span><span>Daily targets</span></div><div class="tool-body"><p>Choose a campaign, then save its daily call and appointment targets plus the admin-reported close ratio.</p><label for="settingsGoalCampaign">Campaign</label><select id="settingsGoalCampaign"><option value="school">Parsity School</option><option value="warm-parsity-school">Warm Parsity School Leads</option><option value="business">Parsity Business</option><option value="reviews">Onyx Reviews</option><option value="quantum-bom">Quantum Bom</option></select></div><div class="goals-form"><label>Daily calls<input id="callGoalInput" type="number" min="0" step="1" /></label><label>Daily appointments<input id="appointmentGoalInput" type="number" min="0" step="1" /></label><label>Admin close ratio %<input id="closeGoalInput" type="number" min="0" max="100" step="1" /></label><button class="secondary" id="saveGoals">Save goals</button></div></section><section class="panel" id="miningProfilePanel" hidden><div class="panel-head"><span>Lead-mining focus</span><span id="miningProfileCampaign"></span></div><div class="tool-body" id="miningProfileBody"></div></section><section class="panel"><div class="panel-head"><span>VOIP provider</span><span id="voipStatus">Not connected</span></div><div class="tool-body"><p>Choose the calling provider to connect when credentials are ready.</p><div class="campaign-control"><select id="voipProvider"><option value="">Choose provider</option><option>Twilio</option><option>Telnyx</option><option>RingCentral</option></select><button class="secondary" id="saveVoipProvider">Save provider</button></div></div></section><section class="panel"><div class="panel-head"><span>Celebration clip</span><span>Plays when a deal is won</span></div><div class="tool-body"><p>Upload a song clip up to 20 seconds. It is saved only in this browser and plays when a lead is moved to Won.</p><div class="celebration-actions"><label class="secondary" style="display:inline-flex;align-items:center;cursor:pointer;">Add clip<input id="celebrationClip" type="file" accept="audio/*" /></label><button class="secondary" id="previewCelebration" disabled>Preview</button><button class="secondary" id="removeCelebration" disabled>Remove</button></div><div class="celebration-status" id="celebrationStatus">No celebration clip added</div></div></section></div>
+        <div class="settings-layout"><section class="panel"><div class="panel-head"><span>Campaign goals</span><span>Daily targets</span></div><div class="tool-body"><p>Choose a campaign, then save its daily call and appointment targets plus the admin-reported close ratio.</p><label for="settingsGoalCampaign">Campaign</label><select id="settingsGoalCampaign"><option value="school">Parsity School</option><option value="warm-parsity-school">Warm Parsity School Leads</option><option value="business">Parsity Business</option><option value="reviews">Onyx Reviews</option><option value="quantum-bom">Quantum Bom</option></select></div><div class="goals-form"><label>Daily calls<input id="callGoalInput" type="number" min="0" step="1" /></label><label>Daily appointments<input id="appointmentGoalInput" type="number" min="0" step="1" /></label><label>Admin close ratio %<input id="closeGoalInput" type="number" min="0" max="100" step="1" /></label><button class="secondary" id="saveGoals">Save goals</button></div></section><section class="panel"><div class="panel-head"><span>Commission defaults</span><span>Visible to assigned BDRs</span></div><div class="tool-body"><p>Set the potential commission used by default for new leads in a campaign. You can override it on any individual deal from the shared pipeline.</p></div><form class="commission-form" id="campaignCommissionForm"><label>Campaign<select id="commissionCampaign"><option value="school">Parsity School</option><option value="warm-parsity-school">Warm Parsity School Leads</option><option value="business">Parsity Business</option><option value="reviews">Onyx Reviews</option><option value="quantum-bom">Quantum Bom</option></select></label><label>Potential commission<input id="campaignCommission" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" /></label><button class="secondary" type="submit">Save default</button></form></section><section class="panel" id="miningProfilePanel" hidden><div class="panel-head"><span>Lead-mining focus</span><span id="miningProfileCampaign"></span></div><div class="tool-body" id="miningProfileBody"></div></section><section class="panel"><div class="panel-head"><span>VOIP provider</span><span id="voipStatus">Not connected</span></div><div class="tool-body"><p>Choose the calling provider to connect when credentials are ready.</p><div class="campaign-control"><select id="voipProvider"><option value="">Choose provider</option><option>Twilio</option><option>Telnyx</option><option>RingCentral</option></select><button class="secondary" id="saveVoipProvider">Save provider</button></div></div></section><section class="panel"><div class="panel-head"><span>Celebration clip</span><span>Plays when a deal is won</span></div><div class="tool-body"><p>Upload a song clip up to 20 seconds. It is saved only in this browser and plays when a lead is moved to Won.</p><div class="celebration-actions"><label class="secondary" style="display:inline-flex;align-items:center;cursor:pointer;">Add clip<input id="celebrationClip" type="file" accept="audio/*" /></label><button class="secondary" id="previewCelebration" disabled>Preview</button><button class="secondary" id="removeCelebration" disabled>Remove</button></div><div class="celebration-status" id="celebrationStatus">No celebration clip added</div></div></section></div>
       </section>
     </main>
     <div class="calendly-modal" id="calendlyModal" role="dialog" aria-modal="true" aria-labelledby="calendlyTitle" aria-hidden="true">

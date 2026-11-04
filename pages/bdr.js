@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react';
 import Header from './components/shared/Header';
-import AdminDialer from './components/AdminDialer';
-import {
-  readDialerWorkspace,
-  subscribeToDialerWorkspace,
-  writeDialerWorkspace,
-} from '../lib/dialerWorkspace';
-
-const dispositions = ['Connected', 'Left voicemail', 'No answer', 'Follow up'];
+import ContractorPipeline from './components/ContractorPipeline';
 
 export default function BdrPage() {
   const [screen, setScreen] = useState('welcome');
@@ -15,23 +8,6 @@ export default function BdrPage() {
   const [contractorEmail, setContractorEmail] = useState('');
   const [requestError, setRequestError] = useState('');
   const [isRequestingLink, setIsRequestingLink] = useState(false);
-  const [assignedLeads, setAssignedLeads] = useState([]);
-  const [selectedLeadId, setSelectedLeadId] = useState('');
-  const [note, setNote] = useState('');
-  const [savedNotes, setSavedNotes] = useState({});
-  const [callStatus, setCallStatus] = useState('Ready');
-
-  const selectedLead = assignedLeads.find((lead) => lead.id === selectedLeadId);
-
-  function updateAssignedLeads(workspace, contractor) {
-    const leads = workspace.leads.filter(
-      (lead) => lead.assignedTo === contractor && lead.campaignId === 'reviews'
-    );
-    setAssignedLeads(leads);
-    setSelectedLeadId((current) =>
-      leads.some((lead) => lead.id === current) ? current : leads[0]?.id || ''
-    );
-  }
 
   useEffect(() => {
     async function restoreSession() {
@@ -40,7 +16,6 @@ export default function BdrPage() {
         if (!response.ok) return;
         const session = await response.json();
         setContractorEmail(session.email);
-        updateAssignedLeads(readDialerWorkspace(), session.email);
         setScreen('workspace');
       } catch {
         // A network failure should leave the visitor at the safe sign-in screen.
@@ -49,14 +24,6 @@ export default function BdrPage() {
 
     restoreSession();
   }, []);
-
-  useEffect(
-    () =>
-      subscribeToDialerWorkspace((workspace) => {
-        if (contractorEmail) updateAssignedLeads(workspace, contractorEmail);
-      }),
-    [contractorEmail]
-  );
 
   async function requestMagicLink(event) {
     event.preventDefault();
@@ -68,7 +35,13 @@ export default function BdrPage() {
       const response = await fetch('/api/bdr/request-magic-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+          returnTo:
+            typeof window === 'undefined'
+              ? ''
+              : `${window.location.pathname}${window.location.search}`,
+        }),
       });
       const result = await response.json();
       if (!response.ok)
@@ -81,42 +54,10 @@ export default function BdrPage() {
     }
   }
 
-  function saveNote() {
-    if (!note.trim()) return;
-    setSavedNotes((notes) => ({ ...notes, [selectedLeadId]: note.trim() }));
-    const workspace = readDialerWorkspace();
-    writeDialerWorkspace({
-      ...workspace,
-      leads: workspace.leads.map((lead) =>
-        lead.id === selectedLeadId ? { ...lead, notes: note.trim() } : lead
-      ),
-    });
-    setNote('');
-  }
-
-  function selectDisposition(disposition) {
-    setCallStatus(`${disposition} selected`);
-    const workspace = readDialerWorkspace();
-    writeDialerWorkspace({
-      ...workspace,
-      leads: workspace.leads.map((lead) =>
-        lead.id === selectedLeadId
-          ? {
-              ...lead,
-              disposition,
-              ...(disposition === 'Connected' ? { stage: 'Contacted' } : {}),
-            }
-          : lead
-      ),
-    });
-  }
-
   function restartPreview() {
     setEmail('');
     setContractorEmail('');
-    setAssignedLeads([]);
     setScreen('welcome');
-    setCallStatus('Ready');
   }
 
   async function signOut() {
@@ -131,10 +72,9 @@ export default function BdrPage() {
     <>
       {screen !== 'workspace' && <Header />}
       {screen === 'workspace' && (
-        <AdminDialer
+        <ContractorPipeline
           signedInEmail={contractorEmail}
           onSignOut={signOut}
-          role="contractor"
         />
       )}
       {screen !== 'workspace' && (
@@ -239,128 +179,6 @@ export default function BdrPage() {
               </div>
             )}
 
-            {screen === 'workspace' && selectedLead && (
-              <div className="bdr-workspace">
-                <header className="bdr-workspace-header">
-                  <div>
-                    <p className="bdr-eyebrow">Contractor workspace</p>
-                    <h1>Onyx BDR Dialer</h1>
-                  </div>
-                  <button
-                    className="bdr-signout"
-                    type="button"
-                    onClick={restartPreview}
-                  >
-                    Sign out
-                  </button>
-                </header>
-
-                <div className="bdr-workspace-grid">
-                  <aside className="bdr-leads" aria-label="Assigned leads">
-                    <div className="bdr-panel-heading">
-                      <div>
-                        <p className="bdr-eyebrow">Your assigned leads</p>
-                        <h2>Onyx Reviews</h2>
-                      </div>
-                      <span>{assignedLeads.length}</span>
-                    </div>
-                    {assignedLeads.map((lead) => (
-                      <button
-                        className={`bdr-lead ${
-                          lead.id === selectedLeadId ? 'is-selected' : ''
-                        }`}
-                        key={lead.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedLeadId(lead.id);
-                          setCallStatus('Ready');
-                          setNote('');
-                        }}
-                      >
-                        <strong>{lead.name}</strong>
-                        <span>{lead.company}</span>
-                      </button>
-                    ))}
-                  </aside>
-
-                  <section
-                    className="bdr-call-panel"
-                    aria-label="Lead calling workspace"
-                  >
-                    <p className="bdr-eyebrow">Current lead</p>
-                    <h2>{selectedLead.name}</h2>
-                    <p className="bdr-company">
-                      {selectedLead.company} · {selectedLead.location}
-                    </p>
-                    <a
-                      className="bdr-phone"
-                      href={`tel:${selectedLead.phone.replace(/[^0-9]/g, '')}`}
-                    >
-                      {selectedLead.phone}
-                    </a>
-
-                    <div className="bdr-call-controls">
-                      <button
-                        className="bdr-primary"
-                        type="button"
-                        onClick={() => setCallStatus('Calling in test mode')}
-                      >
-                        Start call
-                      </button>
-                      <span>{callStatus}</span>
-                    </div>
-
-                    <fieldset>
-                      <legend>Call outcome</legend>
-                      <div className="bdr-dispositions">
-                        {dispositions.map((disposition) => (
-                          <button
-                            key={disposition}
-                            type="button"
-                            onClick={() => selectDisposition(disposition)}
-                          >
-                            {disposition}
-                          </button>
-                        ))}
-                      </div>
-                    </fieldset>
-
-                    <label htmlFor="call-note">Call notes</label>
-                    <textarea
-                      id="call-note"
-                      value={note}
-                      onChange={(event) => setNote(event.target.value)}
-                      placeholder="Capture the conversation, next step, or follow-up date…"
-                      rows="5"
-                    />
-                    <div className="bdr-note-actions">
-                      <button
-                        className="bdr-secondary"
-                        type="button"
-                        onClick={saveNote}
-                      >
-                        Save note
-                      </button>
-                      {savedNotes[selectedLeadId] && <span>Saved locally</span>}
-                    </div>
-                  </section>
-                </div>
-                <p className="bdr-preview-footnote">
-                  Calls, notes, and access controls will connect to your live
-                  services after their integrations are configured.
-                </p>
-              </div>
-            )}
-            {screen === 'workspace' && !selectedLead && (
-              <div className="bdr-card">
-                <p className="bdr-eyebrow">Your assigned leads</p>
-                <h1>Your queue is clear.</h1>
-                <p className="bdr-copy">
-                  Your administrator has not assigned an Onyx Reviews lead to
-                  this workspace yet.
-                </p>
-              </div>
-            )}
           </section>
 
           <style jsx>{`

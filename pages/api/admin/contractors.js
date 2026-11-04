@@ -4,7 +4,10 @@ import {
   normaliseEmail,
   readSessionToken,
 } from '../../../lib/bdrAuth';
-import { sendMagicLinkEmail } from '../../../lib/bdrMail';
+import {
+  sendCampaignAccessEmail,
+  sendMagicLinkEmail,
+} from '../../../lib/bdrMail';
 import {
   listContractors,
   markInvitationFailed,
@@ -36,10 +39,11 @@ function authorisedAdmin(req) {
   return claim && isAllowedAdmin(claim.email) ? claim : null;
 }
 
-function invitePayload(body) {
+function contractorPayload(body) {
   const name = String(body?.name || '').trim().replace(/\s+/g, ' ');
   const email = normaliseEmail(body?.email);
   const phone = String(body?.phone || '').trim();
+  const notes = String(body?.notes || '').trim();
   const campaigns = Array.isArray(body?.campaigns)
     ? [...new Set(body.campaigns.map(String).filter((id) => CAMPAIGN_ID.test(id)))]
     : [];
@@ -53,11 +57,14 @@ function invitePayload(body) {
   if (phone.length > 32) {
     throw new Error('Phone number must be 32 characters or fewer.');
   }
+  if (notes.length > 4000) {
+    throw new Error('Notes must be 4,000 characters or fewer.');
+  }
   if (!campaigns.length) {
     throw new Error('Choose at least one campaign.');
   }
 
-  return { name, email, phone, campaigns };
+  return { name, email, phone, notes, campaigns };
 }
 
 export default async function contractors(req, res) {
@@ -73,20 +80,51 @@ export default async function contractors(req, res) {
     }
   }
 
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'GET, POST');
+  if (!['POST', 'PUT'].includes(req.method)) {
+    res.setHeader('Allow', 'GET, POST, PUT');
     return res.status(405).json({ error: 'Method not allowed.' });
   }
 
-  let invite;
+  let payload;
   try {
-    invite = invitePayload(req.body);
+    payload = contractorPayload(req.body);
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
 
   try {
-    const contractor = await saveContractor({ ...invite, invitedBy: admin.email });
+    const existing = await listContractors().then((contractors) =>
+      contractors.find((contractor) => contractor.email === payload.email)
+    );
+    if (req.method === 'PUT' && !existing) {
+      return res.status(404).json({ error: 'Contractor not found. Send an invitation first.' });
+    }
+    const contractor = await saveContractor({
+      ...payload,
+      invitedBy: admin.email,
+      sendInvitation: req.method === 'POST',
+    });
+
+    if (req.method === 'PUT') {
+      const addedCampaigns = contractor.campaigns.filter(
+        (campaign) => !existing?.campaigns.includes(campaign)
+      );
+      if (addedCampaigns.length) {
+        await sendCampaignAccessEmail({
+          email: contractor.email,
+          recipientName: contractor.name,
+          campaigns: addedCampaigns.map((campaign) => ({
+            id: campaign,
+            name: CAMPAIGN_NAMES[campaign] || campaign,
+          })),
+        });
+      }
+      return res.status(200).json({
+        contractor,
+        campaignNoticeSent: addedCampaigns.length > 0,
+      });
+    }
+
     await sendMagicLinkEmail({
       email: contractor.email,
       token: createMagicLinkToken(contractor.email, 'contractor'),
@@ -100,7 +138,7 @@ export default async function contractors(req, res) {
   } catch (error) {
     console.error('Unable to send contractor invitation', error.message);
     try {
-      await markInvitationFailed(invite.email);
+      await markInvitationFailed(payload.email);
     } catch (storageError) {
       console.error('Unable to mark failed invitation', storageError.message);
     }

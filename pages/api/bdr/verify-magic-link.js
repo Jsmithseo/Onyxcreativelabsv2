@@ -30,5 +30,5 @@ export default async function verifyMagicLink(req, res) {
     'Set-Cookie',
     sessionCookie(createSessionToken(claim.email, 'contractor'))
   );
-  return res.redirect(302, '/bdr?verified=1');
+  return res.redirect(302, claim.returnTo || '/bdr?verified=1');
 }
