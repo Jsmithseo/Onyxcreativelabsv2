@@ -27,12 +27,16 @@ export default async function requestMagicLink(req, res) {
   }
 
   try {
-    await sendMagicLinkEmail({ email, token: createMagicLinkToken(email) });
+    await sendMagicLinkEmail({
+      email,
+      token: createMagicLinkToken(email, 'contractor'),
+    });
     return res.status(202).json({ accepted: true });
   } catch (error) {
     console.error('Unable to send BDR magic link', error.message);
     return res.status(503).json({
-      error: 'Sign-in email is temporarily unavailable. Please contact your administrator.',
+      error:
+        'Sign-in email is temporarily unavailable. Please contact your administrator.',
     });
   }
 }

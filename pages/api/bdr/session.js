@@ -14,7 +14,10 @@ export default function session(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const claim = readSessionToken(readCookie(req.headers.cookie, 'bdr_session'));
+  const claim = readSessionToken(
+    readCookie(req.headers.cookie, 'bdr_session'),
+    'contractor'
+  );
   if (!claim) return res.status(401).json({ authenticated: false });
 
   return res.status(200).json({ authenticated: true, email: claim.email });
