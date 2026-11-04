@@ -193,6 +193,7 @@ leads.forEach((lead, index) => {
   lead.called = Boolean(savedLead.called);
   lead.attempts = Number(savedLead.attempts || 0);
   lead.stage = savedLead.stage || lead.stage;
+  lead.stageBeforeDnc = savedLead.stageBeforeDnc || "";
   lead.wonAt = savedLead.wonAt || null;
   lead.dnc = Boolean(savedLead.dnc ?? lead.dnc);
   lead.lastContact = savedLead.lastContact || "";
@@ -239,10 +240,10 @@ function persistActivity() {
     calls: campaign.calls, talk: campaign.talk, talkSeconds: campaign.talkSeconds || 0,
     appointments: campaign.appointments, deals: campaign.deals, connect: campaign.connect,
   }]));
-  const leadData = Object.fromEntries(leads.filter((lead) => lead.industry || lead.notes || lead.disposition || lead.followAt !== null || lead.called || lead.wonAt).map((lead) => [lead.id, {
+  const leadData = Object.fromEntries(leads.filter((lead) => lead.industry || lead.notes || lead.disposition || lead.followAt !== null || lead.called || lead.wonAt || lead.dnc).map((lead) => [lead.id, {
     industry: lead.industry || "",
     notes: lead.notes, disposition: lead.disposition || "", followAt: lead.followAt, called: lead.called,
-    attempts: lead.attempts || 0, stage: lead.stage, wonAt: lead.wonAt || null, dnc: Boolean(lead.dnc), lastContact: lead.lastContact || "",
+    attempts: lead.attempts || 0, stage: lead.stage, stageBeforeDnc: lead.stageBeforeDnc || "", wonAt: lead.wonAt || null, dnc: Boolean(lead.dnc), lastContact: lead.lastContact || "",
   }]));
   const importedLeads = leads.filter((lead) => lead.source === "CSV import").map(({id,followAt,attempts,called,dnc,lastContact,disposition,...lead}) => lead);
     localStorage.setItem(activityStorageKey, JSON.stringify({ campaigns: campaignData, leads: leadData, callLog, appointments, voipProvider, goals, statsResetAt, statsResetVersion, appointmentResetVersion, followupResetVersion, importedLeads }));
@@ -812,13 +813,34 @@ document.getElementById("campaignCommissionForm").onsubmit = async (event) => {
   notify("Campaign commission default saved");
 };
 
-function showView(viewId) {
+const adminViewRoutes = {
+  operations: "homeView",
+  contractors: "contractorsView",
+  pipeline: "boardView",
+  leads: "leadsView",
+  configuration: "settingsView",
+};
+
+function viewFromLocation() {
+  return adminViewRoutes[window.location.hash.slice(1).toLowerCase()] || "homeView";
+}
+
+function showView(viewId, { updateLocation = true } = {}) {
+  if (!Object.values(adminViewRoutes).includes(viewId)) viewId = "homeView";
   document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active", view.id === viewId));
   document.querySelectorAll(".nav-button").forEach((button) => button.classList.toggle("active", button.dataset.view === viewId));
   if (viewId === "homeView") closeDetail();
   if (viewId === "boardView") loadSharedPipeline({ quiet:true });
   if (viewId === "settingsView") loadSharedPipeline({ quiet:true });
+  if (updateLocation) {
+    const route = Object.entries(adminViewRoutes).find(([, target]) => target === viewId)?.[0] || "operations";
+    const nextHash = `#${route}`;
+    if (window.location.hash !== nextHash) history.pushState(null, "", nextHash);
+  }
 }
+
+window.addEventListener("popstate", () => showView(viewFromLocation(), { updateLocation:false }));
+window.addEventListener("hashchange", () => showView(viewFromLocation(), { updateLocation:false }));
 
 function updateTimezoneMap() {
   const zones = [
@@ -1053,6 +1075,7 @@ function selectLead(index) {
   linkedin.textContent = linkedinUrl ? "View LinkedIn profile ↗" : "No LinkedIn profile";
   linkedin.href = linkedinUrl || "#";
   linkedin.toggleAttribute("aria-disabled", !linkedinUrl);
+  linkedin.onclick = (event) => { if (!linkedinUrl) event.preventDefault(); };
   document.getElementById("notes").value = lead.notes;
   document.getElementById("disposition").value = lead.disposition || "";
   const script = callScripts[lead.campaign] || callScripts.school;
@@ -1143,7 +1166,9 @@ document.getElementById("endCall").onclick = () => {
       durationSeconds:callSeconds,
       scheduledFor:lead.followAt ? new Date(lead.followAt).toISOString() : null,
       nextStage:lead.stage
-    }).then(() => loadSharedPipeline({ quiet:true })).catch(() => {});
+    }).then(() => loadSharedPipeline({ quiet:true })).catch((error) => {
+      notify(`${error.message || "Unable to sync call"} · call retained in this browser`);
+    });
   }
   activeCallLeadId = null;
   document.getElementById("callState").classList.remove("show");
@@ -1167,12 +1192,8 @@ function updateCalendlyTimeContext(lead) {
 document.getElementById("toggleScheduler").onclick = () => {
   const lead = getLead(selectedIndex);
   if (!lead) return;
-  const calendlyUrls = {
-    school: "https://calendly.com/brianjenney83/15-minute-meeting-your-web-dev-roadmap-clone",
-    business: "https://calendly.com/brianjenney83/founder-intro-call",
-    reviews: "https://calendly.com/softwaresmitty/discovery"
-  };
-  if (calendlyUrls[lead.campaign]) {
+  const calendlyUrl = "https://calendly.com/softwaresmitty/discovery";
+  if (calendlyUrl) {
     document.getElementById("calendlyTitle").textContent = `Book with ${lead.name}`;
     document.getElementById("calendlyTimezone").textContent = `${leadZoneNames[lead.zone] || lead.zone || "Prospect"} prospect · Calendly displays live times in your local time`;
     updateCalendlyTimeContext(lead);
@@ -1182,9 +1203,13 @@ document.getElementById("toggleScheduler").onclick = () => {
     container.replaceChildren();
     if (!window.Calendly) { notify("Calendly is still loading — please try again"); return; }
     window.Calendly.initInlineWidget({
-      url: `${calendlyUrls[lead.campaign]}?hide_event_type_details=1`,
+      url: `${calendlyUrl}?hide_event_type_details=1`,
       parentElement: container,
-      prefill: { name: lead.name === "—" ? "" : lead.name, email: lead.email === "—" ? "" : lead.email },
+      prefill: {
+        name: lead.name === "—" ? "" : lead.name,
+        email: lead.email === "—" ? "" : lead.email,
+        customAnswers: { a1: lead.phone === "—" ? "" : lead.phone }
+      },
       utm: { utmSource:"onyx-dialer", utmCampaign:lead.campaign }
     });
     document.getElementById("calendlyModal").classList.add("open");
@@ -1227,7 +1252,9 @@ window.addEventListener("message", (event) => {
     note:"Calendly appointment confirmed",
     scheduledFor:null,
     nextStage:"Appointment Set"
-  }).then(() => loadSharedPipeline({ quiet:true })).catch(() => {});
+  }).then(() => loadSharedPipeline({ quiet:true })).catch((error) => {
+    notify(`${error.message || "Unable to sync appointment"} · appointment retained in this browser`);
+  });
   closeCalendlyScheduler();
   notify("Appointment confirmed in Calendly");
 });
@@ -1261,7 +1288,9 @@ document.getElementById("bookAppointment").onclick = () => {
     note:`${type} booked`,
     scheduledFor:new Date(startsAt).toISOString(),
     nextStage:"Appointment Set"
-  }).then(() => loadSharedPipeline({ quiet:true })).catch(() => {});
+  }).then(() => loadSharedPipeline({ quiet:true })).catch((error) => {
+    notify(`${error.message || "Unable to sync appointment"} · appointment retained in this browser`);
+  });
   notify("Appointment booked");
 };
 let noteTimer;
@@ -1277,7 +1306,7 @@ document.getElementById("notes").oninput = () => {
 };
 document.getElementById("previousPage").onclick = () => { if (currentPage > 0) { currentPage -= 1; renderRows(); } };
 document.getElementById("nextPage").onclick = () => { if ((currentPage + 1) * pageSize < orderedLeads().length) { currentPage += 1; renderRows(); } };
-document.getElementById("saveLead").onclick = () => {
+document.getElementById("saveLead").onclick = async () => {
   const lead = getLead(selectedIndex);
   const editedName = document.getElementById("detailNameInput").hidden ? document.getElementById("detailName").textContent.trim() : document.getElementById("detailNameInput").value.trim();
   if (!editedName) { notify("Enter a contact name before saving"); return; }
@@ -1314,7 +1343,14 @@ document.getElementById("saveLead").onclick = () => {
         scheduledFor:lead.followAt ? new Date(lead.followAt).toISOString() : null,
         nextStage:lead.stage
       });
-  sharedSave.then(() => loadSharedPipeline({ quiet:true })).catch(() => {});
+  try {
+    await sharedSave;
+    await loadSharedPipeline({ quiet:true });
+  } catch (error) {
+    closeDetail();
+    notify(`${error.message || "Unable to sync lead"} · saved in this browser`);
+    return;
+  }
   closeDetail();
   notify(`${lead.name} saved`);
 };
@@ -1407,14 +1443,35 @@ document.getElementById("clearFilters").onclick = () => {
   currentPage = 0;
   renderRows();
 };
-document.getElementById("doNotCall").onchange = (event) => {
+document.getElementById("doNotCall").onchange = async (event) => {
   const lead = getLead(selectedIndex);
+  if (!lead) return;
   lead.dnc = event.target.checked;
-  if (lead.dnc) lead.stage = "Do Not Call";
+  if (lead.dnc) {
+    lead.stageBeforeDnc = lead.stage === "Do Not Call" ? "New" : lead.stage;
+    lead.stage = "Do Not Call";
+  } else if (lead.stage === "Do Not Call") {
+    lead.stage = lead.stageBeforeDnc || "New";
+    delete lead.stageBeforeDnc;
+  }
   document.getElementById("detailStage").value = lead.stage;
   document.getElementById("callLead").disabled = lead.dnc;
   document.getElementById("callLead").textContent = lead.dnc ? "Do not call" : "Call lead";
   persistActivity();
+  try {
+    await recordSharedAdminActivity(lead, {
+      activityType:"stage_change",
+      disposition:lead.disposition,
+      note:lead.dnc ? "Marked Do Not Call from the admin workspace." : "Removed Do Not Call from the admin workspace.",
+      durationSeconds:0,
+      scheduledFor:lead.followAt ? new Date(lead.followAt).toISOString() : null,
+      nextStage:lead.stage
+    });
+    await loadSharedPipeline({ quiet:true });
+    notify(lead.dnc ? "Lead marked Do Not Call" : "Lead restored to Open");
+  } catch (error) {
+    notify(`${error.message || "Unable to update Do Not Call"} · saved in this browser`);
+  }
 };
 document.getElementById("leadImport").onchange = async (event) => {
   const file = event.target.files[0];
@@ -1441,6 +1498,7 @@ document.getElementById("leadImport").onchange = async (event) => {
   const headers = rows[0].map((value) => value.trim().toLowerCase());
   const valueAt = (values, names) => { const index = headers.findIndex((header) => names.includes(header)); return index >= 0 ? (values[index] || "").trim() : ""; };
   let importedCount = 0;
+  const newlyImportedLeads = [];
   let nextLeadId = leads.reduce((highest, lead) => Math.max(highest, Number(lead.id) || 0), -1) + 1;
   const importedKeys = new Set();
   const normalizedEmail = (value) => String(value || "").trim().toLowerCase();
@@ -1468,14 +1526,24 @@ document.getElementById("leadImport").onchange = async (event) => {
     const notes = [industry && `Industry: ${industry}`, employees && `Employees: ${employees}`, revenue && `Revenue: ${revenue}`].filter(Boolean).join(" · ");
     const suppliedZone = normalizedTimeZone(valueAt(values, ["time zone", "timezone", "tz"]));
     const zone = suppliedZone || timeZoneFromAreaCode(phone) || "—";
-    leads.push({ id: nextLeadId++, name: `${first} ${last}`.trim() || email || phone, company, title, phone, email:email || "—", linkedin, location, zone, zoneSource: suppliedZone ? "source" : "area-code", source:"CSV import", stage:"New", followOffset:null, followAt:null, notes, disposition:"", called:false, attempts:0, dnc:false, lastContact:"", campaign:activeCampaign });
+    const importedLead = { id: nextLeadId++, name: `${first} ${last}`.trim() || email || phone, company, title, phone, email:email || "—", linkedin, location, zone, zoneSource: suppliedZone ? "source" : "area-code", source:"CSV import", stage:"New", followOffset:null, followAt:null, notes, disposition:"", called:false, attempts:0, dnc:false, lastContact:"", campaign:activeCampaign };
+    leads.push(importedLead);
+    newlyImportedLeads.push(importedLead);
     importedCount += 1;
   });
   const campaign = campaigns.find((item) => item.id === activeCampaign);
   campaign.leads = leads.filter((lead) => lead.campaign === activeCampaign).length;
   persistActivity();
   refreshActivityViews();
-  notify(`${importedCount} callable leads imported`);
+  try {
+    if (newlyImportedLeads.length) {
+      await syncSharedOperations(newlyImportedLeads);
+      await loadSharedPipeline({ quiet:true });
+    }
+    notify(`${importedCount} callable leads imported`);
+  } catch (error) {
+    notify(`${error.message || "Unable to sync imported leads"} · saved in this browser`);
+  }
   event.target.value = "";
 };
 document.getElementById("exportLeads").onclick = () => {
@@ -1553,13 +1621,55 @@ document.getElementById("exportWeeklyReport").onclick = () => {
   const link = document.createElement("a"); link.href = url; link.download = `${campaign.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-weekly-report.csv`; link.click(); URL.revokeObjectURL(url);
   notify("Weekly client report exported");
 };
-document.getElementById("voipProvider").value = voipProvider;
-document.getElementById("voipStatus").textContent = voipProvider ? `${voipProvider} selected` : "Not connected";
-document.getElementById("saveVoipProvider").onclick = () => {
-  voipProvider = document.getElementById("voipProvider").value;
+function renderVoipProvider() {
+  document.getElementById("voipProvider").value = voipProvider;
   document.getElementById("voipStatus").textContent = voipProvider ? `${voipProvider} selected` : "Not connected";
+}
+
+async function saveDashboardSettings() {
+  const response = await fetch("/api/admin/dashboard-settings", {
+    method:"PUT",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ goals, voipProvider })
+  });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || "Unable to save dashboard settings");
+  return payload.settings;
+}
+
+async function loadDashboardSettings() {
+  try {
+    const response = await fetch("/api/admin/dashboard-settings", { cache:"no-store" });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || "Unable to load dashboard settings");
+    const settings = payload.settings || {};
+    goals = {
+      ...goals,
+      ...(settings.goals || {}),
+      callGoals: { ...(goals.callGoals || {}), ...(settings.goals?.callGoals || {}) },
+      appointmentGoals: { ...(goals.appointmentGoals || {}), ...(settings.goals?.appointmentGoals || {}) },
+      closeRatios: { ...(goals.closeRatios || {}), ...(settings.goals?.closeRatios || {}) },
+    };
+    voipProvider = settings.voipProvider || "";
+    renderVoipProvider();
+    renderGoals();
+  } catch (error) {
+    renderVoipProvider();
+    notify(error.message || "Dashboard settings are unavailable");
+  }
+}
+
+renderVoipProvider();
+document.getElementById("saveVoipProvider").onclick = async () => {
+  voipProvider = document.getElementById("voipProvider").value;
+  renderVoipProvider();
   persistActivity();
-  notify(voipProvider ? `${voipProvider} selected · credentials still required` : "Choose a provider");
+  try {
+    await saveDashboardSettings();
+    notify(voipProvider ? `${voipProvider} selected` : "Provider selection cleared");
+  } catch (error) {
+    notify(`${error.message || "Unable to save provider"} · saved in this browser`);
+  }
 };
 document.getElementById("celebrationClip").onchange = async (event) => {
   const file = event.target.files[0];
@@ -1591,7 +1701,7 @@ document.getElementById("removeCelebration").onclick = async () => {
     notify("Unable to remove the clip");
   }
 };
-document.getElementById("saveGoals").onclick = () => {
+document.getElementById("saveGoals").onclick = async () => {
   const campaignId = document.getElementById("campaignSelect").value;
   goals = {
     ...goals,
@@ -1601,16 +1711,21 @@ document.getElementById("saveGoals").onclick = () => {
   };
   persistActivity();
   renderGoals();
-  notify("Goals saved");
+  try {
+    await saveDashboardSettings();
+    notify("Goals saved");
+  } catch (error) {
+    notify(`${error.message || "Unable to save goals"} · saved in this browser`);
+  }
 };
 
 // The established admin workspace remains the source for the current campaign
 // queue. Mirror its existing lead data into the shared service in small batches
 // so contractors and admins can read the same campaign records without
 // changing this interface or touching browser-local activity history.
-async function syncSharedOperations() {
+async function syncSharedOperations(sourceLeads = leads) {
   const sharedCampaigns = campaigns.map(({ id, name }) => ({ id, name }));
-  const sharedLeads = leads.map((lead) => ({
+  const sharedLeads = sourceLeads.map((lead) => ({
     campaign: lead.campaign,
     name: lead.name,
     company: lead.company,
@@ -1654,9 +1769,11 @@ renderComparison();
 renderGoals();
 renderContractors();
 loadContractors();
+loadDashboardSettings();
 loadCelebrationClip();
+showView(viewFromLocation(), { updateLocation:false });
 setInterval(renderRows, 60000);
 setInterval(() => loadSharedPipeline({ quiet:true }), 30000);
 syncSharedOperations()
   .then(() => loadSharedPipeline({ quiet:true }))
-  .catch(() => {});
+  .catch((error) => notify(error.message || "Unable to sync shared campaign data"));
