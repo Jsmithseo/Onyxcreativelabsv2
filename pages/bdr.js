@@ -142,10 +142,11 @@ export default function BdrPage() {
           <section className="bdr-shell" aria-live="polite">
             {screen !== 'workspace' && (
               <header className="bdr-brand">
-                <span>Onyx Creative Labs</span>
-                <span className="bdr-brand-divider" aria-hidden="true">
-                  /
-                </span>
+                <img
+                  className="bdr-brand-logo"
+                  src="/onyx-creative-labs-logo.webp"
+                  alt="Onyx Creative Labs"
+                />
                 <span className="bdr-brand-product">BDR Dialer</span>
               </header>
             )}
@@ -153,10 +154,10 @@ export default function BdrPage() {
             {screen === 'welcome' && (
               <div className="bdr-card bdr-welcome">
                 <p className="bdr-eyebrow">Contractor access</p>
-                <h1>Your calling workspace is ready when you are.</h1>
+                <h1>Welcome to your Onyx calling workspace.</h1>
                 <p className="bdr-copy">
-                  Sign in securely to see the leads assigned to you and keep
-                  your call notes in one place.
+                  Use your secure invite to sign in, see the campaigns assigned
+                  to you, and keep your call notes in one place.
                 </p>
                 <button
                   className="bdr-primary"
@@ -178,7 +179,7 @@ export default function BdrPage() {
                   ← Back
                 </button>
                 <p className="bdr-eyebrow">Contractor login</p>
-                <h1>Get your secure sign-in link</h1>
+                <h1>Welcome back to Onyx BDR.</h1>
                 <p className="bdr-copy">
                   Enter the email address your administrator used for your
                   invite.
@@ -378,18 +379,21 @@ export default function BdrPage() {
               align-items: center;
               color: var(--onyx-black);
               display: flex;
-              font-size: 16px;
-              font-weight: 600;
-              gap: 9px;
+              gap: 12px;
               margin: 0 0 36px;
             }
-            .bdr-brand-divider {
-              color: var(--onyx-gray);
-              font-weight: 400;
+            .bdr-brand-logo {
+              display: block;
+              height: auto;
+              max-width: 168px;
+              width: 100%;
             }
             .bdr-brand-product {
               color: var(--onyx-charcoal);
-              font-weight: 500;
+              border-left: 1px solid var(--onyx-border);
+              font-size: 14px;
+              font-weight: 600;
+              padding-left: 12px;
             }
             .bdr-card {
               background: #fff;
