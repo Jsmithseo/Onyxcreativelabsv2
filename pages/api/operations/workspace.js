@@ -30,6 +30,7 @@ export default async function workspace(req, res) {
       campaigns,
       campaignSummaries,
       leads,
+      goals: principal.goals || null,
       readOnlyPipeline: principal.role === 'contractor',
     });
   } catch (error) {

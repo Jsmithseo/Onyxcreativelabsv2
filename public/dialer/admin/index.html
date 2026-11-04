@@ -47,7 +47,7 @@
       .contractor-list { border-top:1px solid var(--line); }
       .contractor-empty, .contractor-row { padding:12px 14px; }
       .contractor-empty { color:var(--muted); font-size:13px; }
-      .contractor-row { display:grid; grid-template-columns:1.2fr 1fr 1fr auto; gap:10px; align-items:center; border-bottom:1px solid var(--line); font-size:12px; }
+      .contractor-row { display:grid; grid-template-columns:1.2fr 1fr 1fr 1.3fr auto; gap:10px; align-items:center; border-bottom:1px solid var(--line); font-size:12px; }
       .contractor-row strong { display:block; font-size:13px; }
       .contractor-row small { display:block; color:var(--muted); overflow-wrap:anywhere; }
       .contractor-status { display:inline-flex; width:max-content; padding:4px 7px; border-radius:999px; background:#fff7df; color:#815c00; font-size:10px; font-weight:700; }
@@ -231,7 +231,7 @@
     </style>
   </head>
   <body data-experience="admin">
-    <header><div class="header-left"><div class="brand"><img class="logo" src="../onyx-creative-labs-logo.webp" alt="Onyx Creative Labs" width="150" height="36"></div><nav><button class="nav-button active" data-view="homeView">Operations</button><button class="nav-button" data-view="contractorsView">Contractors</button><button class="nav-button" data-view="boardView">Pipeline</button><button class="nav-button" data-view="leadsView">Lead operations</button><button class="nav-button" data-view="settingsView">Configuration</button></nav></div><a class="workspace-switch" href="/bdr">Contractor login</a></header>
+    <header><div class="header-left"><div class="brand"><img class="logo" src="../onyx-creative-labs-logo.webp" alt="Onyx Creative Labs" width="150" height="36"></div><nav><button class="nav-button active" data-view="homeView">Operations</button><button class="nav-button" data-view="contractorsView">Contractors</button><button class="nav-button" data-view="boardView">Pipeline</button><button class="nav-button" data-view="leadsView">Leads</button><button class="nav-button" data-view="settingsView">Configuration</button></nav></div><a class="workspace-switch" href="/bdr">Contractor login</a></header>
     <main>
       <section class="view active" id="homeView">
         <div class="page-head"><h1>Revenue operations</h1><span class="count">Admin workspace</span></div>
@@ -278,6 +278,8 @@
               <div class="form-field"><label for="contractorName">Name</label><input id="contractorName" required maxlength="120" placeholder="Sierra Johnson" /></div>
               <div class="form-field"><label for="contractorEmail">Email</label><input id="contractorEmail" required type="email" maxlength="160" placeholder="sierra@example.com" /></div>
               <div class="form-field"><label for="contractorPhone">Phone <small>(optional)</small></label><input id="contractorPhone" type="tel" maxlength="32" placeholder="555-555-5555" /></div>
+              <div class="form-field"><label for="contractorCallGoal">Daily call goal</label><input id="contractorCallGoal" type="number" min="0" max="10000" step="1" value="120" /></div>
+              <div class="form-field"><label for="contractorAppointmentGoal">Daily appointment goal</label><input id="contractorAppointmentGoal" type="number" min="0" max="1000" step="1" value="3" /></div>
               <div class="form-field wide"><label for="contractorNotes">Internal notes <small>(optional)</small></label><textarea id="contractorNotes" maxlength="4000" placeholder="Working preferences, onboarding notes, or future deal-system reference."></textarea></div>
               <div class="form-field wide"><label>Campaign access</label><div class="campaign-access" id="contractorCampaignAccess"></div></div>
               <div class="contractor-actions"><small id="contractorFormHelp">An invitation email with a secure sign-in link will be sent immediately.</small><div class="button-row"><button type="button" class="secondary" id="cancelContractor">Cancel</button><button type="submit" class="primary" id="sendContractorInvite">Send invite</button></div></div>

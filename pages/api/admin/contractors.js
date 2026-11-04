@@ -23,6 +23,15 @@ const CAMPAIGN_NAMES = {
   'quantum-bom': 'Quantum Bom',
 };
 
+function optionalGoal(value, label, maximum) {
+  if (value === undefined || value === null || value === '') return undefined;
+  const goal = Number(value);
+  if (!Number.isInteger(goal) || goal < 0 || goal > maximum) {
+    throw new Error(`${label} must be a whole number between 0 and ${maximum}.`);
+  }
+  return goal;
+}
+
 function readCookie(cookieHeader, name) {
   const pair = String(cookieHeader || '')
     .split(';')
@@ -44,6 +53,12 @@ function contractorPayload(body) {
   const email = normaliseEmail(body?.email);
   const phone = String(body?.phone || '').trim();
   const notes = String(body?.notes || '').trim();
+  const dailyCallGoal = optionalGoal(body?.dailyCallGoal, 'Daily call goal', 10000);
+  const dailyAppointmentGoal = optionalGoal(
+    body?.dailyAppointmentGoal,
+    'Daily appointment goal',
+    1000
+  );
   const campaigns = Array.isArray(body?.campaigns)
     ? [...new Set(body.campaigns.map(String).filter((id) => CAMPAIGN_ID.test(id)))]
     : [];
@@ -64,7 +79,15 @@ function contractorPayload(body) {
     throw new Error('Choose at least one campaign.');
   }
 
-  return { name, email, phone, notes, campaigns };
+  return {
+    name,
+    email,
+    phone,
+    notes,
+    campaigns,
+    dailyCallGoal,
+    dailyAppointmentGoal,
+  };
 }
 
 export default async function contractors(req, res) {

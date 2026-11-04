@@ -284,7 +284,7 @@ function renderContractors() {
   rows.innerHTML = contractors.map((contractor) => {
     const campaignNames = contractor.campaigns.map((id) => campaigns.find((campaign) => campaign.id === id)?.name).filter(Boolean);
     const status = contractor.status === "invite_failed" ? "Invite failed" : "Invite sent";
-    return `<div class="contractor-row"><span><strong>${escapeHtml(contractor.name)}</strong><small>${escapeHtml(contractor.email)}</small></span><span><strong>${escapeHtml(contractor.phone || "No phone on file")}</strong><small>Caller contact</small></span><span><strong>${escapeHtml(campaignNames.join(", ") || "No campaigns assigned")}</strong><small>Campaign access</small></span><span><i class="contractor-status">${status}</i><button type="button" class="secondary contractor-edit" data-contractor-email="${escapeHtml(contractor.email)}">Edit</button></span></div>`;
+    return `<div class="contractor-row"><span><strong>${escapeHtml(contractor.name)}</strong><small>${escapeHtml(contractor.email)}</small></span><span><strong>${escapeHtml(contractor.phone || "No phone on file")}</strong><small>Caller contact</small></span><span><strong>${escapeHtml(`${contractor.dailyCallGoal ?? 120} calls · ${contractor.dailyAppointmentGoal ?? 3} appts`)}</strong><small>Daily goals</small></span><span><strong>${escapeHtml(campaignNames.join(", ") || "No campaigns assigned")}</strong><small>Campaign access</small></span><span><i class="contractor-status">${status}</i><button type="button" class="secondary contractor-edit" data-contractor-email="${escapeHtml(contractor.email)}">Edit</button></span></div>`;
   }).join("");
   rows.querySelectorAll(".contractor-edit").forEach((button) => {
     button.onclick = () => openContractorForm(contractors.find((contractor) => contractor.email === button.dataset.contractorEmail));
@@ -300,6 +300,8 @@ function openContractorForm(contractor = null) {
   email.value = contractor?.email || "";
   email.disabled = Boolean(contractor);
   document.getElementById("contractorPhone").value = contractor?.phone || "";
+  document.getElementById("contractorCallGoal").value = contractor?.dailyCallGoal ?? 120;
+  document.getElementById("contractorAppointmentGoal").value = contractor?.dailyAppointmentGoal ?? 3;
   document.getElementById("contractorNotes").value = contractor?.notes || "";
   document.querySelectorAll('input[name="contractorCampaign"]').forEach((input) => {
     input.checked = Boolean(contractor?.campaigns.includes(input.value));
@@ -1297,6 +1299,8 @@ document.getElementById("contractorForm").onsubmit = async (event) => {
   const name = document.getElementById("contractorName").value.trim();
   const email = document.getElementById("contractorEmail").value.trim().toLowerCase();
   const phone = document.getElementById("contractorPhone").value.trim();
+  const dailyCallGoal = document.getElementById("contractorCallGoal").value;
+  const dailyAppointmentGoal = document.getElementById("contractorAppointmentGoal").value;
   const notes = document.getElementById("contractorNotes").value.trim();
   const selectedCampaigns = [...document.querySelectorAll('input[name="contractorCampaign"]:checked')].map((input) => input.value);
   const inviteButton = document.getElementById("sendContractorInvite");
@@ -1307,7 +1311,7 @@ document.getElementById("contractorForm").onsubmit = async (event) => {
     const response = await fetch("/api/admin/contractors", {
       method: editingContractorEmail ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email: editingContractorEmail || email, phone, notes, campaigns: selectedCampaigns }),
+      body: JSON.stringify({ name, email: editingContractorEmail || email, phone, notes, campaigns: selectedCampaigns, dailyCallGoal, dailyAppointmentGoal }),
     });
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Unable to send the invitation");
