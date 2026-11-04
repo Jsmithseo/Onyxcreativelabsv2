@@ -57,7 +57,8 @@ function CallingWindows({ leads }) {
     const interval = window.setInterval(() => setNow(Date.now()), 60000);
     return () => window.clearInterval(interval);
   }, []);
-  return <section className="timezone-map" aria-label="United States calling time zones">
+  return <>
+    <section className="timezone-map" aria-label="United States calling time zones">
     <div className="timezone-head"><strong>U.S. calling windows</strong><span>{priority} leads prioritized</span></div>
     <div className="timezone-content">
       <svg className="us-map" viewBox="0 0 360 90" role="img" aria-label="Stylized map of United States time zones">
@@ -69,7 +70,27 @@ function CallingWindows({ leads }) {
       </svg>
       <div className="zone-times">{zoneDefinitions.map(([id, label, timeZone]) => <div className={`zone-time ${priority === id ? 'active' : ''}`} key={id}><strong>{label}</strong><span>{new Intl.DateTimeFormat([], { timeZone, hour: 'numeric', minute: '2-digit' }).format(now)}</span></div>)}</div>
     </div>
-  </section>;
+    </section>
+    <style jsx global>{`
+      .bdr-workspace .timezone-map{position:relative;overflow:hidden;min-height:120px;padding:13px 16px;border:1px solid #171717;border-radius:7px;color:#fff;background:#171717}
+      .bdr-workspace .timezone-map:before{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 0 38%,rgba(255,255,255,.075) 49%,transparent 62%);animation:bdr-calling-window-sweep 8s ease-in-out infinite;pointer-events:none}
+      .bdr-workspace .timezone-head{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+      .bdr-workspace .timezone-head strong{font-size:12px;letter-spacing:.02em;text-transform:uppercase}
+      .bdr-workspace .timezone-head span{padding:3px 7px;border:1px solid rgba(255,255,255,.23);border-radius:999px;color:#fff;font-size:10px}
+      .bdr-workspace .timezone-content{position:relative;z-index:1;display:grid;grid-template-columns:1.08fr 1fr;align-items:center;gap:20px}
+      .bdr-workspace .us-map{width:100%;max-width:330px;height:67px;display:block}
+      .bdr-workspace .zone-shape{stroke:rgba(255,255,255,.25);stroke-width:1.2}
+      .bdr-workspace .zone-shape.active{fill:#fff;filter:drop-shadow(0 0 7px rgba(255,255,255,.45))}
+      .bdr-workspace .zone-pt{fill:#343434}.bdr-workspace .zone-mt{fill:#4c4c4c}.bdr-workspace .zone-ct{fill:#666}.bdr-workspace .zone-et{fill:#858585}
+      .bdr-workspace .map-label{fill:#fff;font:700 7px Inter,ui-sans-serif,system-ui,sans-serif;text-anchor:middle}
+      .bdr-workspace .zone-times{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 12px}
+      .bdr-workspace .zone-time{padding:5px 8px;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#bdbdbd;font-size:10px;line-height:1.2}
+      .bdr-workspace .zone-time strong{display:block;color:#fff;font-size:11px}.bdr-workspace .zone-time.active{border-color:#fff;background:#fff;color:#555}.bdr-workspace .zone-time.active strong{color:#171717}
+      @keyframes bdr-calling-window-sweep{0%,100%{transform:translateX(-55%);opacity:.2}50%{transform:translateX(55%);opacity:.85}}
+      @media(max-width:700px){.bdr-workspace .timezone-content{grid-template-columns:1fr}.bdr-workspace .us-map{max-width:none}.bdr-workspace .zone-times{grid-template-columns:repeat(4,minmax(0,1fr))}}
+      @media(max-width:520px){.bdr-workspace .timezone-content{gap:6px}.bdr-workspace .zone-times{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    `}</style>
+  </>;
 }
 
 export default function ContractorPipeline({ signedInEmail, onSignOut }) {
