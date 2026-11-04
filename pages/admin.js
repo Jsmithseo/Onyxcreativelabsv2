@@ -1,4 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import {
+  Button,
+  Card,
+  CardBody,
+  Col,
+  Container,
+  Form,
+  FormGroup,
+  Input,
+  Label,
+  Row,
+  Spinner,
+} from 'reactstrap';
 import Header from './components/shared/Header';
 
 export default function AdminPage() {
@@ -85,22 +99,37 @@ export default function AdminPage() {
 
   if (screen === 'workspace') {
     return (
-      <iframe
-        ref={dialerFrame}
-        title="Onyx Dialer administrator workspace"
-        src="/dialer/admin/index.html"
-        className="admin-dialer-frame"
-        style={{ height: dialerHeight ? `${dialerHeight}px` : '100dvh' }}
-      />
+      <Container fluid className="p-0">
+        <iframe
+          ref={dialerFrame}
+          title="Onyx Dialer administrator workspace"
+          src="/dialer/admin/index.html"
+          style={{
+            border: 0,
+            display: 'block',
+            height: dialerHeight ? `${dialerHeight}px` : '100dvh',
+            minHeight: '760px',
+            width: '100%',
+          }}
+        />
+      </Container>
     );
   }
 
   return (
     <>
       <Header />
-      <main className="admin-gate">
-        <section className="admin-gate-card" aria-live="polite">
-          {screen === 'checking' && <p>Checking secure access…</p>}
+      <Container fluid className="admin-gate">
+        <Row className="justify-content-center w-100">
+          <Col lg="5" md="7" sm="10" xl="4">
+            <Card className="admin-gate-card" aria-live="polite">
+              <CardBody className="p-4 p-md-5">
+          {screen === 'checking' && (
+            <p className="mb-0">
+              <Spinner size="sm" className="me-2" />
+              Checking secure access…
+            </p>
+          )}
 
           {screen === 'login' && (
             <>
@@ -110,9 +139,10 @@ export default function AdminPage() {
                 Enter your approved email and we’ll send a secure,
                 password-free sign-in link.
               </p>
-              <form onSubmit={requestMagicLink}>
-                <label htmlFor="admin-email">Email address</label>
-                <input
+              <Form onSubmit={requestMagicLink}>
+                <FormGroup>
+                  <Label for="admin-email">Email address</Label>
+                  <Input
                   id="admin-email"
                   type="email"
                   autoComplete="email"
@@ -121,10 +151,12 @@ export default function AdminPage() {
                   placeholder="you@company.com"
                   required
                 />
-                <button type="submit" disabled={isRequestingLink}>
+                </FormGroup>
+                <Button color="dark" type="submit" disabled={isRequestingLink}>
+                  {isRequestingLink && <Spinner size="sm" className="me-2" />}
                   {isRequestingLink ? 'Sending link…' : 'Send magic link'}
-                </button>
-              </form>
+                </Button>
+              </Form>
               {requestError && <p className="admin-gate-error">{requestError}</p>}
               <p className="admin-gate-helper">
                 You will never need to create or remember a password.
@@ -144,25 +176,23 @@ export default function AdminPage() {
                 The link expires in 15 minutes and opens only the Onyx Admin
                 session.
               </p>
-              <button
+              <Button
                 className="admin-gate-link"
+                color="link"
                 type="button"
                 onClick={() => setScreen('login')}
               >
                 Use a different email
-              </button>
+              </Button>
             </>
           )}
-        </section>
-      </main>
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
 
       <style jsx>{`
-        .admin-dialer-frame {
-          border: 0;
-          display: block;
-          min-height: 760px;
-          width: 100%;
-        }
         .admin-gate {
           align-items: center;
           background: var(--onyx-light-gray);
@@ -176,7 +206,6 @@ export default function AdminPage() {
           border: 1px solid var(--onyx-border);
           box-shadow: 0 18px 45px rgba(24, 24, 27, 0.08);
           max-width: 500px;
-          padding: 38px;
           width: 100%;
         }
         .admin-gate-eyebrow {
@@ -196,8 +225,6 @@ export default function AdminPage() {
           line-height: 1.55;
         }
         form {
-          display: grid;
-          gap: 10px;
           margin-top: 24px;
         }
         label {
@@ -213,12 +240,9 @@ export default function AdminPage() {
           padding: 13px 14px;
         }
         button {
-          background: var(--onyx-black);
-          border: 1px solid var(--onyx-black);
-          color: #fff;
           cursor: pointer;
           font-weight: 700;
-          padding: 13px 16px;
+          padding: 12px 16px;
         }
         button:disabled {
           cursor: wait;
