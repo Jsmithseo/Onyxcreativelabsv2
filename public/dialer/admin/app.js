@@ -1771,7 +1771,7 @@ loadDashboardSettings();
 loadCelebrationClip();
 showView(viewFromLocation(), { updateLocation:false });
 setInterval(renderRows, 60000);
-setInterval(() => loadSharedPipeline({ quiet:true }), 30000);
+setInterval(() => loadSharedPipeline({ quiet:true }), 15000);
 // Shared operations are now the durable source of truth. Do not re-import the
 // browser's legacy sample queue on every load: real leads are added through the
 // explicit CSV import flow above, while existing shared records stay intact.
