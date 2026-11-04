@@ -46,6 +46,7 @@ const statements = [
       disposition TEXT NOT NULL DEFAULT '',
       notes TEXT NOT NULL DEFAULT '',
       next_follow_up_at TIMESTAMPTZ,
+      follow_up_owner_email TEXT,
       potential_commission_cents INTEGER
         CHECK (potential_commission_cents IS NULL OR potential_commission_cents >= 0),
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -53,8 +54,16 @@ const statements = [
     )
   `,
   `
+    ALTER TABLE leads
+    ADD COLUMN IF NOT EXISTS follow_up_owner_email TEXT
+  `,
+  `
     CREATE INDEX IF NOT EXISTS leads_campaign_stage_idx
       ON leads (campaign_id, stage)
+  `,
+  `
+    CREATE INDEX IF NOT EXISTS leads_follow_up_owner_idx
+      ON leads (campaign_id, follow_up_owner_email, next_follow_up_at)
   `,
   `
     CREATE TABLE IF NOT EXISTS lead_activities (
@@ -128,7 +137,7 @@ await sql.query(
     VALUES ($1)
     ON CONFLICT (id) DO NOTHING
   `,
-  ['shared-operations-v1']
+  ['shared-operations-v2']
 );
 
 console.log('Shared operations schema is ready.');
