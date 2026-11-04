@@ -148,6 +148,7 @@ if (statsWereReset) {
 }
 let callLog = Array.isArray(activityState.callLog) ? activityState.callLog : [];
 let appointments = Array.isArray(activityState.appointments) ? activityState.appointments : [];
+let sharedAppointments = [];
 const appointmentResetVersion = "onyx-reviews-appointment-reset-v1";
 const appointmentWasCleared = activityState.appointmentResetVersion !== appointmentResetVersion;
 const clearedAppointmentLeadIds = new Set();
@@ -375,7 +376,7 @@ function renderCalendar() {
   const start = new Date(); start.setHours(0,0,0,0);
   const end = new Date(start); end.setDate(end.getDate() + (range === "day" ? 1 : 7));
   const selectedCampaign = campaigns.find((campaign) => campaign.id === document.getElementById("campaignSelect").value);
-  const visible = appointments.filter((appointment) => {
+  const visible = [...appointments, ...sharedAppointments].filter((appointment) => {
     const matchesScope = statsMode === "overall" || appointment.campaign === selectedCampaign?.name;
     const matchesRange = range === "all" || (appointment.startsAt && new Date(appointment.startsAt) >= start && new Date(appointment.startsAt) < end);
     return matchesScope && matchesRange;
@@ -686,10 +687,30 @@ async function saveSharedAdminDeal(lead, status, reopenStage = "") {
 
 async function loadSharedPipeline({ quiet = false } = {}) {
   try {
-    const response = await fetch("/api/operations/workspace", { cache:"no-store" });
+    const [response, appointmentsResponse] = await Promise.all([
+      fetch("/api/operations/workspace", { cache:"no-store" }),
+      fetch("/api/operations/appointments", { cache:"no-store" }),
+    ]);
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Unable to load shared pipeline");
     sharedWorkspace = payload;
+    if (appointmentsResponse.ok) {
+      const appointmentPayload = await appointmentsResponse.json();
+      sharedAppointments = (appointmentPayload.appointments || [])
+        .filter((appointment) => appointment.actor_role === "contractor")
+        .map((appointment) => ({
+          id: `shared:${appointment.id}`,
+          leadId: appointment.lead_id,
+          name: appointment.lead_name,
+          campaign: appointment.campaign_name,
+          type: `Booked by ${appointment.actor_email}`,
+          startsAt: appointment.scheduled_for,
+          createdAt: appointment.created_at,
+        }));
+      updateMetrics(activeCampaign);
+      renderGoals();
+      renderCalendar();
+    }
     renderSharedPipeline();
     syncCampaignCommissionInputs();
     if (!quiet) notify("Shared pipeline refreshed");
@@ -817,7 +838,7 @@ function updateMetrics(campaignId) {
   const matchesDate = (value) => Boolean(value) && new Date(value).toDateString() === new Date(`${statsDate}T12:00:00`).toDateString();
   const matchesScope = (campaignName) => statsMode === "overall" || campaignName === campaign.name;
   const dailyCalls = callLog.filter((entry) => new Date(entry.at).getTime() >= statsResetAt && matchesDate(entry.at) && matchesScope(entry.campaign));
-  const dailyAppointments = appointments.filter((entry) => matchesDate(entry.createdAt) && matchesScope(entry.campaign));
+  const dailyAppointments = [...appointments, ...sharedAppointments].filter((entry) => matchesDate(entry.createdAt) && matchesScope(entry.campaign));
   const dailyDeals = leads.filter((lead) => lead.stage === "Won" && matchesDate(lead.wonAt) && (statsMode === "overall" || lead.campaign === campaign.id));
   const dailyFollowups = leads.filter((lead) => matchesDate(lead.followAt) && (statsMode === "overall" || lead.campaign === campaign.id));
   const connected = dailyCalls.filter((entry) => ["Connected — qualified", "Connected — follow up"].includes(entry.disposition)).length;
@@ -843,7 +864,7 @@ function renderGoals() {
   const campaign = campaigns.find((item) => item.id === document.getElementById("campaignSelect").value) || campaigns[0];
   const today = new Date().toDateString();
   const callsToday = callLog.filter((entry) => entry.campaign === campaign.name && new Date(entry.at).getTime() >= statsResetAt && new Date(entry.at).toDateString() === today).length;
-  const appointmentsToday = appointments.filter((entry) => entry.campaign === campaign.name && entry.createdAt && new Date(entry.createdAt).toDateString() === today).length;
+  const appointmentsToday = [...appointments, ...sharedAppointments].filter((entry) => entry.campaign === campaign.name && entry.createdAt && new Date(entry.createdAt).toDateString() === today).length;
   const callGoal = (goals.callGoals || {})[campaign.id] ?? 120;
   const appointmentGoal = (goals.appointmentGoals || {})[campaign.id] ?? 0;
   const closeRatio = (goals.closeRatios || {})[campaign.id] ?? goals.closeRatio ?? 0;
@@ -875,7 +896,10 @@ function renderMiningProfile(campaignId) {
 
 function renderCampaigns() {
   document.getElementById("campaignCount").textContent = `${campaigns.length} active`;
-  document.getElementById("campaignRows").innerHTML = campaigns.map((campaign) => `<div class="campaign-row" data-campaign-row="${campaign.id}" role="button" tabindex="0"><span><strong>${escapeHtml(campaign.name)}</strong><small>${escapeHtml(campaign.status)}</small></span><span>${campaign.leads} leads</span><span>${campaign.calls} calls</span><span>${campaign.appointments} appts</span><span>${campaign.deals} won</span><button data-campaign="${campaign.id}">Open</button></div>`).join("");
+  document.getElementById("campaignRows").innerHTML = campaigns.map((campaign) => {
+    const sharedAppointmentCount = sharedAppointments.filter((appointment) => appointment.campaign === campaign.name).length;
+    return `<div class="campaign-row" data-campaign-row="${campaign.id}" role="button" tabindex="0"><span><strong>${escapeHtml(campaign.name)}</strong><small>${escapeHtml(campaign.status)}</small></span><span>${campaign.leads} leads</span><span>${campaign.calls} calls</span><span>${campaign.appointments + sharedAppointmentCount} appts</span><span>${campaign.deals} won</span><button data-campaign="${campaign.id}">Open</button></div>`;
+  }).join("");
   document.querySelectorAll("[data-campaign-row]").forEach((row) => {
     const open = () => openCampaign(row.dataset.campaignRow);
     row.onclick = (event) => { if (event.target.closest("button")) return; open(); };
@@ -1623,6 +1647,7 @@ loadContractors();
 renderSalesBoard();
 loadCelebrationClip();
 setInterval(renderRows, 60000);
+setInterval(() => loadSharedPipeline({ quiet:true }), 30000);
 syncSharedOperations()
   .then(() => loadSharedPipeline({ quiet:true }))
   .catch(() => {});
