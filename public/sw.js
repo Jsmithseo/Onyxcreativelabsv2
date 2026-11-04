@@ -1,7 +1,8 @@
-const VERSION = 'onyx-bdr-pwa-v1';
+const VERSION = 'onyx-bdr-pwa-v2';
 const APP_SHELL = [
   '/bdr',
   '/admin',
+  '/dialer/admin/index.html',
   '/manifest.webmanifest',
   '/icons/onyx-pwa-192.png',
   '/icons/onyx-pwa-512.png',
@@ -48,6 +49,7 @@ self.addEventListener('fetch', (event) => {
 
   if (
     url.pathname.startsWith('/_next/static/') ||
+    url.pathname.startsWith('/dialer/') ||
     url.pathname.startsWith('/icons/') ||
     url.pathname === '/manifest.webmanifest' ||
     url.pathname === '/onyx-creative-labs-logo.webp'

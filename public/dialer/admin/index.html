@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>BDR Command Center — Admin</title>
+    <meta name="description" content="An administrator workspace for BDR campaigns, data, and operational configuration." />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23171717'/%3E%3Cpath d='M21 15c-3 1-5 4-5 7 0 14 19 28 33 33 4 1 7-1 8-5l2-6-11-5-5 6c-7-4-13-10-17-17l6-5-5-11z' fill='white'/%3E%3C/svg%3E" />
+    <style>
+      :root { --ink:#171717; --muted:#737373; --line:#dddddd; --soft:#f6f6f6; --green:#1b7348; --red:#b93b3b; }
+      * { box-sizing:border-box; }
+      .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+      body { margin:0; min-width:320px; color:var(--ink); background:white; font:16px/1.4 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      button, input, textarea, select { font:inherit; } button { cursor:pointer; }
+      header { height:60px; padding:0 24px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
+      .header-left { display:flex; align-items:center; gap:28px; }
+      .brand { display:flex; align-items:center; gap:10px; font-weight:750; }
+      .logo { width:150px; height:36px; object-fit:contain; display:block; }
+      nav { display:flex; align-self:stretch; gap:20px; }
+      .nav-button { border:0; border-bottom:2px solid transparent; background:white; color:var(--muted); padding:0 2px; font-size:13px; }
+      .nav-button.active { color:var(--ink); border-bottom-color:var(--ink); font-weight:700; }
+      .rep { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:14px; }
+      .dot { width:8px; height:8px; border-radius:50%; background:#2b9a61; }
+      main { padding:28px 24px 48px; max-width:1500px; margin:auto; }
+      .view { display:none; } .view.active { display:block; }
+      .page-head { display:flex; justify-content:space-between; align-items:end; margin-bottom:18px; }
+      h1 { margin:0; font-size:23px; letter-spacing:-.03em; } .count { color:var(--muted); font-size:14px; }
+      .home-controls { display:grid; grid-template-columns:minmax(240px,360px) minmax(360px,1fr); gap:12px; margin-bottom:18px; }
+      .contractor-panel { margin-bottom:18px; }
+      .contractor-panel .tool-body { padding:14px; }
+      .contractor-intro { display:flex; justify-content:space-between; gap:16px; align-items:center; }
+      .contractor-intro p { margin:4px 0 0; color:var(--muted); font-size:12px; }
+      .contractor-form { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:14px; padding-top:14px; border-top:1px solid var(--line); }
+      .contractor-form .form-field.wide { grid-column:1/-1; }
+      .campaign-access { display:flex; flex-wrap:wrap; gap:7px; padding-top:3px; }
+      .campaign-access label { display:inline-flex; align-items:center; gap:6px; min-height:31px; padding:0 9px; border:1px solid var(--line); border-radius:999px; color:var(--ink); font-size:12px; cursor:pointer; }
+      .campaign-access input { width:auto; height:auto; margin:0; }
+      .contractor-actions { display:flex; align-items:center; justify-content:space-between; gap:10px; grid-column:1/-1; }
+      .contractor-actions small { color:var(--muted); font-size:11px; }
+      .contractor-list { border-top:1px solid var(--line); }
+      .contractor-empty, .contractor-row { padding:12px 14px; }
+      .contractor-empty { color:var(--muted); font-size:13px; }
+      .contractor-row { display:grid; grid-template-columns:1.2fr 1fr 1fr auto; gap:10px; align-items:center; border-bottom:1px solid var(--line); font-size:12px; }
+      .contractor-row strong { display:block; font-size:13px; }
+      .contractor-row small { display:block; color:var(--muted); overflow-wrap:anywhere; }
+      .contractor-status { display:inline-flex; width:max-content; padding:4px 7px; border-radius:999px; background:#fff7df; color:#815c00; font-size:10px; font-weight:700; }
+      .control-box { border:1px solid var(--line); padding:14px; }
+      .control-box label { display:block; color:var(--muted); font-size:11px; margin-bottom:6px; }
+      .campaign-control { display:grid; grid-template-columns:1fr auto; gap:8px; }
+      .timezone-map { position:relative; overflow:hidden; min-height:102px; padding:13px 16px; border:1px solid #171717; border-radius:7px; color:#fff; background:#171717; box-shadow:inset 0 1px 0 rgba(255,255,255,.08); }
+      .timezone-map::before { content:""; position:absolute; inset:0; background:linear-gradient(105deg,transparent 0 38%,rgba(255,255,255,.075) 49%,transparent 62%); animation:map-sweep 8s ease-in-out infinite; pointer-events:none; }
+      .timezone-head { position:relative; z-index:1; display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px; }
+      .timezone-head strong { font-size:12px; letter-spacing:.02em; text-transform:uppercase; } .timezone-head span { padding:3px 7px; border:1px solid rgba(255,255,255,.23); border-radius:999px; color:#fff; font-size:10px; }
+      .timezone-content { position:relative; z-index:1; display:grid; grid-template-columns:1.08fr 1fr; align-items:center; gap:20px; }
+      .us-map { width:100%; max-width:330px; height:67px; display:block; }
+      .zone-shape { stroke:rgba(255,255,255,.25); stroke-width:1.2; transition:fill .25s ease,filter .25s ease,opacity .25s ease; }
+      .zone-shape.active { fill:#fff; filter:drop-shadow(0 0 7px rgba(255,255,255,.45)); animation:zone-pulse 1.8s ease-in-out infinite; }
+      .zone-pt { fill:#343434; } .zone-mt { fill:#4c4c4c; } .zone-ct { fill:#666; } .zone-et { fill:#858585; }
+      .map-label { fill:#fff; font:700 7px Inter,ui-sans-serif,system-ui,sans-serif; text-anchor:middle; }
+      .zone-times { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px 12px; }
+      .zone-time { padding:5px 8px; border:1px solid rgba(255,255,255,.14); border-radius:4px; color:#bdbdbd; font-size:10px; line-height:1.2; transition:background .2s,border-color .2s,color .2s; }
+      .zone-time strong { display:block; color:#fff; font-size:11px; } .zone-time.active { border-color:#fff; background:#fff; color:#555; } .zone-time.active strong { color:#171717; }
+      @keyframes map-sweep { 0%,100% { transform:translateX(-55%); opacity:.2; } 50% { transform:translateX(55%); opacity:.85; } }
+      @keyframes zone-pulse { 0%,100% { opacity:1; } 50% { opacity:.72; } }
+      .metrics { display:grid; grid-template-columns:repeat(6,1fr); border-top:1px solid var(--line); border-left:1px solid var(--line); margin-bottom:20px; }
+      .stats-heading { display:flex; justify-content:space-between; align-items:center; margin:18px 0 8px; font-size:13px; }
+      .stats-controls { display:flex; align-items:center; gap:8px; }
+      .stats-date { width:auto; height:32px; padding:0 9px; border:1px solid var(--line); border-radius:6px; background:white; color:var(--ink); font:inherit; }
+      .stats-toggle { display:flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+      .stats-toggle button { height:30px; padding:0 12px; border:0; border-right:1px solid var(--line); background:white; color:var(--muted); font-size:12px; } .stats-toggle button:last-child { border-right:0; } .stats-toggle button.active { background:var(--ink); color:white; }
+      .metric { padding:14px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
+      .metric span { display:block; color:var(--muted); font-size:11px; margin-bottom:6px; }
+      .metric strong { font-size:22px; letter-spacing:-.03em; }
+      .metric-action { cursor:pointer; transition:background .15s ease, box-shadow .15s ease; }
+      .metric-action:hover { background:var(--soft); }
+      .metric-action:focus-visible { outline:2px solid var(--ink); outline-offset:-3px; }
+      .metric-action span::after { content:"View"; float:right; color:var(--ink); font-weight:700; opacity:.65; }
+      .home-grid { display:block; }
+      .panel { border:1px solid var(--line); }
+      .panel-head { min-height:44px; padding:0 12px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); font-size:13px; font-weight:700; }
+      .panel-head button { height:30px; padding:0 10px; border:1px solid var(--line); border-radius:5px; background:white; color:var(--ink); font-size:11px; font-weight:700; }
+      .history-row { display:grid; grid-template-columns:1.2fr 1fr .9fr 1fr; min-height:42px; align-items:center; border-bottom:1px solid var(--line); font-size:12px; }
+      .history-row:last-child { border-bottom:0; } .history-row span { padding:0 10px; } .history-empty { padding:18px 12px; color:var(--muted); font-size:13px; }
+      .history-row.call-history-item { cursor:pointer; } .history-row.call-history-item:hover, .history-row.call-history-item:focus-visible { background:#fafafa; outline:2px solid var(--green); outline-offset:-2px; }
+      .tool-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:12px; }
+      .queue-search { border:0; border-bottom:1px solid var(--line); padding:10px 14px; background:var(--soft); }
+      .tool-body { padding:12px; } .tool-body p { margin:0 0 10px; color:var(--muted); font-size:12px; }
+      .goals-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-bottom:1px solid var(--line); }
+      .goal-card { padding:12px; border-right:1px solid var(--line); } .goal-card:last-child { border-right:0; }
+      .goal-card span { display:block; color:var(--muted); font-size:11px; } .goal-card strong { display:block; margin:4px 0 8px; font-size:17px; letter-spacing:-.02em; }
+      .goal-track { height:4px; overflow:hidden; background:#e7e7e7; } .goal-track i { display:block; height:100%; background:var(--ink); transition:width .25s ease; }
+      .goals-form { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) auto; gap:8px; align-items:end; padding:12px; }
+      .goals-form label { display:block; color:var(--muted); font-size:11px; } .goals-form input { width:100%; height:34px; margin-top:4px; }
+      .settings-layout { max-width:700px; } .settings-layout .panel { margin-top:16px; }
+      .celebration-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; } .celebration-actions input { display:none; }
+      .celebration-status { margin-top:10px; color:var(--muted); font-size:12px; } .celebration-status.ready { color:var(--green); }
+      .button-row { display:flex; flex-wrap:wrap; gap:8px; } .button-row input[type=file] { display:none; }
+      .filter-bar { display:grid; grid-template-columns:repeat(4,minmax(120px,1fr)) auto; gap:8px; padding:10px; border-bottom:1px solid var(--line); background:var(--soft); }
+      .filter-bar button { height:38px; border:1px solid var(--line); border-radius:6px; background:white; font-size:12px; }
+      .script-box { padding:12px; border:1px solid var(--line); background:var(--soft); font-size:12px; line-height:1.55; }
+      .script-box strong { display:block; margin-top:8px; } .script-box strong:first-child { margin-top:0; }
+      .dnc-row { display:flex; align-items:center; justify-content:space-between; gap:10px; } .dnc-row input { width:auto; height:auto; }
+      .lead-history-row { padding:9px 0; border-bottom:1px solid var(--line); font-size:12px; } .lead-history-row:last-child { border-bottom:0; }
+      .campaign-row { display:grid; grid-template-columns:1.3fr .6fr .65fr .65fr .6fr auto; align-items:center; min-height:49px; border-bottom:1px solid var(--line); font-size:12px; cursor:pointer; }
+      .campaign-row:hover, .campaign-row:focus-visible { background:#fafafa; outline:none; }
+      .campaign-row:last-child { border-bottom:0; } .campaign-row > span { padding:0 10px; }
+      .campaign-row strong { display:block; font-size:13px; } .campaign-row small { color:var(--muted); }
+      .campaign-row button { margin-right:8px; height:30px; border:1px solid var(--line); border-radius:5px; background:white; font-size:11px; font-weight:700; }
+      .sales-board-panel { margin-top:12px; }
+      .sales-board { display:grid; grid-template-columns:repeat(4,minmax(190px,1fr)); gap:10px; padding:10px; background:var(--soft); overflow-x:auto; }
+      .sales-column { min-height:190px; background:white; border:1px solid var(--line); border-radius:6px; }
+      .sales-column.is-over { outline:2px solid var(--ink); outline-offset:-2px; background:#fafafa; }
+      .sales-column-head { display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid var(--line); font-size:12px; font-weight:750; }
+      .sales-column-head small { color:var(--muted); font-weight:500; }
+      .sales-cards { display:grid; gap:7px; padding:8px; min-height:135px; }
+      .sales-card { padding:9px 10px; border:1px solid var(--line); border-radius:5px; background:white; cursor:grab; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+      .sales-card:active { cursor:grabbing; }
+      .sales-card strong { display:block; font-size:12px; }
+      .sales-card span { display:block; margin-top:2px; color:var(--muted); font-size:11px; }
+      .sales-empty { padding:14px 8px; color:var(--muted); font-size:11px; text-align:center; }
+      @media (max-width:900px) { .sales-board { grid-template-columns:repeat(4,220px); } }
+      .workspace { border:1px solid var(--line); min-height:680px; }
+      .table-pane { min-width:0; }
+      .table-title { height:49px; display:flex; align-items:center; padding:0 14px; border-bottom:1px solid var(--line); font-size:14px; font-weight:700; }
+      .sheet-scroll { overflow-x:auto; }
+      .sheet { min-width:860px; }
+      .grid { display:grid; grid-template-columns:38px 1.25fr 1.05fr 1fr .62fr .9fr .78fr; }
+      .grid-head { background:var(--soft); border-bottom:1px solid var(--line); color:var(--muted); font-size:12px; font-weight:650; }
+      .grid-head span { height:38px; padding:0 10px; display:flex; align-items:center; border-right:1px solid var(--line); }
+      .grid-row { width:100%; border:0; border-bottom:1px solid var(--line); background:white; color:var(--ink); text-align:left; padding:0; }
+      .grid-row:hover { background:#fafafa; } .grid-row.active { background:#f0f0f0; }
+      .grid-row.next { background:#dff4e7; } .grid-row.next:hover { background:#d5eedf; }
+      .grid-row span { min-width:0; height:48px; padding:0 10px; display:flex; align-items:center; border-right:1px solid var(--line); font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .grid-row .row-number { justify-content:center; color:#9a9a9a; padding:0; font-size:12px; }
+      .grid-row .name { font-weight:650; }
+      .status { display:inline-flex!important; align-items:center!important; height:23px!important; width:max-content; align-self:center; margin-left:9px; padding:0 8px!important; border:0!important; border-radius:999px; background:#eef6f1; color:var(--green); font-size:11px!important; }
+      .due { color:#a23a3a; font-weight:700; }
+      .empty-state { min-height:120px; display:grid; place-items:center; padding:24px; color:var(--muted); font-size:14px; }
+      .table-footer { height:48px; padding:0 13px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
+      .pager { display:flex; gap:6px; } .pager button { height:30px; min-width:68px; border:1px solid var(--line); border-radius:5px; background:white; color:var(--ink); font-size:12px; }
+      .pager button:disabled { color:#aaa; background:var(--soft); cursor:default; }
+      .detail { position:fixed; z-index:20; top:60px; right:0; bottom:0; width:min(420px,100%); padding:22px; overflow:auto; background:white; border-left:1px solid var(--line); box-shadow:-12px 0 30px rgba(0,0,0,.08); transform:translateX(100%); visibility:hidden; pointer-events:none; transition:transform .2s ease, visibility 0s linear .2s; }
+      .detail.open { transform:translateX(0); visibility:visible; pointer-events:auto; transition-delay:0s; }
+      .detail-head { padding-bottom:20px; border-bottom:1px solid var(--line); }
+      .detail-top { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; }
+      .detail-head h2 { margin:0; font-size:21px; letter-spacing:-.025em; } .detail-head p { margin:4px 0 0; color:var(--muted); font-size:14px; }
+      .lead-name-row { display:flex; align-items:center; gap:8px; } .lead-name-row input { width:min(250px, 100%); font-size:18px; font-weight:700; letter-spacing:-.025em; padding:5px 7px; } .edit-name-button { padding:4px 7px; font-size:11px; }
+      .close-detail { width:30px; height:30px; flex:0 0 auto; border:1px solid var(--line); border-radius:6px; background:white; color:var(--ink); font-size:18px; line-height:1; }
+      .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:17px; }
+      .primary, .secondary { min-height:40px; border-radius:7px; padding:0 12px; font-size:13px; font-weight:700; }
+      .primary { border:1px solid var(--ink); background:var(--ink); color:white; } .primary:hover { background:#333; }
+      .secondary { border:1px solid var(--line); background:white; color:var(--ink); } .secondary:hover { background:var(--soft); }
+      .call-state { display:none; margin-top:12px; padding:9px 11px; background:#edf8f2; color:var(--green); font-size:13px; }
+      .call-state.show { display:flex; align-items:center; justify-content:space-between; }
+      .call-state button { border:0; background:transparent; color:var(--red); font-size:12px; font-weight:700; }
+      .details-grid { display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--line); border-left:1px solid var(--line); margin:20px 0 0; }
+      .detail-field { min-width:0; padding:10px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
+      .detail-field label, .form-field label { display:block; color:var(--muted); font-size:11px; margin-bottom:3px; }
+      .detail-field div { font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .detail-field.wide { grid-column:1/-1; } .detail-field a { display:block; color:var(--ink); font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .overview-list { margin:0; padding:0; list-style:none; } .overview-list li { position:relative; padding:6px 0 6px 14px; border-bottom:1px solid var(--line); font-size:12px; line-height:1.35; }
+      .overview-list li:last-child { border-bottom:0; } .overview-list li::before { content:"•"; position:absolute; left:1px; color:var(--green); } .overview-list strong { margin-right:4px; }
+      .section { padding-top:20px; margin-top:20px; border-top:1px solid var(--line); }
+      .section-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:9px; }
+      h3 { margin:0; font-size:13px; } .saved { color:var(--muted); font-size:11px; }
+      textarea { width:100%; min-height:102px; resize:vertical; border:1px solid var(--line); border-radius:6px; padding:10px; color:var(--ink); background:white; font-size:13px; line-height:1.5; }
+      select, input { width:100%; height:38px; border:1px solid var(--line); border-radius:6px; padding:0 9px; color:var(--ink); background:white; font-size:13px; }
+      textarea:focus, select:focus, input:focus { outline:2px solid #acd1bd; border-color:var(--green); }
+      .form-field { min-width:0; }
+      .form-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+      .scheduler { display:none; } .scheduler.open { display:block; }
+      .schedule-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+      .schedule-grid .wide { grid-column:1/-1; }
+      .book-row { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:end; margin-top:8px; }
+      .confirmation { display:none; margin-top:10px; padding:9px 10px; background:#edf8f2; color:var(--green); font-size:12px; }
+      .confirmation.show { display:block; }
+      .save-row { display:flex; justify-content:flex-end; margin-top:10px; }
+      .toast { position:fixed; right:22px; bottom:22px; padding:10px 14px; border-radius:7px; background:var(--ink); color:white; font-size:13px; opacity:0; transform:translateY(8px); transition:.2s; pointer-events:none; }
+      .toast.show { opacity:1; transform:translateY(0); }
+      .calendly-modal { position:fixed; z-index:40; inset:0; display:none; place-items:center; padding:20px; background:rgba(23,23,23,.28); }
+      .calendly-modal.open { display:grid; }
+      .calendly-card { width:min(980px,100%); max-height:calc(100vh - 40px); overflow:hidden; border:1px solid var(--line); border-radius:10px; background:white; box-shadow:0 20px 60px rgba(0,0,0,.18); }
+      .calendly-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding:15px 18px; border-bottom:1px solid var(--line); }
+      .calendly-card-head h2 { margin:0; font-size:17px; letter-spacing:-.02em; } .calendly-card-head p { margin:3px 0 0; color:var(--muted); font-size:12px; }
+      .calendly-time-context { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:10px; }
+      .calendly-time-context > div { padding:7px 9px; border-left:2px solid var(--green); background:var(--soft); }
+      .calendly-time-context span { display:block; color:var(--muted); font-size:10px; line-height:1.2; }
+      .calendly-time-context strong { display:block; margin-top:2px; font-size:12px; line-height:1.25; }
+      .calendly-card-head button { width:30px; height:30px; flex:0 0 auto; border:1px solid var(--line); border-radius:6px; background:white; font-size:18px; }
+      #calendlyInline { min-width:320px; height:min(710px,calc(100vh - 135px)); }
+      .call-details-card { width:min(620px,100%); max-height:calc(100vh - 40px); overflow:auto; border:1px solid var(--line); border-radius:10px; background:white; box-shadow:0 20px 60px rgba(0,0,0,.18); }
+      .call-details-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding:18px; border-bottom:1px solid var(--line); }
+      .call-details-head h2 { margin:0; font-size:18px; letter-spacing:-.02em; } .call-details-head p { margin:4px 0 0; color:var(--muted); font-size:13px; }
+      .call-details-head button { width:30px; height:30px; flex:0 0 auto; border:1px solid var(--line); border-radius:6px; background:white; font-size:18px; }
+      .call-details-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); border-left:1px solid var(--line); border-top:1px solid var(--line); margin:18px; }
+      .call-detail-item { min-height:66px; padding:10px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
+      .call-detail-item span { display:block; color:var(--muted); font-size:11px; margin-bottom:3px; } .call-detail-item strong { font-size:13px; word-break:break-word; }
+      .call-detail-note { margin:0 18px 18px; padding:12px; border:1px solid var(--line); background:var(--soft); font-size:13px; line-height:1.45; white-space:pre-wrap; }
+      @media (max-width:1000px) { .metrics { grid-template-columns:repeat(3,1fr); } .filter-bar { grid-template-columns:repeat(2,minmax(120px,1fr)); } }
+      @media (max-width:700px) { .timezone-content { grid-template-columns:1fr; } .us-map { max-width:none; } .zone-times { grid-template-columns:repeat(4,minmax(0,1fr)); } .goals-grid { grid-template-columns:1fr; } .goal-card { border-right:0; border-bottom:1px solid var(--line); } .goal-card:last-child { border-bottom:0; } .goals-form { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+      @media (max-width:620px) { header, main { padding-left:14px; padding-right:14px; } .header-left { gap:14px; } .brand { font-size:0; } nav { gap:10px; } .home-controls, .tool-grid, .filter-bar, .goals-form, .contractor-form { grid-template-columns:1fr; } .metrics { grid-template-columns:repeat(2,1fr); } .workspace { border-left:0; border-right:0; } .detail { padding:20px 14px; } .actions, .form-row { grid-template-columns:1fr; } .campaign-row { grid-template-columns:1fr auto; padding:8px; } .campaign-row > span:not(:first-child) { display:none; } .zone-times { grid-template-columns:repeat(2,minmax(0,1fr)); } .contractor-intro, .contractor-actions { align-items:flex-start; flex-direction:column; } .contractor-row { grid-template-columns:1fr; gap:4px; } }
+    </style>
+  </head>
+  <body data-experience="admin">
+    <header><div class="header-left"><div class="brand"><img class="logo" src="../onyx-creative-labs-logo.webp" alt="Onyx Creative Labs" width="150" height="36"></div><nav><button class="nav-button active" data-view="homeView">Operations</button><button class="nav-button" data-view="boardView">Pipeline</button><button class="nav-button" data-view="leadsView">Lead operations</button><button class="nav-button" data-view="settingsView">Configuration</button></nav></div><a class="workspace-switch" href="../bdr/">Contractor login</a></header>
+    <main>
+      <section class="view active" id="homeView">
+        <div class="page-head"><h1>Revenue operations</h1><span class="count">Admin workspace</span></div>
+        <section class="panel contractor-panel" aria-labelledby="contractorsTitle">
+          <div class="panel-head"><span id="contractorsTitle">Contractors</span><button id="showContractorForm">Invite contractor</button></div>
+          <div class="tool-body">
+            <div class="contractor-intro"><div><strong>Manage BDR access</strong><p>Add a caller, keep their phone on file, and choose the campaigns they can work. New campaigns will appear here automatically.</p></div><span class="count" id="contractorCount">0 contractors</span></div>
+            <form class="contractor-form" id="contractorForm" hidden>
+              <div class="form-field"><label for="contractorName">Name</label><input id="contractorName" required maxlength="120" placeholder="Sierra Johnson" /></div>
+              <div class="form-field"><label for="contractorEmail">Email</label><input id="contractorEmail" required type="email" maxlength="160" placeholder="sierra@example.com" /></div>
+              <div class="form-field"><label for="contractorPhone">Phone</label><input id="contractorPhone" type="tel" maxlength="32" placeholder="555-555-5555" /></div>
+              <div class="form-field wide"><label>Campaign access</label><div class="campaign-access" id="contractorCampaignAccess"></div></div>
+              <div class="contractor-actions"><small>Invitation emails will send as magic links when the secure BDR backend is connected.</small><div class="button-row"><button type="button" class="secondary" id="cancelContractor">Cancel</button><button type="submit" class="primary">Save contractor</button></div></div>
+            </form>
+          </div>
+          <div class="contractor-list" id="contractorRows"></div>
+        </section>
+        <div class="home-controls">
+          <div class="control-box"><label for="campaignSelect">Campaign</label><div class="campaign-control"><select id="campaignSelect"><option value="school">Parsity School</option><option value="warm-parsity-school">Warm Parsity School Leads</option><option value="business">Parsity Business</option><option value="reviews">Onyx Reviews</option><option value="quantum-bom">Quantum Bom</option></select><button class="primary" id="openCampaign">Open campaign</button></div></div>
+          <section class="timezone-map" aria-label="United States calling time zones">
+            <div class="timezone-head"><strong>U.S. calling windows</strong><span id="mapStatus">Live priority</span></div>
+            <div class="timezone-content">
+              <svg class="us-map" viewBox="0 0 360 90" role="img" aria-label="Stylized map of United States time zones">
+                <path class="zone-shape zone-pt" data-map-zone="PT" d="M11 15 L76 9 L83 29 L71 48 L84 76 L49 80 L37 66 L18 69 L10 48 Z"/>
+                <path class="zone-shape zone-mt" data-map-zone="MT" d="M76 9 L137 10 L144 24 L137 42 L151 65 L130 78 L84 76 L71 48 L83 29 Z"/>
+                <path class="zone-shape zone-ct" data-map-zone="CT" d="M137 10 L211 16 L232 29 L226 48 L240 68 L205 80 L151 65 L137 42 L144 24 Z"/>
+                <path class="zone-shape zone-et" data-map-zone="ET" d="M211 16 L276 12 L330 27 L343 42 L330 56 L337 71 L299 79 L278 66 L240 68 L226 48 L232 29 Z"/>
+                <path class="zone-shape zone-pt" data-map-zone="PT" d="M56 82 L69 86 L64 89 L51 87 Z"/><path class="zone-shape zone-pt" data-map-zone="PT" d="M103 82 L125 84 L132 89 L110 88 Z"/>
+                <text class="map-label" x="47" y="44">PT</text><text class="map-label" x="111" y="44">MT</text><text class="map-label" x="185" y="48">CT</text><text class="map-label" x="278" y="45">ET</text>
+              </svg>
+              <div class="zone-times" aria-live="polite"><div class="zone-time" data-time-zone="PT"><strong>Pacific</strong><span>—</span></div><div class="zone-time" data-time-zone="MT"><strong>Mountain</strong><span>—</span></div><div class="zone-time" data-time-zone="CT"><strong>Central</strong><span>—</span></div><div class="zone-time" data-time-zone="ET"><strong>Eastern</strong><span>—</span></div></div>
+            </div>
+          </section>
+        </div>
+        <div class="stats-heading"><strong id="campaignStatsTitle">Parsity School stats</strong><div class="stats-controls"><label for="statsDate" class="sr-only">Stats date</label><input class="stats-date" id="statsDate" type="date" aria-label="View call stats by date" /><div class="stats-toggle" aria-label="Stats scope"><button class="active" id="showCampaignStats">Campaign</button><button id="showOverallStats">Overall</button></div></div></div>
+        <div class="metrics">
+          <div class="metric"><span>Calls today</span><strong id="metricCalls">0</strong></div><div class="metric"><span>Talk time</span><strong id="metricTalk">0m</strong></div><div class="metric metric-action" id="appointmentsMetricCard" role="button" tabindex="0" aria-label="View booked appointments and times"><span>Appointments</span><strong id="metricAppointments">0</strong></div><div class="metric"><span>Deals closed</span><strong id="metricDeals">0</strong></div><div class="metric"><span>Connect rate</span><strong id="metricConnect">0%</strong></div><div class="metric"><span>Follow-ups due</span><strong id="metricFollowups">0</strong></div>
+        </div>
+        <div class="home-grid">
+          <section class="panel"><div class="panel-head"><span>Campaigns</span><span id="campaignCount">3 active</span></div><div id="campaignRows"></div></section>
+          <section class="panel" id="callHistoryPanel" hidden><div class="panel-head"><span>Call history</span><span id="callHistoryCount">0 calls</span></div><div class="history-row" style="font-weight:700;background:var(--soft);"><span>Lead</span><span>Campaign</span><span>Phone</span><span>Called at</span></div><div id="callHistoryRows"></div></section>
+          <div style="margin-top:10px;" class="button-row"><button class="secondary" id="toggleCallHistory">View call history</button><button class="secondary" id="toggleCalendar">Appointment calendar</button><button class="secondary" id="toggleComparison">Campaign comparison</button></div>
+          <section class="panel" id="calendarPanel" hidden><div class="panel-head"><span>Appointment calendar</span><span id="appointmentCount">0 appointments</span></div><div class="tool-body"><select id="calendarRange"><option value="day">Today</option><option value="week" selected>Next 7 days</option><option value="all">All appointments</option></select></div><div class="history-row" style="font-weight:700;background:var(--soft);"><span>Lead</span><span>Campaign</span><span>Meeting</span><span>Date and time</span></div><div id="calendarRows"></div></section>
+          <section class="panel" id="comparisonPanel" hidden><div class="panel-head"><span>Campaign comparison</span><span>Current activity</span></div><div class="history-row" style="font-weight:700;background:var(--soft);"><span>Campaign</span><span>Connect rate</span><span>Appointment rate</span><span>Deals</span></div><div id="comparisonRows"></div></section>
+          <div class="tool-grid">
+            <section class="panel"><div class="panel-head"><span>Import and export</span></div><div class="tool-body"><p>Export all lead results or a client-ready seven-day report for the selected campaign.</p><div class="button-row"><label class="secondary" style="display:inline-flex;align-items:center;cursor:pointer;">Import CSV<input id="leadImport" type="file" accept=".csv,text/csv" /></label><button class="secondary" id="exportLeads">Export results</button><button class="secondary" id="exportWeeklyReport">Weekly client report</button></div></div></section>
+            <section class="panel"><div class="panel-head"><span>Goals &amp; KPIs</span><span id="goalScope">Selected campaign · daily</span></div><div class="goals-grid"><div class="goal-card"><span>Calls today</span><strong id="callGoalValue">0 / 120</strong><div class="goal-track"><i id="callGoalProgress"></i></div></div><div class="goal-card"><span>Appointments today</span><strong id="appointmentGoalValue">0 / 3</strong><div class="goal-track"><i id="appointmentGoalProgress"></i></div></div><div class="goal-card"><span>Close ratio · admin</span><strong id="closeGoalValue">Not entered</strong><div class="goal-track"><i id="closeGoalProgress"></i></div></div></div></section>
+          </div>
+        </div>
+      </section>
+      <section class="view" id="boardView">
+        <div class="page-head"><h1>Prospecting board</h1><button class="primary" id="addProspect">Add prospect</button></div>
+        <form class="control-box" id="prospectForm" hidden>
+          <label>Name<input id="prospectName" required maxlength="150"></label>
+          <label>Campaign<select id="prospectCampaign"><option value="">Unassigned</option><option>Parsity School</option><option>Warm Parsity School Leads</option><option>Parsity Business</option><option>Onyx Reviews</option><option>Quantum Bom</option></select></label>
+          <label>Appointment date and time (your local time, optional)<input id="prospectDate" type="datetime-local"></label>
+          <label>Notes<input id="prospectNotes" maxlength="500"></label>
+          <label>Stage<select id="prospectStage"><option value="appointments">Appointments</option><option value="followup">Follow-up</option><option value="closed">Closed</option><option value="not-closed">Not closed</option></select></label>
+          <button class="primary" type="submit">Save prospect</button> <button class="secondary" type="button" id="cancelProspect">Cancel</button>
+        </form>
+        <section class="panel sales-board-panel"><div class="panel-head"><span>Sales pipeline</span><span>Drag cards to update stage</span></div><div id="salesBoard" class="sales-board"></div></section>
+      </section>
+      <section class="view" id="leadsView">
+      <div class="page-head"><h1>Call queue</h1><span class="count" id="queueSummary"></span></div>
+      <div class="workspace">
+        <section class="table-pane" aria-label="Lead spreadsheet">
+          <div class="table-title" id="currentCampaignTitle">Parsity School · prioritized leads</div>
+          <div class="control-box queue-search"><label for="leadSearch">Search leads</label><input id="leadSearch" type="search" placeholder="Search name, company, phone, or email — press Enter" /></div>
+          <div class="filter-bar"><select id="filterZone"><option value="">All time zones</option><option>ET</option><option>CT</option><option>MT</option><option>PT</option></select><select id="filterStage"><option value="">All stages</option><option>New</option><option>Contacted</option><option>Qualified</option><option>Appointment Set</option><option>Won</option><option>Lost</option><option>Do Not Call</option></select><select id="filterDisposition"><option value="">All dispositions</option><option>Connected — qualified</option><option>Connected — follow up</option><option>Left voicemail</option><option>No answer</option><option>Not interested</option></select><input id="filterLastContact" type="date" aria-label="Last contact date" /><button id="clearFilters">Clear filters</button></div>
+          <div class="sheet-scroll"><div class="sheet">
+            <div class="grid grid-head"><span></span><span>Name</span><span>Company</span><span>Phone</span><span>Time zone</span><span>Follow-up</span><span>Status</span></div>
+            <div id="leadRows"></div>
+          </div></div>
+          <div class="table-footer"><span id="pageStatus"></span><div class="pager"><button id="previousPage">Previous</button><button id="nextPage">Next</button></div></div>
+        </section>
+        <aside class="detail" id="leadDetail" aria-live="polite" aria-hidden="true">
+          <div class="detail-head"><div class="detail-top"><div><div class="lead-name-row"><h2 id="detailName"></h2><input id="detailNameInput" type="text" aria-label="Contact name" hidden /><button class="secondary edit-name-button" id="editContactName" type="button">Edit name</button></div><p id="detailRole"></p></div><button class="close-detail" id="closeDetail" aria-label="Close lead details">×</button></div>
+            <div class="actions"><button class="primary" id="callLead">Call lead</button><button class="secondary" id="toggleScheduler">Appointment scheduler</button></div>
+            <div class="call-state" id="callState"><span id="callTimer">Calling · 00:00</span><button id="endCall">End call</button></div>
+          </div>
+          <div class="section"><div class="section-head"><h3>Wrap up</h3></div><div class="form-row"><div class="form-field"><label for="disposition">Disposition</label><select id="disposition"><option value="">Choose outcome</option><option>Connected — qualified</option><option>Connected — follow up</option><option>Left voicemail</option><option>No answer</option><option>Not interested</option></select></div><div class="form-field"><label for="followUp">Follow-up</label><input id="followUp" type="date" value="2026-09-19" /></div></div><div class="save-row"><button class="primary" id="saveLead">Save lead</button></div></div>
+          <div class="details-grid">
+            <div class="detail-field wide"><label for="detailIndustry">Industry</label><input id="detailIndustry" type="text" placeholder="Not specified" /></div>
+            <div class="detail-field"><label>Company</label><div id="detailCompany"></div></div><div class="detail-field"><label>Title</label><div id="detailTitle"></div></div>
+            <div class="detail-field"><label>Phone</label><div id="detailPhone"></div></div><div class="detail-field"><label>Email</label><div id="detailEmail"></div></div>
+            <div class="detail-field wide"><label>LinkedIn</label><a id="detailLinkedin" href="#" target="_blank" rel="noopener noreferrer"></a></div>
+            <div class="detail-field"><label>Time zone</label><div id="detailLocation"></div></div><div class="detail-field"><label>Campaign</label><div id="detailSource"></div></div>
+            <div class="detail-field"><label>Attempts</label><div id="detailAttempts"></div></div><div class="detail-field"><label>Stage</label><select id="detailStage"><option>New</option><option>Contacted</option><option>Qualified</option><option>Appointment Set</option><option>Won</option><option>Lost</option><option>Do Not Call</option></select></div>
+          </div>
+          <div class="section"><div class="section-head"><h3>Company &amp; owner overview</h3></div><ul class="overview-list" id="companyOverview"></ul></div>
+          <div class="section"><div class="section-head"><h3>Company intelligence</h3><span class="saved">Lead-data signals</span></div><ul class="overview-list" id="companyIntelligence"></ul></div>
+          <div class="section"><div class="dnc-row"><div><h3>Do not call</h3><span class="saved">Blocks future call attempts</span></div><input id="doNotCall" type="checkbox" aria-label="Do not call this lead" /></div></div>
+          <div class="section"><div class="section-head"><h3>Call script</h3><span class="saved" id="scriptCampaign"></span></div><div class="script-box" id="callScript"></div></div>
+          <div class="section"><div class="section-head"><h3>Lead call history</h3><span class="saved" id="leadHistoryCount">0 attempts</span></div><div id="leadCallHistory"></div></div>
+          <div class="section"><div class="section-head"><h3>Notes</h3><span class="saved" id="saved">Saved</span></div><textarea id="notes" aria-label="Lead notes"></textarea></div>
+          <div class="section scheduler" id="scheduler"><div class="section-head"><h3>Appointment</h3></div>
+            <div class="schedule-grid"><div class="form-field wide"><label for="meetingType">Meeting</label><select id="meetingType"><option>Discovery call</option><option>Product demo</option><option>Technical review</option><option>Follow-up call</option></select></div><div class="form-field"><label for="appointmentDate">Date</label><input id="appointmentDate" type="date" value="2026-09-22" /></div><div class="form-field"><label for="appointmentTime">Time</label><input id="appointmentTime" type="time" value="10:00" /></div></div>
+            <div class="book-row"><div class="form-field"><label for="duration">Duration</label><select id="duration"><option value="15">15 minutes</option><option value="30" selected>30 minutes</option><option value="45">45 minutes</option><option value="60">60 minutes</option></select></div><button class="primary" id="bookAppointment">Book</button></div>
+            <div class="confirmation" id="appointmentConfirmation"></div>
+          </div>
+        </aside>
+      </div>
+      </section>
+      <section class="view" id="settingsView">
+        <div class="page-head"><h1>Settings</h1><span class="count">Dialer configuration</span></div>
+        <div class="settings-layout"><section class="panel"><div class="panel-head"><span>Campaign goals</span><span>Daily targets</span></div><div class="tool-body"><p>Choose a campaign, then save its daily call and appointment targets plus the admin-reported close ratio.</p><label for="settingsGoalCampaign">Campaign</label><select id="settingsGoalCampaign"><option value="school">Parsity School</option><option value="warm-parsity-school">Warm Parsity School Leads</option><option value="business">Parsity Business</option><option value="reviews">Onyx Reviews</option><option value="quantum-bom">Quantum Bom</option></select></div><div class="goals-form"><label>Daily calls<input id="callGoalInput" type="number" min="0" step="1" /></label><label>Daily appointments<input id="appointmentGoalInput" type="number" min="0" step="1" /></label><label>Admin close ratio %<input id="closeGoalInput" type="number" min="0" max="100" step="1" /></label><button class="secondary" id="saveGoals">Save goals</button></div></section><section class="panel" id="miningProfilePanel" hidden><div class="panel-head"><span>Lead-mining focus</span><span id="miningProfileCampaign"></span></div><div class="tool-body" id="miningProfileBody"></div></section><section class="panel"><div class="panel-head"><span>VOIP provider</span><span id="voipStatus">Not connected</span></div><div class="tool-body"><p>Choose the calling provider to connect when credentials are ready.</p><div class="campaign-control"><select id="voipProvider"><option value="">Choose provider</option><option>Twilio</option><option>Telnyx</option><option>RingCentral</option></select><button class="secondary" id="saveVoipProvider">Save provider</button></div></div></section><section class="panel"><div class="panel-head"><span>Celebration clip</span><span>Plays when a deal is won</span></div><div class="tool-body"><p>Upload a song clip up to 20 seconds. It is saved only in this browser and plays when a lead is moved to Won.</p><div class="celebration-actions"><label class="secondary" style="display:inline-flex;align-items:center;cursor:pointer;">Add clip<input id="celebrationClip" type="file" accept="audio/*" /></label><button class="secondary" id="previewCelebration" disabled>Preview</button><button class="secondary" id="removeCelebration" disabled>Remove</button></div><div class="celebration-status" id="celebrationStatus">No celebration clip added</div></div></section></div>
+      </section>
+    </main>
+    <div class="calendly-modal" id="calendlyModal" role="dialog" aria-modal="true" aria-labelledby="calendlyTitle" aria-hidden="true">
+      <section class="calendly-card"><div class="calendly-card-head"><div><h2 id="calendlyTitle">Book appointment</h2><p id="calendlyTimezone"></p><div class="calendly-time-context" aria-live="polite"><div><span>Prospect’s local time</span><strong id="prospectLocalTime">—</strong></div><div><span>Your local time</span><strong id="repLocalTime">—</strong></div></div></div><button id="closeCalendly" aria-label="Close appointment scheduler">×</button></div><div id="calendlyInline"></div></section>
+    </div>
+    <div class="calendly-modal" id="callDetailsModal" role="dialog" aria-modal="true" aria-labelledby="callDetailsTitle" aria-hidden="true">
+      <section class="call-details-card"><div class="call-details-head"><div><h2 id="callDetailsTitle">Call details</h2><p id="callDetailsSubtitle"></p></div><button id="closeCallDetails" aria-label="Close call details">×</button></div><div class="call-details-grid" id="callDetailsGrid"></div><div class="call-detail-note" id="callDetailsNote"></div></section>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <script src="../leads.js"></script>
+    <script src="../business-leads.js"></script>
+    <script src="../business-leads-apollo-1.js"></script>
+    <script src="../business-leads-apollo-2.js"></script>
+    <script src="../business-leads-apollo-3.js"></script>
+    <script src="../business-leads-apollo-4.js"></script>
+    <script src="../business-leads-apollo-5.js"></script>
+    <script src="../business-leads-apollo-6.js"></script>
+    <script src="../business-leads-apollo-7.js"></script>
+    <script src="../business-leads-apollo-8.js"></script>
+    <script src="../business-leads-apollo-9.js"></script>
+    <script src="../business-leads-apollo-10.js"></script>
+    <script src="../business-leads-apollo-11.js"></script>
+    <script src="../business-people-apollo-1.js"></script>
+    <script src="../business-people-apollo-2.js"></script>
+    <script src="../business-people-apollo-3.js"></script>
+    <script src="../business-enrichment-apollo.js"></script>
+    <script src="../business-enrichment-apollo-400.js"></script>
+    <script src="../business-enrichment-apollo-70.js"></script>
+    <script src="../business-enrichment-apollo-final.js"></script>
+    <script src="../reviews-leads-apollo.js"></script>
+    <script src="../reviews-leads-apollo-2.js"></script>
+    <script src="../reviews-leads-apollo-3.js"></script>
+    <script src="../reviews-leads-apollo-4.js"></script>
+    <script src="https://assets.calendly.com/assets/external/widget.js"></script>
+    <script src="../business-nontechnical-research.js"></script>
+    <script src="../parsity-school-import-1042.js"></script>
+    <script src="../parsity-school-import-17.js"></script>
+    <script src="./app.js?v=contractors-1"></script>
+  </body>
+</html>
