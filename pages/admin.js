@@ -1,12 +1,44 @@
 import { useEffect, useState } from 'react';
 import Header from './components/shared/Header';
 
+const campaignLeads = [
+  {
+    id: 'onyx-review-001',
+    name: 'Maya Thompson',
+    company: 'Thompson Home Services',
+    phone: '(415) 555-0142',
+    location: 'Oakland, CA',
+  },
+  {
+    id: 'onyx-review-002',
+    name: 'Jordan Lee',
+    company: 'Lee Solar & Roofing',
+    phone: '(510) 555-0187',
+    location: 'Berkeley, CA',
+  },
+  {
+    id: 'onyx-review-003',
+    name: 'Riley Martinez',
+    company: 'Martinez Plumbing Co.',
+    phone: '(925) 555-0129',
+    location: 'Walnut Creek, CA',
+  },
+];
+
+const dispositions = ['Connected', 'Left voicemail', 'No answer', 'Follow up'];
+
 export default function AdminPage() {
   const [screen, setScreen] = useState('login');
   const [email, setEmail] = useState('');
   const [signedInEmail, setSignedInEmail] = useState('');
   const [requestError, setRequestError] = useState('');
   const [isRequestingLink, setIsRequestingLink] = useState(false);
+  const [selectedLeadId, setSelectedLeadId] = useState(campaignLeads[0].id);
+  const [note, setNote] = useState('');
+  const [savedNotes, setSavedNotes] = useState({});
+  const [callStatus, setCallStatus] = useState('Ready');
+
+  const selectedLead = campaignLeads.find((lead) => lead.id === selectedLeadId);
 
   useEffect(() => {
     async function restoreSession() {
@@ -62,6 +94,12 @@ export default function AdminPage() {
       setEmail('');
       setScreen('login');
     }
+  }
+
+  function saveNote() {
+    if (!note.trim()) return;
+    setSavedNotes((notes) => ({ ...notes, [selectedLeadId]: note.trim() }));
+    setNote('');
   }
 
   return (
@@ -142,59 +180,123 @@ export default function AdminPage() {
             </section>
           )}
 
-          {screen === 'workspace' && (
+          {screen === 'workspace' && selectedLead && (
             <section
               className="admin-workspace"
-              aria-label="Onyx admin workspace"
+              aria-label="Onyx BDR Dialer admin workspace"
             >
               <header className="admin-workspace-header">
                 <div>
-                  <p className="admin-eyebrow">Onyx Creative Labs</p>
-                  <h1>Admin</h1>
+                  <p className="admin-eyebrow">Administrator access</p>
+                  <h1>Onyx BDR Dialer</h1>
                 </div>
-                <button
-                  className="admin-signout"
-                  type="button"
-                  onClick={signOut}
-                >
-                  Sign out
-                </button>
+                <div className="admin-header-actions">
+                  <span className="admin-session-email">{signedInEmail}</span>
+                  <button
+                    className="admin-signout"
+                    type="button"
+                    onClick={signOut}
+                  >
+                    Sign out
+                  </button>
+                </div>
               </header>
-              <div className="admin-workspace-body">
-                <p className="admin-eyebrow">Signed in securely</p>
-                <h2>Welcome back.</h2>
-                <p className="admin-copy">
-                  You’re signed in as <strong>{signedInEmail}</strong>.
-                  Contractor and administrator sessions are isolated from one
-                  another.
-                </p>
-                <div className="admin-status-grid">
-                  <article>
-                    <span>Contractors</span>
-                    <strong>BDR access</strong>
-                    <p>
-                      Manage access and assignments here as the admin tools are
-                      connected.
-                    </p>
-                  </article>
-                  <article>
-                    <span>Appointments</span>
-                    <strong>Review queue</strong>
-                    <p>
-                      Booked appointment review and confirmation will appear
-                      here.
-                    </p>
-                  </article>
-                  <article>
-                    <span>Onyx Reviews</span>
-                    <strong>Campaign overview</strong>
-                    <p>
-                      Campaign performance will live in this administrator
-                      workspace.
-                    </p>
-                  </article>
-                </div>
+              <div className="admin-workspace-grid">
+                <aside className="admin-leads" aria-label="Campaign leads">
+                  <div className="admin-panel-heading">
+                    <div>
+                      <p className="admin-eyebrow">Campaign leads</p>
+                      <h2>Onyx Reviews</h2>
+                    </div>
+                    <span>{campaignLeads.length}</span>
+                  </div>
+                  {campaignLeads.map((lead) => (
+                    <button
+                      className={`admin-lead ${
+                        lead.id === selectedLeadId ? 'is-selected' : ''
+                      }`}
+                      key={lead.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedLeadId(lead.id);
+                        setCallStatus('Ready');
+                        setNote('');
+                      }}
+                    >
+                      <strong>{lead.name}</strong>
+                      <span>{lead.company}</span>
+                    </button>
+                  ))}
+                </aside>
+
+                <section
+                  className="admin-call-panel"
+                  aria-label="Lead calling workspace"
+                >
+                  <p className="admin-eyebrow">Current lead</p>
+                  <h2>{selectedLead.name}</h2>
+                  <p className="admin-company">
+                    {selectedLead.company} · {selectedLead.location}
+                  </p>
+                  <a
+                    className="admin-phone"
+                    href={`tel:${selectedLead.phone.replace(/[^0-9]/g, '')}`}
+                  >
+                    {selectedLead.phone}
+                  </a>
+
+                  <div className="admin-call-controls">
+                    <button
+                      className="admin-primary"
+                      type="button"
+                      onClick={() => setCallStatus('Calling in test mode')}
+                    >
+                      Start call
+                    </button>
+                    <span>{callStatus}</span>
+                  </div>
+
+                  <fieldset>
+                    <legend>Call outcome</legend>
+                    <div className="admin-dispositions">
+                      {dispositions.map((disposition) => (
+                        <button
+                          key={disposition}
+                          type="button"
+                          onClick={() =>
+                            setCallStatus(`${disposition} selected`)
+                          }
+                        >
+                          {disposition}
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  <label htmlFor="admin-call-note">Call notes</label>
+                  <textarea
+                    id="admin-call-note"
+                    value={note}
+                    onChange={(event) => setNote(event.target.value)}
+                    placeholder="Capture the conversation, next step, or follow-up date…"
+                    rows="5"
+                  />
+                  <div className="admin-note-actions">
+                    <button
+                      className="admin-secondary"
+                      type="button"
+                      onClick={saveNote}
+                    >
+                      Save note
+                    </button>
+                    {savedNotes[selectedLeadId] && <span>Saved locally</span>}
+                  </div>
+                </section>
               </div>
+              <p className="admin-workspace-footnote">
+                Administrator view: campaign leads are visible here while
+                contractor access stays restricted to assigned leads.
+              </p>
             </section>
           )}
         </section>
@@ -281,7 +383,8 @@ export default function AdminPage() {
             font-size: 14px;
             font-weight: 700;
           }
-          input {
+          input,
+          textarea {
             border: 1px solid #cbd5e1;
             border-radius: 5px;
             color: var(--onyx-black);
@@ -289,7 +392,11 @@ export default function AdminPage() {
             padding: 13px 14px;
             width: 100%;
           }
-          input:focus {
+          textarea {
+            resize: vertical;
+          }
+          input:focus,
+          textarea:focus {
             border-color: var(--onyx-accent);
             box-shadow: 0 0 0 3px var(--onyx-accent-soft);
             outline: none;
@@ -386,39 +493,156 @@ export default function AdminPage() {
             font-weight: 700;
             padding: 9px 12px;
           }
-          .admin-workspace-body {
-            padding: 42px 32px;
+          .admin-header-actions {
+            align-items: center;
+            display: flex;
+            gap: 14px;
           }
-          .admin-status-grid {
+          .admin-session-email {
+            color: #d4d4d8;
+            font-size: 13px;
+          }
+          .admin-workspace-grid {
             display: grid;
-            gap: 16px;
-            grid-template-columns: repeat(3, 1fr);
-            margin-top: 32px;
+            grid-template-columns: minmax(240px, 0.72fr) minmax(0, 1.5fr);
+            min-height: 570px;
           }
-          .admin-status-grid article {
-            border: 1px solid var(--onyx-border);
-            border-top: 3px solid var(--onyx-accent);
-            padding: 22px;
+          .admin-leads {
+            background: var(--onyx-light-gray);
+            border-right: 1px solid var(--onyx-border);
+            padding: 24px 16px;
           }
-          .admin-status-grid span {
+          .admin-panel-heading {
+            align-items: flex-start;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 8px 16px;
+          }
+          .admin-panel-heading h2 {
+            font-size: 21px;
+          }
+          .admin-panel-heading span {
+            align-items: center;
+            background: var(--onyx-accent);
+            border-radius: 999px;
+            display: inline-flex;
+            font-size: 13px;
+            font-weight: 800;
+            height: 25px;
+            justify-content: center;
+            width: 25px;
+          }
+          .admin-lead {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 5px;
+            color: var(--onyx-black);
+            display: grid;
+            gap: 4px;
+            margin-bottom: 7px;
+            padding: 13px 11px;
+            text-align: left;
+            width: 100%;
+          }
+          .admin-lead:hover,
+          .admin-lead.is-selected {
+            background: #fff;
+            border-color: #cbd5e1;
+          }
+          .admin-lead strong {
+            font-size: 14px;
+          }
+          .admin-lead span {
             color: var(--onyx-gray);
-            display: block;
             font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            margin-bottom: 10px;
-            text-transform: uppercase;
           }
-          .admin-status-grid strong {
-            display: block;
-            font-size: 18px;
-            margin-bottom: 8px;
+          .admin-call-panel {
+            padding: 36px;
           }
-          .admin-status-grid p {
+          .admin-company {
+            color: var(--onyx-gray);
+            margin-bottom: 17px;
+          }
+          .admin-phone {
+            color: var(--onyx-black);
+            font-size: 20px;
+            font-weight: 800;
+            text-decoration-color: var(--onyx-accent);
+            text-decoration-thickness: 2px;
+            text-underline-offset: 4px;
+          }
+          .admin-call-controls {
+            align-items: center;
+            display: flex;
+            gap: 14px;
+            margin: 28px 0;
+          }
+          .admin-call-controls .admin-primary {
+            margin: 0;
+          }
+          .admin-call-controls span {
+            color: var(--onyx-gray);
+            font-size: 13px;
+          }
+          fieldset {
+            border: 0;
+            border-top: 1px solid var(--onyx-border);
+            margin: 0 0 23px;
+            padding: 20px 0 0;
+          }
+          legend {
             color: var(--onyx-charcoal);
             font-size: 14px;
+            font-weight: 700;
+            padding-right: 10px;
+          }
+          .admin-dispositions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+          }
+          .admin-dispositions button {
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 999px;
+            color: var(--onyx-charcoal);
+            font-size: 13px;
+            font-weight: 700;
+            padding: 8px 11px;
+          }
+          .admin-dispositions button:hover {
+            background: var(--onyx-accent-soft);
+            border-color: var(--onyx-accent);
+          }
+          .admin-call-panel > label {
+            display: block;
+            margin: 0 0 9px;
+          }
+          .admin-note-actions {
+            align-items: center;
+            display: flex;
+            gap: 12px;
+            margin-top: 11px;
+          }
+          .admin-secondary {
+            background: var(--onyx-black);
+            border: 1px solid var(--onyx-black);
+            border-radius: 5px;
+            color: #fff;
+            font-weight: 700;
+            padding: 10px 14px;
+          }
+          .admin-note-actions span {
+            color: var(--onyx-gray);
+            font-size: 13px;
+          }
+          .admin-workspace-footnote {
+            border-top: 1px solid var(--onyx-border);
+            color: var(--onyx-gray);
+            font-size: 12px;
             line-height: 1.5;
             margin: 0;
+            padding: 17px 30px;
           }
           @media (max-width: 700px) {
             .admin-page {
@@ -432,11 +656,20 @@ export default function AdminPage() {
               gap: 17px;
               padding: 24px 20px;
             }
-            .admin-workspace-body {
-              padding: 30px 20px;
+            .admin-header-actions {
+              align-items: flex-end;
+              flex-direction: column;
+              gap: 8px;
             }
-            .admin-status-grid {
+            .admin-workspace-grid {
               grid-template-columns: 1fr;
+            }
+            .admin-leads {
+              border-bottom: 1px solid var(--onyx-border);
+              border-right: 0;
+            }
+            .admin-call-panel {
+              padding: 28px 20px;
             }
           }
         `}</style>
