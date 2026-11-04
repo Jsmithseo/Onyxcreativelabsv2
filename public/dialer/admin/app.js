@@ -1774,6 +1774,8 @@ loadCelebrationClip();
 showView(viewFromLocation(), { updateLocation:false });
 setInterval(renderRows, 60000);
 setInterval(() => loadSharedPipeline({ quiet:true }), 30000);
-syncSharedOperations()
-  .then(() => loadSharedPipeline({ quiet:true }))
-  .catch((error) => notify(error.message || "Unable to sync shared campaign data"));
+// Shared operations are now the durable source of truth. Do not re-import the
+// browser's legacy sample queue on every load: real leads are added through the
+// explicit CSV import flow above, while existing shared records stay intact.
+loadSharedPipeline({ quiet:true })
+  .catch((error) => notify(error.message || "Unable to load shared campaign data"));
