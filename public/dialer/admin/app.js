@@ -34,6 +34,12 @@ const campaigns = [
 const activityStorageKey = "calldesk-ui-test-activity-v1";
 let activityState = {};
 try { activityState = JSON.parse(localStorage.getItem(activityStorageKey) || "{}"); } catch { activityState = {}; }
+// Contractor access is now stored securely on the server. Remove the old
+// browser-only contractor list once, while leaving all other dialer activity.
+if (Array.isArray(activityState.contractors)) {
+  delete activityState.contractors;
+  try { localStorage.setItem(activityStorageKey, JSON.stringify(activityState)); } catch {}
+}
 const savedLeadIdentity = (lead) => {
   const email = String(lead.email || "").trim().toLowerCase();
   const phone = String(lead.phone || "").replace(/\D/g, "").replace(/^1(?=\d{10}$)/, "");
@@ -242,7 +248,7 @@ function persistActivity() {
     attempts: lead.attempts || 0, stage: lead.stage, wonAt: lead.wonAt || null, dnc: Boolean(lead.dnc), lastContact: lead.lastContact || "",
   }]));
   const importedLeads = leads.filter((lead) => lead.source === "CSV import").map(({id,followAt,attempts,called,dnc,lastContact,disposition,...lead}) => lead);
-    localStorage.setItem(activityStorageKey, JSON.stringify({ campaigns: campaignData, leads: leadData, callLog, appointments, voipProvider, goals, contractors, salesBoardCards, statsResetAt, statsResetVersion, appointmentResetVersion, followupResetVersion, importedLeads }));
+    localStorage.setItem(activityStorageKey, JSON.stringify({ campaigns: campaignData, leads: leadData, callLog, appointments, voipProvider, goals, salesBoardCards, statsResetAt, statsResetVersion, appointmentResetVersion, followupResetVersion, importedLeads }));
 }
 
 function refreshActivityViews() {
