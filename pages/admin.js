@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Header from './components/shared/Header';
 
 export default function AdminPage() {
@@ -6,6 +6,44 @@ export default function AdminPage() {
   const [email, setEmail] = useState('');
   const [requestError, setRequestError] = useState('');
   const [isRequestingLink, setIsRequestingLink] = useState(false);
+  const dialerFrame = useRef(null);
+  const [dialerHeight, setDialerHeight] = useState(null);
+
+  const syncDialerHeight = useCallback(() => {
+    const document = dialerFrame.current?.contentDocument;
+    if (!document?.body) return;
+
+    const height = Math.max(
+      document.body.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.scrollHeight,
+      document.documentElement.offsetHeight,
+      760
+    );
+    setDialerHeight(height);
+  }, []);
+
+  useEffect(() => {
+    const frame = dialerFrame.current;
+    if (screen !== 'workspace' || !frame) return undefined;
+
+    let observer;
+    const observeDialer = () => {
+      syncDialerHeight();
+      const document = frame.contentDocument;
+      if (!document?.body || !window.ResizeObserver) return;
+      observer = new ResizeObserver(syncDialerHeight);
+      observer.observe(document.body);
+      observer.observe(document.documentElement);
+    };
+
+    frame.addEventListener('load', observeDialer);
+    observeDialer();
+    return () => {
+      frame.removeEventListener('load', observeDialer);
+      observer?.disconnect();
+    };
+  }, [screen, syncDialerHeight]);
 
   useEffect(() => {
     async function restoreSession() {
@@ -48,9 +86,11 @@ export default function AdminPage() {
   if (screen === 'workspace') {
     return (
       <iframe
+        ref={dialerFrame}
         title="Onyx Dialer administrator workspace"
         src="/dialer/admin/index.html"
         className="admin-dialer-frame"
+        style={{ height: dialerHeight ? `${dialerHeight}px` : '100dvh' }}
       />
     );
   }
@@ -120,7 +160,6 @@ export default function AdminPage() {
         .admin-dialer-frame {
           border: 0;
           display: block;
-          height: 100vh;
           min-height: 760px;
           width: 100%;
         }
