@@ -20,6 +20,7 @@
     "@mui/material": "^5.16.4",
     "@stripe/react-stripe-js": "^2.7.3",
     "@stripe/stripe-js": "^2.4.0",
+    "@vercel/blob": "^2.8.2",
     "axios": "^1.7.3",
     "bootstrap": "^5.3.3",
     "mdb-react-ui-kit": "^6.3.0",

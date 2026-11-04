@@ -61,12 +61,6 @@ export default function BdrPage() {
   async function requestMagicLink(event) {
     event.preventDefault();
     if (!email.trim()) return;
-    if (!email.trim().toLowerCase().endsWith('@gmail.com')) {
-      setRequestError(
-        'Use the Gmail address assigned to you for Onyx BDR Dialer access.'
-      );
-      return;
-    }
     setIsRequestingLink(true);
     setRequestError('');
 

@@ -157,7 +157,7 @@ const quantumBomFollowupWasCleared = activityState.followupResetVersion !== foll
 if (quantumBomFollowupWasCleared) activityState.followupResetVersion = followupResetVersion;
 let voipProvider = activityState.voipProvider || "";
 let goals = { callGoals: { school: 120, business: 120, "quantum-bom": 120, reviews: 120 }, appointmentGoals: { school: 3, business: 3, "quantum-bom": 3, reviews: 0 }, closeRatios: {}, ...(activityState.goals || {}) };
-let contractors = Array.isArray(activityState.contractors) ? activityState.contractors : [];
+let contractors = [];
 let salesBoardCards = Array.isArray(activityState.salesBoardCards) ? activityState.salesBoardCards : [
   { id:"muhammad", name:"Muhammad", stage:"followup", detail:"Appointment completed · follow-up needed", day:"" },
   { id:"aaron", name:"Aaron", stage:"followup", detail:"Appointment completed · follow-up needed", day:"" },
@@ -276,8 +276,21 @@ function renderContractors() {
   }
   rows.innerHTML = contractors.map((contractor) => {
     const campaignNames = contractor.campaigns.map((id) => campaigns.find((campaign) => campaign.id === id)?.name).filter(Boolean);
-    return `<div class="contractor-row"><span><strong>${escapeHtml(contractor.name)}</strong><small>${escapeHtml(contractor.email)}</small></span><span><strong>${escapeHtml(contractor.phone || "No phone on file")}</strong><small>Caller contact</small></span><span><strong>${escapeHtml(campaignNames.join(", ") || "No campaigns assigned")}</strong><small>Campaign access</small></span><span class="contractor-status">Invite pending</span></div>`;
+    const status = contractor.status === "invite_failed" ? "Invite failed" : "Invite sent";
+    return `<div class="contractor-row"><span><strong>${escapeHtml(contractor.name)}</strong><small>${escapeHtml(contractor.email)}</small></span><span><strong>${escapeHtml(contractor.phone || "No phone on file")}</strong><small>Caller contact</small></span><span><strong>${escapeHtml(campaignNames.join(", ") || "No campaigns assigned")}</strong><small>Campaign access</small></span><span class="contractor-status">${status}</span></div>`;
   }).join("");
+}
+
+async function loadContractors() {
+  try {
+    const response = await fetch("/api/admin/contractors", { cache: "no-store" });
+    if (!response.ok) throw new Error("Contractor access is unavailable");
+    const payload = await response.json();
+    contractors = Array.isArray(payload.contractors) ? payload.contractors : [];
+    renderContractors();
+  } catch {
+    notify("Unable to load contractor access");
+  }
 }
 
 function renderCallHistory() {
@@ -1031,21 +1044,37 @@ document.getElementById("cancelContractor").onclick = () => {
   form.reset();
   form.hidden = true;
 };
-document.getElementById("contractorForm").onsubmit = (event) => {
+document.getElementById("contractorForm").onsubmit = async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
   const name = document.getElementById("contractorName").value.trim();
   const email = document.getElementById("contractorEmail").value.trim().toLowerCase();
   const phone = document.getElementById("contractorPhone").value.trim();
   const selectedCampaigns = [...document.querySelectorAll('input[name="contractorCampaign"]:checked')].map((input) => input.value);
+  const inviteButton = document.getElementById("sendContractorInvite");
   if (!selectedCampaigns.length) { notify("Choose at least one campaign"); return; }
-  if (contractors.some((contractor) => contractor.email === email)) { notify("That contractor is already listed"); return; }
-  contractors.push({ id: `contractor-${Date.now()}`, name, email, phone, campaigns: selectedCampaigns, createdAt: Date.now() });
-  persistActivity();
-  renderContractors();
-  form.reset();
-  form.hidden = true;
-  notify(`${name} saved — magic-link invite pending backend`);
+  inviteButton.disabled = true;
+  inviteButton.textContent = "Sending invite…";
+  try {
+    const response = await fetch("/api/admin/contractors", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, phone, campaigns: selectedCampaigns }),
+    });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || "Unable to send the invitation");
+    contractors = [payload.contractor, ...contractors.filter((contractor) => contractor.email !== payload.contractor.email)];
+    renderContractors();
+    form.reset();
+    form.hidden = true;
+    notify(`${name} invited — secure sign-in link sent`);
+  } catch (error) {
+    notify(error.message || "Unable to send the invitation");
+    await loadContractors();
+  } finally {
+    inviteButton.disabled = false;
+    inviteButton.textContent = "Send invite";
+  }
 };
 document.getElementById("campaignSelect").onchange = (event) => { updateMetrics(event.target.value); renderGoals(); };
 document.getElementById("settingsGoalCampaign").onchange = (event) => {
@@ -1297,6 +1326,7 @@ setInterval(updateTimezoneMap, 60000);
 renderComparison();
 renderGoals();
 renderContractors();
+loadContractors();
 renderSalesBoard();
 loadCelebrationClip();
 setInterval(renderRows, 60000);

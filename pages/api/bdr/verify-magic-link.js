@@ -3,6 +3,7 @@ import {
   readMagicLinkToken,
   sessionMaxAge,
 } from '../../../lib/bdrAuth';
+import { isActiveContractor } from '../../../lib/contractorStore';
 
 function sessionCookie(value) {
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
@@ -11,7 +12,7 @@ function sessionCookie(value) {
   )}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${sessionMaxAge}${secure}`;
 }
 
-export default function verifyMagicLink(req, res) {
+export default async function verifyMagicLink(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return res.status(405).json({ error: 'Method not allowed' });
@@ -21,7 +22,7 @@ export default function verifyMagicLink(req, res) {
     ? req.query.token[0]
     : req.query.token;
   const claim = readMagicLinkToken(token, 'contractor');
-  if (!claim) {
+  if (!claim || !(await isActiveContractor(claim.email))) {
     return res.redirect(302, '/bdr?signInError=invalid-link');
   }
 

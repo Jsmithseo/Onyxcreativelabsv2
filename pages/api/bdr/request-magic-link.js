@@ -1,8 +1,8 @@
 import {
   createMagicLinkToken,
-  isAllowedContractor,
   normaliseEmail,
 } from '../../../lib/bdrAuth';
+import { isActiveContractor } from '../../../lib/contractorStore';
 import { sendMagicLinkEmail } from '../../../lib/bdrMail';
 
 function hasValidEmail(email) {
@@ -22,7 +22,7 @@ export default async function requestMagicLink(req, res) {
 
   // Do not reveal which contractors have access. Requests for an unassigned
   // address get the same successful response without sending mail.
-  if (!isAllowedContractor(email)) {
+  if (!(await isActiveContractor(email))) {
     return res.status(202).json({ accepted: true });
   }
 

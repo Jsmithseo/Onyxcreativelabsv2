@@ -209,7 +209,7 @@
     </style>
   </head>
   <body data-experience="admin">
-    <header><div class="header-left"><div class="brand"><img class="logo" src="../onyx-creative-labs-logo.webp" alt="Onyx Creative Labs" width="150" height="36"></div><nav><button class="nav-button active" data-view="homeView">Operations</button><button class="nav-button" data-view="boardView">Pipeline</button><button class="nav-button" data-view="leadsView">Lead operations</button><button class="nav-button" data-view="settingsView">Configuration</button></nav></div><a class="workspace-switch" href="../bdr/">Contractor login</a></header>
+    <header><div class="header-left"><div class="brand"><img class="logo" src="../onyx-creative-labs-logo.webp" alt="Onyx Creative Labs" width="150" height="36"></div><nav><button class="nav-button active" data-view="homeView">Operations</button><button class="nav-button" data-view="boardView">Pipeline</button><button class="nav-button" data-view="leadsView">Lead operations</button><button class="nav-button" data-view="settingsView">Configuration</button></nav></div><a class="workspace-switch" href="/bdr">Contractor login</a></header>
     <main>
       <section class="view active" id="homeView">
         <div class="page-head"><h1>Revenue operations</h1><span class="count">Admin workspace</span></div>
@@ -222,7 +222,7 @@
               <div class="form-field"><label for="contractorEmail">Email</label><input id="contractorEmail" required type="email" maxlength="160" placeholder="sierra@example.com" /></div>
               <div class="form-field"><label for="contractorPhone">Phone</label><input id="contractorPhone" type="tel" maxlength="32" placeholder="555-555-5555" /></div>
               <div class="form-field wide"><label>Campaign access</label><div class="campaign-access" id="contractorCampaignAccess"></div></div>
-              <div class="contractor-actions"><small>Invitation emails will send as magic links when the secure BDR backend is connected.</small><div class="button-row"><button type="button" class="secondary" id="cancelContractor">Cancel</button><button type="submit" class="primary">Save contractor</button></div></div>
+              <div class="contractor-actions"><small>An invitation email with a secure sign-in link will be sent immediately.</small><div class="button-row"><button type="button" class="secondary" id="cancelContractor">Cancel</button><button type="submit" class="primary" id="sendContractorInvite">Send invite</button></div></div>
             </form>
           </div>
           <div class="contractor-list" id="contractorRows"></div>
