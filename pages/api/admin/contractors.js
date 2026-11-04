@@ -12,6 +12,13 @@ import {
 } from '../../../lib/contractorStore';
 
 const CAMPAIGN_ID = /^[a-z0-9-]{1,80}$/;
+const CAMPAIGN_NAMES = {
+  school: 'Parsity School',
+  'warm-parsity-school': 'Warm Parsity School Leads',
+  business: 'Parsity Business',
+  reviews: 'Onyx Reviews',
+  'quantum-bom': 'Quantum Bom',
+};
 
 function readCookie(cookieHeader, name) {
   const pair = String(cookieHeader || '')
@@ -84,6 +91,10 @@ export default async function contractors(req, res) {
       email: contractor.email,
       token: createMagicLinkToken(contractor.email, 'contractor'),
       invitation: true,
+      recipientName: contractor.name,
+      campaigns: contractor.campaigns.map(
+        (campaign) => CAMPAIGN_NAMES[campaign] || campaign
+      ),
     });
     return res.status(201).json({ contractor });
   } catch (error) {
