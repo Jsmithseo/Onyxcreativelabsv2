@@ -20,6 +20,9 @@
       nav { display:flex; align-self:stretch; gap:20px; }
       .nav-button { border:0; border-bottom:2px solid transparent; background:white; color:var(--muted); padding:0 2px; font-size:13px; }
       .nav-button.active { color:var(--ink); border-bottom-color:var(--ink); font-weight:700; }
+      .workspace-switch { align-self:stretch; display:inline-flex; align-items:center; border-bottom:2px solid transparent; color:var(--muted); font-size:13px; padding:0 2px; text-decoration:none; }
+      .workspace-switch:hover { color:var(--ink); }
+      .workspace-switch:focus-visible { border-bottom-color:var(--ink); outline:none; }
       .rep { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:14px; }
       .dot { width:8px; height:8px; border-radius:50%; background:#2b9a61; }
       main { width:100%; min-width:0; padding:28px 24px 48px; max-width:none; margin:0; }
@@ -33,9 +36,12 @@
       .contractor-intro p { margin:4px 0 0; color:var(--muted); font-size:12px; }
       .contractor-form { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:14px; padding-top:14px; border-top:1px solid var(--line); }
       .contractor-form .form-field.wide { grid-column:1/-1; }
-      .campaign-access { display:flex; flex-wrap:wrap; gap:7px; padding-top:3px; }
-      .campaign-access label { display:inline-flex; align-items:center; gap:6px; min-height:31px; padding:0 9px; border:1px solid var(--line); border-radius:999px; color:var(--ink); font-size:12px; cursor:pointer; }
-      .campaign-access input { width:auto; height:auto; margin:0; }
+      .campaign-access { display:flex; flex-wrap:wrap; gap:8px 18px; padding-top:4px; }
+      .campaign-access label { display:inline-flex; align-items:center; gap:7px; min-height:24px; padding:0; border:0; border-radius:0; color:var(--ink); background:transparent; font-size:12px; line-height:1.25; cursor:pointer; }
+      .campaign-access label:hover { color:var(--green); }
+      .campaign-access label:has(input:checked) { font-weight:700; }
+      .campaign-access input[type=checkbox] { -webkit-appearance:auto; appearance:auto; flex:0 0 15px; width:15px; height:15px; margin:0; padding:0; border:initial; border-radius:0; background:initial; accent-color:var(--green); }
+      .campaign-access input[type=checkbox]:focus-visible { outline:2px solid #acd1bd; outline-offset:2px; }
       .contractor-actions { display:flex; align-items:center; justify-content:space-between; gap:10px; grid-column:1/-1; }
       .contractor-actions small { color:var(--muted); font-size:11px; }
       .contractor-list { border-top:1px solid var(--line); }
