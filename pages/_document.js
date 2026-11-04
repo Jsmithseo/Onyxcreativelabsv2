@@ -5,6 +5,13 @@ export default function Document() {
   return (
     <Html>
       <Head>
+        <meta name="application-name" content="Onyx BDR Dialer" />
+        <meta name="theme-color" content="#171717" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <link rel="apple-touch-icon" href="/icons/onyx-pwa-192.png" />
         {/* Google tag (gtag.js) */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16644561919"></script>
         <script

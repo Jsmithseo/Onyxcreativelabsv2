@@ -1,0 +1,26 @@
+{
+  "id": "/bdr",
+  "name": "Onyx BDR Dialer",
+  "short_name": "Onyx BDR",
+  "description": "Onyx Creative Labs contractor dialer and lead workspace.",
+  "lang": "en-US",
+  "start_url": "/bdr",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#171717",
+  "icons": [
+    {
+      "src": "/icons/onyx-pwa-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/onyx-pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -21,6 +21,22 @@ const App = ({ Component, pageProps }) => {
     };
   }, [router.events]);
 
+  useEffect(() => {
+    if (
+      process.env.NODE_ENV !== 'production' ||
+      typeof window === 'undefined' ||
+      !('serviceWorker' in navigator)
+    ) {
+      return;
+    }
+
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        // The site remains fully usable online if a browser blocks workers.
+      });
+    });
+  }, []);
+
   return (
     <>
       <Script
