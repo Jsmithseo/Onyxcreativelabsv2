@@ -249,6 +249,10 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
     event.preventDefault();
     if (!selectedLead) return;
     if (liveCall?.leadId === selectedLead.id) { setError('End the active call before saving its activity.'); return; }
+    if (activity.activityType === 'call' && callSeconds > 0 && !activity.disposition) {
+      setError('Choose an outcome before saving a recorded call.');
+      return;
+    }
     if (activity.activityType === 'appointment' && !activity.scheduledFor) { setError('Choose an appointment date and time.'); return; }
     setSaving(true);
     try {
