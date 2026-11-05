@@ -769,63 +769,6 @@ async function openSharedLead(leadId) {
 }
 
 document.getElementById("refreshSharedPipeline").onclick = () => loadSharedPipeline();
-let reviewsReconciliationPreview = null;
-function reviewsReconciliationLeads() {
-  return leads.filter((lead) => lead.campaign === "reviews");
-}
-function renderReviewsReconciliationPreview(preview, error = "") {
-  const status = document.getElementById("reviewsReconciliationStatus");
-  const run = document.getElementById("reconcileReviewsOperations");
-  if (error) {
-    status.textContent = error;
-    run.disabled = true;
-    return;
-  }
-  status.textContent = `Onyx Reviews preview: ${preview.candidate_count} candidates · ${preview.explicit_assignment_count} explicit assignments · ${preview.mapped_assignment_count} mapped to a contractor with Reviews access · ${preview.invalid_assignment_count} unmapped or unauthorized assignments · ${preview.exact_match_count} exact shared matches · ${preview.identity_conflict_count} identity conflicts.`;
-  run.disabled = preview.candidate_count === 0 || preview.identity_conflict_count > 0 || preview.invalid_assignment_count > 0;
-}
-document.getElementById("previewReviewsReconciliation").onclick = async () => {
-  const button = document.getElementById("previewReviewsReconciliation");
-  button.disabled = true;
-  button.textContent = "Previewing…";
-  try {
-    const response = await fetch("/api/operations/reconciliation-preview", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ campaignId: "reviews", leads: reviewsReconciliationLeads() }),
-    });
-    const preview = await response.json();
-    if (!response.ok) throw new Error(preview.error || "Unable to preview Onyx Reviews reconciliation");
-    reviewsReconciliationPreview = preview;
-    renderReviewsReconciliationPreview(preview);
-  } catch (error) {
-    reviewsReconciliationPreview = null;
-    renderReviewsReconciliationPreview(null, error.message || "Unable to preview Onyx Reviews reconciliation");
-  } finally {
-    button.disabled = false;
-    button.textContent = "Preview Onyx Reviews";
-  }
-};
-document.getElementById("reconcileReviewsOperations").onclick = async () => {
-  if (!reviewsReconciliationPreview || reviewsReconciliationPreview.identity_conflict_count || reviewsReconciliationPreview.invalid_assignment_count) return;
-  const confirmed = window.confirm(
-    `Reconcile only ${reviewsReconciliationPreview.candidate_count} Onyx Reviews leads to the shared operations service?`
-  );
-  if (!confirmed) return;
-  const button = document.getElementById("reconcileReviewsOperations");
-  button.disabled = true;
-  button.textContent = "Reconciling…";
-  try {
-    await syncSharedOperations(reviewsReconciliationLeads());
-    await loadSharedPipeline({ quiet: true });
-    notify("Onyx Reviews reconciliation completed");
-  } catch (error) {
-    notify(error.message || "Unable to reconcile Onyx Reviews");
-  } finally {
-    button.textContent = "Reconcile Onyx Reviews";
-    renderReviewsReconciliationPreview(reviewsReconciliationPreview);
-  }
-};
 document.getElementById("reconcileSharedOperations").onclick = async () => {
   const confirmed = window.confirm(
     "Reconcile the current Admin queue with the shared operations service? This writes the current browser queue and its explicit assignments to the shared server."
