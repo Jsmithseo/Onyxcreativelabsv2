@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { previewContractorCsv } from '../../lib/contractorLeadImport.mjs';
+import LeadBriefing from '../../components/bdr/LeadBriefing';
 import PipelineComponent from './PipelineComponent';
 
 const workableStages = ['New', 'Contacted', 'Qualified', 'Appointment Set', 'Pitched', 'Do Not Call'];
@@ -602,7 +603,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
           <div><small>Attempts</small><strong>{detail?.activities?.filter((item) => item.activity_type === 'call').length || 0}</strong></div>{pipelineReadOnly ? <div><small>Stage</small><strong>{currentLead?.stage || 'New'}</strong></div> : <label><small>Stage</small><select value={activity.nextStage || currentLead?.stage || 'New'} onChange={(event) => setActivity({ ...activity, nextStage: event.target.value })}>{workableStages.map((stage) => <option key={stage}>{stage}</option>)}</select></label>}
           <div className="wide"><small>Disposition</small><strong>{currentLead?.disposition || 'Not recorded'}</strong></div>
         </div>
-        {currentLead?.notes && <section className="queue-read-only"><h3>Lead briefing and call script</h3><p style={{ whiteSpace:'pre-wrap' }}>{currentLead.notes}</p></section>}
+        {currentLead?.notes && <LeadBriefing key={currentLead.id} notes={currentLead.notes} />}
         <section className="queue-notes"><div><h3>Notes</h3><span>{detailError || (detail ? pipelineReadOnly ? 'Shared read-only' : 'Shared with your team' : 'Loading lead history…')}</span></div>{!pipelineReadOnly && <textarea value={activity.note} onChange={(event) => setActivity({ ...activity, note: event.target.value })} placeholder="Record what happened on the call." />}</section>
         {currentLead?.campaign_id === 'reviews' && <section className="review-script"><h3>15-minute review-growth call</h3><ol><li>“Could I speak with whoever handles marketing or customer reviews?”</li><li>“Hi, I’m calling from Onyx Creative Labs. I noticed you already have reviews, and we help businesses earn more of them—and more business from them.”</li><li>“Would a quick 15-minute call in the next couple of days be useful? I have tomorrow at 10 or 11.”</li></ol></section>}
         <section className="queue-history"><h3>Lead call history</h3>{detail?.activities?.length ? detail.activities.map((item) => <article key={item.id}><strong>{item.activity_type.replace('_', ' ')}</strong><span>{dateLabel(item.created_at, true)}{item.disposition ? ` · ${item.disposition}` : ''}{item.activity_type === 'appointment' ? item.scheduled_for ? ` · Scheduled ${dateLabel(item.scheduled_for, true)}` : ' · Calendly confirmed' : ''}{item.actor_email ? ` · Booked by ${item.actor_email}` : ''}</span>{item.note && <p>{item.note}</p>}</article>) : <p>{detailError || (detail ? 'No shared activity yet.' : 'Loading lead history…')}</p>}</section>
