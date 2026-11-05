@@ -35,3 +35,14 @@ test('unverified counts, non-Google review sources and duplicate businesses bloc
   const duplicate = batch(); duplicate.expectedCount = 2; duplicate.leads.push({ ...duplicate.leads[0] });
   assert.throws(() => prepareCampaignImport(duplicate), /duplicates/);
 });
+
+test('Google research retains its provenance and retry identity independently of Apollo records', () => {
+  const google = { ...batch(), source:'Google Maps' };
+  const first = prepareCampaignImport(google).leads[0];
+  const retry = prepareCampaignImport(google).leads[0];
+  const apollo = prepareCampaignImport(batch()).leads[0];
+  assert.equal(first.id, retry.id);
+  assert.notEqual(first.id, apollo.id);
+  assert.equal(first.source, 'Google Maps · Onyx Review Bay Area research');
+  assert.equal(first.follow_up_owner_email, 'robinsonsierra510@gmail.com');
+});
