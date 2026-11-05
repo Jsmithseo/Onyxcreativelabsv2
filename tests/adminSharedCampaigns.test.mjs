@@ -39,3 +39,20 @@ test('a new shared campaign and its lead become available in Admin without copyi
   context.merge();
   assert.equal(imported.notes, 'Unsaved draft');
 });
+
+test('after master sync Admin reads only shared records and shared campaign totals', () => {
+  const selects=Object.fromEntries(['campaignSelect','settingsGoalCampaign','commissionCampaign','sharedCallsCampaign'].map(id=>[id,{options:[],append(option){this.options.push(option);}}]));
+  const context={campaigns:[{id:'school',name:'School'},{id:'stale',name:'Browser-only campaign'}],leads:[{id:1,campaign:'school',phone:'4155550100',name:'Cached name'},{id:2,campaign:'stale',phone:'4155550101',name:'Browser-only lead'}],activeCallLeadId:null,selectedIndex:-1,
+    sharedWorkspace:{adminMasterSynced:true,campaigns:[{id:'school',name:'School'}],leads:[{id:'shared',campaign_id:'school',phone:'4155550100',name:'Shared name',stage:'Contacted',notes:'Shared notes'}],campaignSummaries:[{campaign_id:'school',call_count:7,appointment_count:1}]},
+    savedLeadIdentity:lead=>lead.phone?[`phone:${lead.phone}`]:[],document:{getElementById:id=>selects[id]||{classList:{contains:()=>false}},createElement:()=>({})},renderCampaigns(){},renderRows(){},renderContractors(){}};
+  vm.runInNewContext(mergeSource+'\nthis.merge=mergeSharedCampaigns;',context);
+  context.merge();
+  assert.equal(context.leads.length,1);
+  assert.equal(context.leads[0].sharedLeadId,'shared');
+  assert.equal(context.leads[0].name,'Shared name');
+  assert.equal(context.campaigns.length,1);
+  assert.equal(context.campaigns[0].calls,7);
+  context.sharedWorkspace.leads=[];
+  context.merge();
+  assert.equal(context.leads.length,0,'removed server records must not reappear from browser data');
+});

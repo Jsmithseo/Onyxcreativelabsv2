@@ -37,6 +37,8 @@ async function handlerTest(file, principal, query = {}, body) {
     listCampaigns:async () => [{id:'assigned'}, {id:'other'}],
     listPipeline:async (campaignIds) => { seen.push({ campaignIds }); return []; },
     listCampaignSummaries:async () => [],
+    isAdminMasterSynced:async () => false,
+    SALES_PIPELINE_LANES:[],
     listCallHistory:async (value) => { seen.push(value); return { calls:[], total:0 }; },
     getContractorCallReport:async (value) => { seen.push(value); return {}; },
     getLeadDetail:async (id, campaignIds) => campaignIds.includes(id) ? { lead:{ id } } : null,

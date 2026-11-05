@@ -538,6 +538,8 @@ function escapeHtml(value) {
 }
 
 let sharedWorkspace = { campaigns: [], leads: [] };
+let adminSyncSnapshot = null;
+let adminSyncPreview = null;
 let contractorReport = null;
 let sharedCallHistory = { calls:[], total:0 };
 let sharedCallPage = 0;
@@ -647,6 +649,7 @@ function mergeSharedCampaigns() {
       addedCampaign = true;
     }
     campaign.name = shared.name;
+    if (sharedWorkspace.adminMasterSynced) campaign.sharedManaged = true;
     if (campaign.sharedManaged) {
       const summary = (sharedWorkspace.campaignSummaries || []).find((item) => item.campaign_id === shared.id) || {};
       campaign.calls = summary.call_count || 0;
@@ -666,12 +669,24 @@ function mergeSharedCampaigns() {
     }
   }
   let nextId = leads.reduce((highest, item) => Math.max(highest, Number(item.id) || 0), -1) + 1;
+  const bySharedId = new Map(leads.filter((lead) => lead.sharedLeadId).map((lead) => [lead.sharedLeadId,lead]));
+  const byLegacyKey = new Map();
+  leads.filter((lead) => !lead.sharedLeadId).forEach((lead) => savedLeadIdentity(lead).forEach((key) => {
+    const scopedKey = `${lead.campaign}:${key}`;
+    if (!byLegacyKey.has(scopedKey)) byLegacyKey.set(scopedKey, []);
+    byLegacyKey.get(scopedKey).push(lead);
+  }));
   for (const shared of sharedWorkspace.leads || []) {
     const keys = savedLeadIdentity(shared);
-    let lead = leads.find((item) => item.sharedLeadId === shared.id) || leads.find((item) =>
-      item.campaign === shared.campaign_id && savedLeadIdentity(item).some((key) => keys.includes(key))
-    );
-    if (lead && (lead.id === activeCallLeadId || (lead.id === selectedIndex && document.getElementById("leadDetail").classList.contains("open")))) continue;
+    const candidates = [...new Set(keys.flatMap((key) => byLegacyKey.get(`${shared.campaign_id}:${key}`) || []))].filter((item) => !item.sharedLeadId);
+    let lead = bySharedId.get(shared.id)
+      || candidates.find((item) => keys.some((key) => key.startsWith("email:") && savedLeadIdentity(item).includes(key)))
+      || candidates.find((item) => item.name === shared.name)
+      || (candidates.length === 1 ? candidates[0] : null);
+    if (lead && (lead.id === activeCallLeadId || (lead.id === selectedIndex && document.getElementById("leadDetail").classList.contains("open")))) {
+      Object.assign(lead, {sharedLeadId:shared.id,sharedName:shared.name,sharedNotes:shared.notes || ""});
+      continue;
+    }
     if (!lead) {
       lead = { id:nextId++, attempts:0, called:false, lastContact:"" };
       leads.push(lead);
@@ -687,6 +702,17 @@ function mergeSharedCampaigns() {
       dnc:shared.stage === "Do Not Call", assignedTo:shared.follow_up_owner_email || null,
       ...(shared.last_call_at ? { called:true, lastContact:new Date(shared.last_call_at).getTime(), attempts:Number(shared.call_count || 1), lastCalledBy:shared.last_called_by } : {}),
     });
+    bySharedId.set(shared.id,lead);
+  }
+  if (sharedWorkspace.adminMasterSynced) {
+    const serverIds = new Set(sharedWorkspace.leads.map((lead) => lead.id));
+    for (let index = leads.length - 1; index >= 0; index--) {
+      if (!serverIds.has(leads[index].sharedLeadId)) leads.splice(index, 1);
+    }
+    const serverCampaigns = new Set(sharedWorkspace.campaigns.map((campaign) => campaign.id));
+    for (let index = campaigns.length - 1; index >= 0; index--) {
+      if (!serverCampaigns.has(campaigns[index].id)) campaigns.splice(index, 1);
+    }
   }
   campaigns.forEach((campaign) => { campaign.leads = leads.filter((lead) => lead.campaign === campaign.id).length; });
   renderCampaigns();
@@ -733,7 +759,7 @@ function renderSharedPipeline() {
   if (!board) return;
   const leads = (Array.isArray(sharedWorkspace.leads) ? sharedWorkspace.leads : [])
     .filter(hasCalendlyAppointment);
-  board.innerHTML = sharedPipelineColumns.map(([id, label]) => {
+  board.innerHTML = (sharedWorkspace.pipelineColumns || sharedPipelineColumns).map(([id, label]) => {
     const laneLeads = leads.filter((lead) => sharedPipelineLane(lead) === id);
     return `<section class="shared-pipeline-column" data-shared-pipeline-stage="${id}"><div class="shared-pipeline-column-head"><span>${label}</span><small>${laneLeads.length}</small></div><div class="shared-pipeline-cards">${laneLeads.length ? laneLeads.map((lead) => `<button type="button" class="shared-lead-card" draggable="true" data-shared-lead="${escapeHtml(lead.id)}"><strong>${escapeHtml(lead.name || "Unnamed lead")}</strong><span>${escapeHtml(lead.campaign_name || "")}</span><span>${escapeHtml(lead.last_activity_by ? `Last updated by ${lead.last_activity_by}` : "No activity yet")}</span><span class="commission">Potential ${formatCommission(lead.potential_commission_cents)}</span></button>`).join("") : '<div class="sales-empty">Drop leads here</div>'}</div></section>`;
   }).join("");
@@ -898,6 +924,7 @@ async function loadSharedPipeline({ quiet = false } = {}) {
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Unable to load shared pipeline");
     sharedWorkspace = payload;
+    document.getElementById("adminMasterSync").hidden = Boolean(payload.adminMasterSynced);
     mergeSharedCampaigns();
     if (appointmentsResponse.ok) {
       const appointmentPayload = await appointmentsResponse.json();
@@ -982,6 +1009,40 @@ document.getElementById("reconcileSharedOperations").onclick = async () => {
     button.disabled = false;
     button.textContent = "Reconcile Admin queue";
   }
+};
+
+document.getElementById("previewAdminCampaignSync").onclick = async () => {
+  const status = document.getElementById("adminSyncStatus");
+  const apply = document.getElementById("applyAdminCampaignSync");
+  apply.disabled = true;
+  try {
+    if (!sharedWorkspace.campaigns.length) throw new Error("Refresh the Admin workspace before previewing its queues.");
+    adminSyncSnapshot = {
+      campaigns:campaigns.map(({id,name}) => ({id,name})),
+      leads:leads.map((lead) => ({...sharedLegacyLead(lead),sharedLeadId:lead.sharedLeadId || "",called:lead.called,attempts:lead.attempts,lastContact:lead.lastContact})),
+    };
+    status.textContent = "Comparing Admin campaign queues…";
+    const response = await fetch("/api/operations/admin-campaign-sync", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({...adminSyncSnapshot,preview:true}) });
+    adminSyncPreview = await response.json();
+    if (!response.ok) throw new Error(adminSyncPreview.error || "Unable to preview Admin queues.");
+    status.textContent = adminSyncPreview.campaigns.map((campaign) => `${campaign.name}: ${campaign.shared} shared, ${campaign.candidates} queued`).join(" · ") + ` — ${adminSyncPreview.identity_conflict_count} identity conflicts, ${adminSyncPreview.duplicate_count} duplicate identities, ${adminSyncPreview.invalid_assignment_count} invalid assignments, ${adminSyncPreview.missing_shared_count} shared records missing from this snapshot, ${adminSyncPreview.legacy_call_state_count} browser-only call states needing review.`;
+    apply.disabled = !adminSyncPreview.ready;
+  } catch (error) { status.textContent = error.message; }
+};
+
+document.getElementById("applyAdminCampaignSync").onclick = async () => {
+  const button = document.getElementById("applyAdminCampaignSync");
+  const status = document.getElementById("adminSyncStatus");
+  button.disabled = true;
+  try {
+    if (!adminSyncSnapshot || !adminSyncPreview?.ready) throw new Error("Preview the Admin queues first.");
+    status.textContent = "Backing up and sharing Admin campaign queues…";
+    const response = await fetch("/api/operations/admin-campaign-sync", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({...adminSyncSnapshot,previewHash:adminSyncPreview.preview_hash}) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Unable to share Admin queues.");
+    await loadSharedPipeline({quiet:true});
+    notify("Admin campaigns and BDR queues now share the same lead records.");
+  } catch (error) { status.textContent = error.message; button.disabled = false; }
 };
 document.getElementById("closeSharedLead").onclick = () => {
   selectedSharedLeadId = "";
@@ -1607,8 +1668,8 @@ document.getElementById("saveLead").onclick = async () => {
     await sharedSave;
     await loadSharedPipeline({ quiet:true });
   } catch (error) {
-    closeDetail();
-    notify(`${error.message || "Unable to sync lead"} · saved in this browser`);
+    if (!sharedWorkspace.adminMasterSynced) closeDetail();
+    notify(sharedWorkspace.adminMasterSynced ? `${error.message || "Unable to sync lead"} · keep this lead open and retry` : `${error.message || "Unable to sync lead"} · saved in this browser`);
     return;
   }
   closeDetail();
@@ -1793,7 +1854,7 @@ document.getElementById("leadImport").onchange = async (event) => {
     const suppliedZone = normalizedTimeZone(valueAt(values, ["time zone", "timezone", "tz"]));
     const zone = suppliedZone || timeZoneFromAreaCode(phone) || "—";
     const importedLead = { id: nextLeadId++, name: `${first} ${last}`.trim() || email || phone, company, title, phone, email:email || "—", linkedin, location, zone, zoneSource: suppliedZone ? "source" : "area-code", source:"CSV import", stage:"New", followOffset:null, followAt:null, notes, disposition:"", called:false, attempts:0, dnc:false, lastContact:"", campaign:activeCampaign };
-    leads.push(importedLead);
+    if (!sharedWorkspace.adminMasterSynced) leads.push(importedLead);
     newlyImportedLeads.push(importedLead);
     importedCount += 1;
   });
@@ -1808,7 +1869,8 @@ document.getElementById("leadImport").onchange = async (event) => {
     }
     notify(`${importedCount} callable leads imported`);
   } catch (error) {
-    notify(`${error.message || "Unable to sync imported leads"} · saved in this browser`);
+    notify(sharedWorkspace.adminMasterSynced ? "Import interrupted. Refresh and retry the file to finish sharing it." : `${error.message || "Unable to sync imported leads"} · saved in this browser`);
+    if (sharedWorkspace.adminMasterSynced) await loadSharedPipeline({ quiet:true });
   }
   event.target.value = "";
 };

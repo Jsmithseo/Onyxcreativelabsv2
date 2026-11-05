@@ -3,13 +3,13 @@ import { previewContractorCsv } from '../../lib/contractorLeadImport.mjs';
 import LeadBriefing from '../../components/bdr/LeadBriefing';
 import { belongsInCallQueue, nextQueueLead } from '../../lib/callQueue.mjs';
 import CallHistory from '../../components/bdr/CallHistory';
+import { SALES_PIPELINE_LANES, selectPipelineLeads } from '../../lib/salesPipeline.mjs';
 import PipelineComponent from './PipelineComponent';
 
 const workableStages = ['New', 'Contacted', 'Qualified', 'Appointment Set', 'Pitched', 'Do Not Call'];
 const dispositions = ['Connected — qualified', 'Connected — follow up', 'Left voicemail', 'No answer', 'Not interested'];
 const appointmentTypes = ['Discovery call', 'Product demo', 'Technical review', 'Follow-up meeting'];
 const calendlyDiscoveryUrl = 'https://calendly.com/softwaresmitty/discovery';
-const lanes = [['appointments', 'Appointments'], ['followups', 'Follow-ups'], ['pitched', 'Pitched / presented'], ['won', 'Wins'], ['lost', 'Loss']];
 const emptyDashboard = { stats: { calls_today: 0, talk_seconds: 0, appointments_today: 0, deals_closed: 0, connect_rate: 0, follow_ups_due: 0 }, calls: [], followUps: [] };
 const zoneDefinitions = [['PT', 'Pacific', 'America/Los_Angeles'], ['MT', 'Mountain', 'America/Denver'], ['CT', 'Central', 'America/Chicago'], ['ET', 'Eastern', 'America/New_York']];
 const queuePageSize = 20;
@@ -157,6 +157,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const [workspace, setWorkspace] = useState({ campaigns: [], campaignSummaries: [], leads: [] });
   const [dashboard, setDashboard] = useState(emptyDashboard);
   const [activeCampaign, setActiveCampaign] = useState('');
+  const [pipelineCampaign, setPipelineCampaign] = useState('');
   const [activeView, setActiveView] = useState('operations');
   const [selectedLead, setSelectedLead] = useState(null);
   const [pipelineReadOnly, setPipelineReadOnly] = useState(false);
@@ -205,6 +206,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       if (!response.ok) throw new Error(payload.error || 'Unable to load your workspace.');
       if (requestId !== workspaceRequestRef.current) return null;
       setWorkspace(payload);
+      setPipelineCampaign((current) => !current || payload.campaigns.some((campaign) => campaign.id === current) ? current : '');
       setSelectedLead((current) => current && !payload.campaigns.some((campaign) => campaign.id === current.campaign_id) ? null : current);
       setDetail((current) => current?.lead && !payload.campaigns.some((campaign) => campaign.id === current.lead.campaign_id) ? null : current);
       setActiveCampaign((current) => {
@@ -535,7 +537,8 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const activeSummary = workspace.campaignSummaries?.find((summary) => summary.campaign_id === activeCampaign) || {};
   const visibleLeads = useMemo(() => workspace.leads.filter((lead) => lead.campaign_id === activeCampaign), [workspace.leads, activeCampaign]);
   const activeQueueLeads = visibleLeads.filter((lead) => belongsInCallQueue(lead));
-  const pipelineLeads = visibleLeads.filter(hasCalendlyAppointment);
+  const pipelineLeads = selectPipelineLeads(workspace.leads, pipelineCampaign);
+  const lanes = workspace.pipelineColumns || SALES_PIPELINE_LANES;
   const queueLeads = useMemo(() => {
     const query = queueFilters.query.trim().toLowerCase();
     const zones = queueZoneOrder();
@@ -595,7 +598,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
         {historyPanel}
         <section className="panel dashboard-followups"><div className="panel-head"><span>Follow-ups due</span><span>{dashboard.stats?.follow_ups_due || 0} due</span></div>{dashboard.followUps?.length ? <div>{dashboard.followUps.map((lead) => <button className="history-row" type="button" key={lead.id} onClick={() => openLead(lead)}><span><strong>{lead.name}</strong><small>{lead.company || lead.phone || 'Open lead'}</small></span><span>Due</span><span>{dateLabel(lead.next_follow_up_at, true)}</span></button>)}</div> : <div className="empty">Scheduled follow-ups appear here when due and remain until the next call is logged.</div>}</section>
       </section>}
-      {activeView === 'pipeline' && <section><div className="page-head"><div><h1>{active?.name || 'Campaign'} sales pipeline</h1><p>Booked appointments appear here and stay in sync with the Admin sales pipeline.</p></div>{campaignPicker}</div>{!activeCampaign ? <div className="empty">Choose a campaign to open its sales pipeline.</div> : <PipelineComponent lanes={lanes} leads={pipelineLeads} laneFor={pipelineLane} onLeadClick={(lead) => openLead(lead, { readOnlyPipeline: true })} dateLabel={dateLabel} money={money} />}</section>}
+      {activeView === 'pipeline' && <section><div className="page-head"><div><h1>Sales pipeline</h1><p>Booked appointments shared by Admin across your assigned campaigns.</p></div><label className="campaign-picker">Campaign<select value={pipelineCampaign} onChange={(event) => setPipelineCampaign(event.target.value)}><option value="">All assigned campaigns</option>{workspace.campaigns.map((campaign) => <option key={campaign.id} value={campaign.id}>{campaign.name}</option>)}</select></label></div><PipelineComponent lanes={lanes} leads={pipelineLeads} laneFor={pipelineLane} onLeadClick={(lead) => openLead(lead, { readOnlyPipeline: true })} dateLabel={dateLabel} money={money} /></section>}
       {activeView === 'leads' && (
         <section className="queue-view">
           <div className="page-head queue-page-head">

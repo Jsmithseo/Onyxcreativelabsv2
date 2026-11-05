@@ -12,9 +12,10 @@ export default function PipelineComponent({
       return <section className="pipeline-lane" key={id}>
         <header><strong>{label}</strong><span>{cards.length}</span></header>
         {cards.length ? cards.map((lead) => <button className="pipeline-card" type="button" key={lead.id} onClick={() => onLeadClick(lead)}>
-          <strong>{lead.name}</strong><span>{lead.company || 'Individual lead'}</span>
+          <strong>{lead.name}</strong><span>{lead.campaign_name || lead.company || 'Individual lead'}</span>
+          <small>{lead.last_activity_by ? `Last updated by ${lead.last_activity_by}` : 'No activity yet'}</small>
           <small>{id === 'followups' && lead.next_follow_up_at ? `Due ${dateLabel(lead.next_follow_up_at, true)}` : lead.stage}</small>
-          <em>{money(lead.potential_commission_cents)} potential commission</em>
+          <em>Potential {money(lead.potential_commission_cents)}</em>
         </button>) : <p className="lane-empty">No {label.toLowerCase()} yet.</p>}
       </section>;
     })}
