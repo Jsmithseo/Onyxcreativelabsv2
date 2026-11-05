@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   allowedContractorImport,
   importIdentity,
+  normaliseContractorImportRow,
   previewContractorCsv,
 } from '../lib/contractorLeadImport.mjs';
 
@@ -46,4 +47,14 @@ test('import identity is owner and campaign scoped, so a forged client assignee 
     importIdentity({ campaignId: 'reviews', ownerEmail: 'a@example.com', lead }),
     importIdentity({ campaignId: 'school', ownerEmail: 'a@example.com', lead })
   );
+});
+
+test('normalizing an accepted row again preserves notes and industry metadata exactly once', () => {
+  const once = normaliseContractorImportRow({
+    name: 'Avery Lee', company: 'Acme', email: 'avery@example.com',
+    industry: 'Construction', notes: 'Met at conference.',
+  });
+  const twice = normaliseContractorImportRow(once);
+  assert.equal(twice.notes, once.notes);
+  assert.equal((twice.notes.match(/Industry: Construction/g) || []).length, 1);
 });
