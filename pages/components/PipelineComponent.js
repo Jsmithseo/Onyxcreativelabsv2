@@ -6,7 +6,7 @@ export default function PipelineComponent({
   dateLabel = () => '—',
   money = () => '$0',
 }) {
-  return <div className="pipeline-board" aria-label="Sales pipeline">
+  return <><div className="pipeline-board" aria-label="Sales pipeline">
     {lanes.map(([id, label]) => {
       const cards = leads.filter((lead) => laneFor(lead) === id);
       return <section className="pipeline-lane" key={id}>
@@ -18,5 +18,15 @@ export default function PipelineComponent({
         </button>) : <p className="lane-empty">No {label.toLowerCase()} yet.</p>}
       </section>;
     })}
-  </div>;
+  </div><style jsx>{`
+    .pipeline-board{display:grid;grid-template-columns:repeat(5,minmax(190px,1fr));gap:10px;overflow-x:auto}
+    .pipeline-lane{background:var(--soft);border:1px solid var(--line);min-height:270px;padding:9px}
+    .pipeline-lane header{display:flex;justify-content:space-between;padding:4px 4px 10px;font-size:12px}
+    .pipeline-lane header span{color:var(--muted)}
+    .pipeline-card{display:grid;gap:4px;width:100%;padding:10px;margin:0 0 8px;border:1px solid var(--line);border-radius:5px;background:#fff;text-align:left;cursor:pointer}
+    .pipeline-card strong{font-size:13px}.pipeline-card span,.pipeline-card small{font-size:11px;color:var(--muted)}
+    .pipeline-card em{font-style:normal;color:var(--green);font-size:10px;font-weight:700}
+    .lane-empty{color:var(--muted);font-size:12px;padding:12px 4px}
+    @media(max-width:1000px){.pipeline-board{grid-template-columns:repeat(5,220px)}}
+  `}</style></>;
 }
