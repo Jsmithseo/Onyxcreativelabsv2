@@ -5,7 +5,7 @@ const workableStages = ['New', 'Contacted', 'Qualified', 'Appointment Set', 'Pit
 const dispositions = ['Connected — qualified', 'Connected — follow up', 'Left voicemail', 'No answer', 'Not interested'];
 const appointmentTypes = ['Discovery call', 'Product demo', 'Technical review', 'Follow-up meeting'];
 const calendlyDiscoveryUrl = 'https://calendly.com/softwaresmitty/discovery';
-const lanes = [['followups', 'Follow-ups'], ['appointments', 'Appointments'], ['pitched', 'Pitched / presented'], ['won', 'Wins'], ['lost', 'Loss']];
+const lanes = [['open', 'Open / new'], ['followups', 'Follow-ups'], ['appointments', 'Appointments'], ['pitched', 'Pitched / presented'], ['won', 'Wins'], ['lost', 'Loss']];
 const emptyDashboard = { stats: { calls_today: 0, talk_seconds: 0, appointments_today: 0, deals_closed: 0, connect_rate: 0, follow_ups_due: 0 }, calls: [], followUps: [] };
 const zoneDefinitions = [['PT', 'Pacific', 'America/Los_Angeles'], ['MT', 'Mountain', 'America/Denver'], ['CT', 'Central', 'America/Chicago'], ['ET', 'Eastern', 'America/New_York']];
 const queuePageSize = 20;
@@ -60,7 +60,7 @@ function pipelineLane(lead) {
   if (lead.disposition === 'Connected — follow up' && !lead.next_follow_up_at) return 'followups';
   if (lead.stage === 'Appointment Set') return 'appointments';
   if (lead.stage === 'Pitched' || lead.stage === 'Qualified') return 'pitched';
-  return null;
+  return 'open';
 }
 
 function preferredZone(leads) {
@@ -439,7 +439,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const active = workspace.campaigns.find((campaign) => campaign.id === activeCampaign);
   const activeSummary = workspace.campaignSummaries?.find((summary) => summary.campaign_id === activeCampaign) || {};
   const visibleLeads = useMemo(() => workspace.leads.filter((lead) => lead.campaign_id === activeCampaign), [workspace.leads, activeCampaign]);
-  const pipelineLeads = useMemo(() => visibleLeads.filter((lead) => lead.worked_by_principal), [visibleLeads]);
+  const pipelineLeads = visibleLeads;
   const queueLeads = useMemo(() => {
     const query = queueFilters.query.trim().toLowerCase();
     const zones = queueZoneOrder();
@@ -497,7 +497,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
         <section className="panel campaign-panel"><div className="panel-head"><span>Campaigns</span><span>{workspace.campaigns.length} active</span></div>{loading ? <div className="empty">Loading assigned campaigns…</div> : workspace.campaigns.map((campaign) => { const summary = workspace.campaignSummaries?.find((row) => row.campaign_id === campaign.id) || {}; return <div className="campaign-row" key={campaign.id}><span><strong>{campaign.name}</strong><small>Active</small></span><span>{summary.lead_count || 0} leads</span><span>{summary.call_count || 0} calls</span><span>{summary.appointment_count || 0} appts</span><span>{summary.won_count || 0} won</span><button className="campaign-open" type="button" onClick={() => openCampaign(campaign.id)}>Open queue <span aria-hidden="true">→</span></button></div>; })}{!loading && !workspace.campaigns.length && <div className="empty">Your administrator has not assigned a campaign yet.</div>}</section>
         <div className="operations-grid"><section className="panel"><div className="panel-head"><span>Today’s calls</span><span>{dashboard.calls?.length || 0} logged</span></div>{showHistory && dashboard.calls?.length ? <div>{dashboard.calls.map((call) => <button className="history-row" type="button" key={call.id} onClick={() => openLead({ id: call.lead_id, name: call.lead_name, campaign_id: activeCampaign })}><span><strong>{call.lead_name}</strong><small>{call.disposition || 'Call logged'}</small></span><span>{duration(call.duration_seconds)}</span><span>{dateLabel(call.created_at, true)}</span></button>)}</div> : <div className="empty">Select Appointments above to view your call history.</div>}</section><section className="panel"><div className="panel-head"><span>Follow-ups due</span><span>{dashboard.stats?.follow_ups_due || 0} due</span></div>{dashboard.followUps?.length ? <div>{dashboard.followUps.map((lead) => <button className="history-row" type="button" key={lead.id} onClick={() => openLead(lead)}><span><strong>{lead.name}</strong><small>{lead.company || lead.phone || 'Open lead'}</small></span><span>Due</span><span>{dateLabel(lead.next_follow_up_at, true)}</span></button>)}</div> : <div className="empty">Scheduled follow-ups appear here on the day they are due and remain until you log the next call.</div>}</section></div>
       </section>}
-      {activeView === 'pipeline' && <section><div className="page-head"><div><h1>{active?.name || 'Campaign'} pipeline</h1><p>Only leads you have worked appear here. This is a read-only view; your saved call and appointment activity updates it automatically.</p></div>{campaignPicker}</div>{!activeCampaign ? <div className="empty">Choose a campaign to open its pipeline.</div> : <div className="pipeline-board">{lanes.map(([id, label]) => { const cards = pipelineLeads.filter((lead) => pipelineLane(lead) === id); return <section className="pipeline-lane" key={id}><header><strong>{label}</strong><span>{cards.length}</span></header>{cards.length ? cards.map((lead) => <button className="pipeline-card" type="button" key={lead.id} onClick={() => openLead(lead, { readOnlyPipeline: true })}><strong>{lead.name}</strong><span>{lead.company || 'Individual lead'}</span><small>{id === 'followups' && lead.next_follow_up_at ? `Due ${dateLabel(lead.next_follow_up_at, true)}` : lead.stage}</small><em>{money(lead.potential_commission_cents)} potential commission</em></button>) : <p className="lane-empty">No {label.toLowerCase()} yet.</p>}</section>; })}</div>}</section>}
+      {activeView === 'pipeline' && <section><div className="page-head"><div><h1>{active?.name || 'Campaign'} pipeline</h1><p>Shared campaign updates appear here. Lead state, notes, follow-ups, and history stay in sync with Admin.</p></div>{campaignPicker}</div>{!activeCampaign ? <div className="empty">Choose a campaign to open its pipeline.</div> : <div className="pipeline-board">{lanes.map(([id, label]) => { const cards = pipelineLeads.filter((lead) => pipelineLane(lead) === id); return <section className="pipeline-lane" key={id}><header><strong>{label}</strong><span>{cards.length}</span></header>{cards.length ? cards.map((lead) => <button className="pipeline-card" type="button" key={lead.id} onClick={() => openLead(lead, { readOnlyPipeline: true })}><strong>{lead.name}</strong><span>{lead.company || 'Individual lead'}</span><small>{id === 'followups' && lead.next_follow_up_at ? `Due ${dateLabel(lead.next_follow_up_at, true)}` : lead.stage}</small><em>{money(lead.potential_commission_cents)} potential commission</em></button>) : <p className="lane-empty">No {label.toLowerCase()} yet.</p>}</section>; })}</div>}</section>}
       {activeView === 'leads' && (
         <section className="queue-view">
           <div className="page-head queue-page-head">
