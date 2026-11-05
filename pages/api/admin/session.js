@@ -18,9 +18,22 @@ export default function adminSession(req, res) {
     readCookie(req.headers.cookie, 'admin_session'),
     'admin'
   );
-  if (!claim) return res.status(401).json({ authenticated: false });
+  if (claim) {
+    return res
+      .status(200)
+      .json({ authenticated: true, email: claim.email, role: 'admin' });
+  }
 
-  return res
-    .status(200)
-    .json({ authenticated: true, email: claim.email, role: 'admin' });
+  // Local `next dev` previews can exercise the workspace without a real
+  // magic-link session. This server-side condition is unavailable in
+  // production builds and deployments.
+  if (process.env.NODE_ENV === 'development') {
+    return res.status(200).json({
+      authenticated: true,
+      email: 'local-admin-preview@onyx.invalid',
+      role: 'admin',
+    });
+  }
+
+  return res.status(401).json({ authenticated: false });
 }

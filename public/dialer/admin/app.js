@@ -662,7 +662,8 @@ function sharedLegacyLead(lead) {
     stage: lead.stage,
     disposition: lead.disposition,
     notes: lead.notes,
-    followAt: lead.followAt ? new Date(lead.followAt).toISOString() : null
+    followAt: lead.followAt ? new Date(lead.followAt).toISOString() : null,
+    assignedTo: lead.assignedTo || lead.assigned_to || lead.follow_up_owner_email || null,
   };
 }
 
@@ -744,6 +745,14 @@ async function openSharedLead(leadId) {
       ["Current stage", lead.stage || "New"]
     ].map(([label, value]) => `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join("");
     document.getElementById("sharedDealStatus").value = lead.deal_status || "open";
+    const assignee = document.getElementById("sharedAssignee");
+    const campaign = document.getElementById("sharedAssignmentCampaign");
+    assignee.innerHTML = contractors.map((item) => `<option value="${escapeHtml(item.email)}">${escapeHtml(item.name)} · ${escapeHtml(item.email)}</option>`).join("");
+    campaign.innerHTML = campaigns.map((item) => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name)}</option>`).join("");
+    campaign.value = lead.campaign_id || "";
+    const currentAssignee = String(lead.follow_up_owner_email || "").toLowerCase();
+    if ([...assignee.options].some((option) => option.value === currentAssignee)) assignee.value = currentAssignee;
+    document.getElementById("sharedAssignmentStatus").textContent = currentAssignee ? `Assigned to ${currentAssignee}` : "Not assigned";
     document.getElementById("sharedDealCommission").value = ((Number(lead.potential_commission_cents) || 0) / 100).toFixed(2);
     document.getElementById("sharedLeadActivityCount").textContent = `${payload.activities.length} activities`;
     document.getElementById("sharedLeadActivities").innerHTML = payload.activities.length ? payload.activities.map((activity) => `<div class="shared-activity"><strong>${escapeHtml(activity.activity_type.replace("_", " "))}</strong> · ${escapeHtml(activity.actor_email || "System")}${activity.note ? `<div>${escapeHtml(activity.note)}</div>` : ""}<small>${activityDate(activity.created_at)}${activity.scheduled_for ? ` · Scheduled ${activityDate(activity.scheduled_for)}` : ""}${activity.resulting_stage ? ` · ${escapeHtml(activity.resulting_stage)}` : ""}</small></div>`).join("") : '<div class="sales-empty">No shared activity yet.</div>';
@@ -755,9 +764,49 @@ async function openSharedLead(leadId) {
 }
 
 document.getElementById("refreshSharedPipeline").onclick = () => loadSharedPipeline();
+document.getElementById("reconcileSharedOperations").onclick = async () => {
+  const confirmed = window.confirm(
+    "Reconcile the current Admin queue with the shared operations service? This writes the current browser queue and its explicit assignments to the shared server."
+  );
+  if (!confirmed) return;
+  const button = document.getElementById("reconcileSharedOperations");
+  button.disabled = true;
+  button.textContent = "Reconciling…";
+  try {
+    await syncSharedOperations();
+    await loadSharedPipeline({ quiet: true });
+    notify("Shared operations reconciliation completed");
+  } catch (error) {
+    notify(error.message || "Unable to reconcile shared operations");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Reconcile Admin queue";
+  }
+};
 document.getElementById("closeSharedLead").onclick = () => {
   selectedSharedLeadId = "";
   document.getElementById("sharedLeadDetail").hidden = true;
+};
+document.getElementById("sharedAssignmentForm").onsubmit = async (event) => {
+  event.preventDefault();
+  if (!selectedSharedLeadId) return;
+  const status = document.getElementById("sharedAssignmentStatus");
+  status.textContent = "Saving assignment…";
+  try {
+    const response = await fetch(`/api/operations/leads/${encodeURIComponent(selectedSharedLeadId)}/assignment`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contractorEmail: document.getElementById("sharedAssignee").value, campaignId: document.getElementById("sharedAssignmentCampaign").value })
+    });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || "Unable to save assignment");
+    status.textContent = "Assignment saved";
+    notify("Lead assignment saved");
+    await loadSharedPipeline({ quiet:true });
+    await openSharedLead(selectedSharedLeadId);
+  } catch (error) {
+    status.textContent = error.message || "Unable to save assignment";
+  }
 };
 document.getElementById("sharedDealForm").onsubmit = async (event) => {
   event.preventDefault();
@@ -1738,6 +1787,7 @@ async function syncSharedOperations(sourceLeads = leads) {
     disposition: lead.disposition,
     notes: lead.notes,
     followAt: lead.followAt ? new Date(lead.followAt).toISOString() : null,
+    assignedTo: lead.assignedTo || lead.assigned_to || lead.follow_up_owner_email || null,
   }));
   const batchSize = 250;
   for (let start = 0; start < sharedLeads.length; start += batchSize) {
