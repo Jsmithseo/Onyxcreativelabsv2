@@ -35,3 +35,21 @@ test('activity update keeps SQL binds aligned while preserving the owner', async
     store.setOperationsDatabaseForTests(null);
   }
 });
+
+test('contractor lead queries are restricted to the assigned owner and expose Calendly status', async () => {
+  let captured;
+  store.setOperationsDatabaseForTests({
+    async query(sql, values) {
+      captured = { sql, values };
+      return [];
+    },
+  });
+  try {
+    await store.listPipeline(['campaign_1'], 'jeremy@example.com', true);
+    assert.match(captured.sql, /leads\.follow_up_owner_email = \$2/);
+    assert.match(captured.sql, /AS calendly_appointment_count/);
+    assert.deepEqual(captured.values, [['campaign_1'], 'jeremy@example.com', true]);
+  } finally {
+    store.setOperationsDatabaseForTests(null);
+  }
+});

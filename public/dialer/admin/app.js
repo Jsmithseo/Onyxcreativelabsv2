@@ -521,7 +521,6 @@ function escapeHtml(value) {
 let sharedWorkspace = { campaigns: [], leads: [] };
 let selectedSharedLeadId = "";
 const sharedPipelineColumns = [
-  ["open", "Open leads"],
   ["appointments", "Booked appointments"],
   ["followups", "Follow-ups"],
   ["pitched", "Pitched"],
@@ -543,7 +542,11 @@ function sharedPipelineLane(lead) {
   if (lead.stage === "Appointment Set") return "appointments";
   if (lead.stage === "Pitched" || lead.stage === "Qualified") return "pitched";
   if (lead.stage === "Contacted" && (lead.disposition === "Connected — follow up" || lead.next_follow_up_at)) return "followups";
-  return "open";
+  return "appointments";
+}
+
+function hasCalendlyAppointment(lead) {
+  return Number(lead.calendly_appointment_count || 0) > 0;
 }
 
 function activityDate(value) {
@@ -554,7 +557,8 @@ function activityDate(value) {
 function renderSharedPipeline() {
   const board = document.getElementById("sharedPipelineBoard");
   if (!board) return;
-  const leads = Array.isArray(sharedWorkspace.leads) ? sharedWorkspace.leads : [];
+  const leads = (Array.isArray(sharedWorkspace.leads) ? sharedWorkspace.leads : [])
+    .filter(hasCalendlyAppointment);
   board.innerHTML = sharedPipelineColumns.map(([id, label]) => {
     const laneLeads = leads.filter((lead) => sharedPipelineLane(lead) === id);
     return `<section class="shared-pipeline-column" data-shared-pipeline-stage="${id}"><div class="shared-pipeline-column-head"><span>${label}</span><small>${laneLeads.length}</small></div><div class="shared-pipeline-cards">${laneLeads.length ? laneLeads.map((lead) => `<button type="button" class="shared-lead-card" draggable="true" data-shared-lead="${escapeHtml(lead.id)}"><strong>${escapeHtml(lead.name || "Unnamed lead")}</strong><span>${escapeHtml(lead.campaign_name || "")}</span><span>${escapeHtml(lead.last_activity_by ? `Last updated by ${lead.last_activity_by}` : "No activity yet")}</span><span class="commission">Potential ${formatCommission(lead.potential_commission_cents)}</span></button>`).join("") : '<div class="sales-empty">Drop leads here</div>'}</div></section>`;
@@ -599,7 +603,6 @@ async function moveSharedLead(leadId, lane) {
 
   const [laneId, laneLabel] = next;
   const stageByLane = {
-    open: "New",
     appointments: "Appointment Set",
     followups: "Contacted",
     pitched: "Pitched",
