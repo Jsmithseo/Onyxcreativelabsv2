@@ -36,7 +36,7 @@ test('activity update keeps SQL binds aligned while preserving the owner', async
   }
 });
 
-test('contractor lead queries are restricted to the assigned owner and expose Calendly status', async () => {
+test('campaign lead queries expose Calendly status without adding an owner restriction', async () => {
   let captured;
   store.setOperationsDatabaseForTests({
     async query(sql, values) {
@@ -45,10 +45,9 @@ test('contractor lead queries are restricted to the assigned owner and expose Ca
     },
   });
   try {
-    await store.listPipeline(['campaign_1'], 'jeremy@example.com', true);
-    assert.match(captured.sql, /leads\.follow_up_owner_email = \$2/);
+    await store.listPipeline(['campaign_1']);
     assert.match(captured.sql, /AS calendly_appointment_count/);
-    assert.deepEqual(captured.values, [['campaign_1'], 'jeremy@example.com', true]);
+    assert.deepEqual(captured.values, [['campaign_1'], '', false]);
   } finally {
     store.setOperationsDatabaseForTests(null);
   }

@@ -22,8 +22,7 @@ export default async function activities(req, res) {
     const campaignIds = allowedCampaignIds(principal, allCampaigns);
     const lead = await getLeadDetail(
       req.body?.leadId,
-      campaignIds,
-      principal.role === 'contractor' ? principal.email : ''
+      campaignIds
     );
     if (!lead) return res.status(404).json({ error: 'Lead not found.' });
 
