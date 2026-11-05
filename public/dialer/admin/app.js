@@ -358,7 +358,7 @@ function showCallDetails(callIndex) {
     ["Time zone", lead?.zone || "Not recorded"]
   ];
   document.getElementById("callDetailsGrid").innerHTML = fields.map(([label, value]) => `<div class="call-detail-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join("");
-  document.getElementById("callDetailsNote").textContent = entry.note || lead?.notes || "No call notes recorded.";
+  document.getElementById("callDetailsNote").textContent = entry.note || (entry.actorEmail ? "" : lead?.notes) || "No call notes recorded.";
   document.getElementById("callDetailsModal").classList.add("open");
   document.getElementById("callDetailsModal").setAttribute("aria-hidden", "false");
 }
