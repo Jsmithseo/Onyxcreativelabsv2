@@ -340,13 +340,14 @@ function formatCallDuration(seconds) {
 }
 
 function showCallDetails(callIndex) {
-  const entry = callLog[callIndex];
+  const entry = typeof callIndex === "object" ? callIndex : callLog[callIndex];
   if (!entry) return;
   const lead = leads.find((item) => item.id === entry.leadId);
   const followUp = lead?.followAt ? new Date(lead.followAt).toLocaleString([], { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" }) : "None scheduled";
   document.getElementById("callDetailsTitle").textContent = entry.name || "Call details";
   document.getElementById("callDetailsSubtitle").textContent = `${entry.campaign || "—"} · ${formatPhone(entry.phone)}`;
   const fields = [
+    ["Called by", entry.actorEmail || "Admin"],
     ["Called at", new Date(entry.at).toLocaleString([], { month:"short", day:"numeric", year:"numeric", hour:"numeric", minute:"2-digit" })],
     ["Call length", formatCallDuration(entry.duration)],
     ["Disposition", entry.disposition || "Not recorded"],
@@ -398,6 +399,24 @@ function renderLeadHistory(lead) {
   const history = callLog.filter((entry) => entry.leadId === lead.id);
   document.getElementById("leadHistoryCount").textContent = `${history.length} attempt${history.length === 1 ? "" : "s"}`;
   document.getElementById("leadCallHistory").innerHTML = history.length ? [...history].reverse().map((entry) => `<div class="lead-history-row"><strong>${new Date(entry.at).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}</strong> · ${entry.duration || 0}s · ${escapeHtml(entry.disposition || "No disposition")}<br>${escapeHtml(entry.note || "No note")}${entry.appointment ? `<br>Appointment: ${escapeHtml(entry.appointment)}` : ""}</div>`).join("") : '<div class="history-empty">No calls for this lead yet.</div>';
+  if (lead.sharedLeadId) loadLeadCallHistory(lead, history);
+}
+
+async function loadLeadCallHistory(lead, localHistory) {
+  try {
+    const response = await fetch(`/api/operations/leads/${encodeURIComponent(lead.sharedLeadId)}`, { cache:"no-store" });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || "Unable to load shared calls");
+    if (selectedIndex !== lead.id) return;
+    const calls = (payload.activities || []).filter((activity) => activity.activity_type === "call");
+    // Admin calls are already in its local log; the shared contractor records
+    // are read directly and never copied into that browser-owned log.
+    const history = [...localHistory.map((entry) => ({ ...entry, actorEmail:"Admin" })), ...calls.filter((call) => call.actor_role === "contractor").map((call) => ({ at:call.created_at, actorEmail:call.actor_email, disposition:call.disposition, note:call.note, duration:call.duration_seconds }))].sort((a,b) => new Date(b.at) - new Date(a.at));
+    document.getElementById("leadHistoryCount").textContent = `${history.length} calls`;
+    document.getElementById("leadCallHistory").innerHTML = history.length ? history.map((entry) => `<div class="lead-history-row"><strong>${escapeHtml(activityDate(entry.at))}</strong> · Called by ${escapeHtml(entry.actorEmail)}<br>${escapeHtml(entry.disposition || "Call logged")}${entry.duration ? ` · ${formatCallDuration(entry.duration)}` : ""}<br>${escapeHtml(entry.note || "No call note")}</div>`).join("") : '<div class="history-empty">No calls for this lead yet.</div>';
+  } catch {
+    if (selectedIndex === lead.id) document.getElementById("leadCallHistory").insertAdjacentHTML("beforeend", '<div class="history-empty">Shared call history could not be loaded. Reopen this lead to retry.</div>');
+  }
 }
 
 function renderCompanyOverview(lead) {
@@ -519,6 +538,67 @@ function escapeHtml(value) {
 }
 
 let sharedWorkspace = { campaigns: [], leads: [] };
+let contractorReport = null;
+let sharedCallHistory = { calls:[], total:0 };
+let sharedCallPage = 0;
+let contractorActivityRequest = 0;
+const sharedCallPageSize = 20;
+
+function contractorReportKey() {
+  return `${document.getElementById("statsDate").value}|${statsMode === "overall" ? "" : document.getElementById("campaignSelect").value}`;
+}
+
+function renderSharedCallHistory() {
+  const { calls, total } = sharedCallHistory;
+  document.getElementById("sharedCallHistoryCount").textContent = `${total} calls logged`;
+  document.getElementById("sharedCallHistoryRows").innerHTML = calls.length ? calls.map((call, index) => `<div class="history-row shared-call-row" data-shared-call="${index}" role="button" tabindex="0"><span><strong>${escapeHtml(call.lead_name)}</strong><br>${escapeHtml(call.campaign_name)}</span><span>${escapeHtml(call.actor_email)}</span><span>${escapeHtml(call.disposition || "Call logged")}</span><span>${escapeHtml(activityDate(call.created_at))}</span></div>`).join("") : '<div class="history-empty">No BDR calls logged for this campaign yet.</div>';
+  document.querySelectorAll(".shared-call-row").forEach((row) => {
+    const open = () => {
+      const call = calls[Number(row.dataset.sharedCall)];
+      showCallDetails({ leadId:leads.find((lead) => lead.sharedLeadId === call.lead_id)?.id, name:call.lead_name, campaign:call.campaign_name, phone:call.phone, at:call.created_at, actorEmail:call.actor_email, disposition:call.disposition, duration:call.duration_seconds, note:call.note });
+    };
+    row.onclick = open;
+    row.onkeydown = (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); } };
+  });
+  document.getElementById("sharedCallHistoryPage").textContent = total ? `${sharedCallPage * sharedCallPageSize + 1}–${Math.min((sharedCallPage + 1) * sharedCallPageSize, total)} of ${total}` : "0 calls";
+  document.getElementById("sharedCallsPrevious").disabled = sharedCallPage === 0;
+  document.getElementById("sharedCallsNext").disabled = (sharedCallPage + 1) * sharedCallPageSize >= total;
+}
+
+async function refreshContractorActivity() {
+  const request = ++contractorActivityRequest;
+  const key = contractorReportKey();
+  const [date, campaign] = key.split("|");
+  const scope = campaign ? campaigns.find((item) => item.id === campaign)?.name || campaign : "All campaigns";
+  const params = new URLSearchParams({ from:date, to:date });
+  if (campaign) params.set("campaign", campaign);
+  const historyParams = new URLSearchParams({ contractorsOnly:"true", offset:String(sharedCallPage * sharedCallPageSize), limit:String(sharedCallPageSize) });
+  if (campaign) historyParams.set("campaign", campaign);
+  document.getElementById("sharedCallHistoryScope").textContent = `All dates · ${scope}`;
+  const results = await Promise.allSettled([
+    fetch(`/api/admin/call-report?${params}`, { cache:"no-store" }).then(async (response) => { const data = await response.json(); if (!response.ok) throw new Error(data.error); return data; }),
+    fetch(`/api/operations/calls?${historyParams}`, { cache:"no-store" }).then(async (response) => { const data = await response.json(); if (!response.ok) throw new Error(data.error); return data; }),
+  ]);
+  if (request !== contractorActivityRequest || key !== contractorReportKey()) return;
+  if (results[0].status === "fulfilled") {
+    contractorReport = { ...results[0].value, key };
+    document.getElementById("contractorReportScope").textContent = `${scope} · ${date} · Pacific time`;
+    document.getElementById("contractorReportRows").innerHTML = '<div class="contractor-report-row report-head"><span>Contractor</span><span>Calls logged</span><span>Outcomes recorded</span><span>Appointments booked</span><span>Last call</span></div>' + contractorReport.contractors.map((row) => `<div class="contractor-report-row"><span><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.email)}</small></span><span>${row.calls}</span><span>${row.outcomes}</span><span>${row.appointments}</span><span>${row.last_call_at ? escapeHtml(activityDate(row.last_call_at)) : "—"}</span></div>`).join("");
+  } else {
+    contractorReport = null;
+    document.getElementById("contractorReportScope").textContent = "Report unavailable. Select Refresh to retry.";
+    document.getElementById("contractorReportRows").innerHTML = "";
+  }
+  if (results[1].status === "fulfilled") {
+    sharedCallHistory = results[1].value;
+    if (sharedCallPage && sharedCallPage * sharedCallPageSize >= sharedCallHistory.total) { sharedCallPage = 0; return refreshContractorActivity(); }
+    renderSharedCallHistory();
+  } else {
+    document.getElementById("sharedCallHistoryRows").innerHTML = '<div class="history-empty">Call history unavailable. Select Refresh to retry.</div>';
+  }
+  updateMetrics(document.getElementById("campaignSelect").value);
+  renderGoals();
+}
 let selectedSharedLeadId = "";
 
 function mergeSharedCampaigns() {
@@ -569,6 +649,7 @@ function mergeSharedCampaigns() {
       industry:String(shared.notes || "").match(/^Industry:\s*(.+)$/im)?.[1]?.trim() || "",
       followAt:shared.next_follow_up_at ? new Date(shared.next_follow_up_at).getTime() : null,
       dnc:shared.stage === "Do Not Call", assignedTo:shared.follow_up_owner_email || null,
+      ...(shared.last_call_at ? { called:true, lastContact:new Date(shared.last_call_at).getTime(), attempts:Number(shared.call_count || 1), lastCalledBy:shared.last_called_by } : {}),
     });
   }
   campaigns.forEach((campaign) => { campaign.leads = leads.filter((lead) => lead.campaign === campaign.id).length; });
@@ -593,16 +674,17 @@ function formatCommission(cents) {
 }
 
 function sharedPipelineLane(lead) {
+  if (lead.pipeline_lane) return lead.pipeline_lane;
   if (lead.deal_status === "won" || lead.stage === "Won") return "won";
   if (lead.deal_status === "lost" || lead.stage === "Lost") return "lost";
   if (lead.stage === "Appointment Set") return "appointments";
-  if (lead.stage === "Pitched" || lead.stage === "Qualified") return "pitched";
+  if (lead.stage === "Pitched") return "pitched";
   if (lead.stage === "Contacted" && (lead.disposition === "Connected — follow up" || lead.next_follow_up_at)) return "followups";
   return "appointments";
 }
 
 function hasCalendlyAppointment(lead) {
-  return Number(lead.calendly_appointment_count || 0) > 0;
+  return lead.pipeline_eligible ?? Number(lead.calendly_appointment_count || 0) > 0;
 }
 
 function activityDate(value) {
@@ -799,6 +881,7 @@ async function loadSharedPipeline({ quiet = false } = {}) {
       renderCalendar();
     }
     renderSharedPipeline();
+    await refreshContractorActivity();
     syncCampaignCommissionInputs();
     if (!quiet) notify("Shared pipeline refreshed");
   } catch (error) {
@@ -999,7 +1082,9 @@ function updateMetrics(campaignId) {
   const dailyFollowups = leads.filter((lead) => matchesDate(lead.followAt) && (statsMode === "overall" || lead.campaign === campaign.id));
   const connected = dailyCalls.filter((entry) => ["Connected — qualified", "Connected — follow up"].includes(entry.disposition)).length;
   const talkSeconds = dailyCalls.reduce((total, entry) => total + Number(entry.duration || 0), 0);
-  const stats = { calls:dailyCalls.length, talk:formatTalkTime(talkSeconds), appointments:dailyAppointments.length, deals:dailyDeals.length, followups:dailyFollowups.length, connect:dailyCalls.length ? `${Math.round((connected / dailyCalls.length) * 100)}%` : "0%" };
+  const shared = contractorReport?.key === contractorReportKey() ? contractorReport.totals : { calls:0, connected:0, talk_seconds:0 };
+  const totalCalls = dailyCalls.length + shared.calls;
+  const stats = { calls:totalCalls, talk:formatTalkTime(talkSeconds + shared.talk_seconds), appointments:dailyAppointments.length, deals:dailyDeals.length, followups:dailyFollowups.length, connect:totalCalls ? `${Math.round(((connected + shared.connected) / totalCalls) * 100)}%` : "0%" };
   const dateLabel = new Date(`${statsDate}T12:00:00`).toLocaleDateString([], { month:"short", day:"numeric", year:"numeric" });
   document.getElementById("campaignStatsTitle").textContent = `${statsMode === "overall" ? "All campaigns" : campaign.name} · ${dateLabel}`;
   document.getElementById("metricCalls").textContent = stats.calls;
@@ -1019,7 +1104,8 @@ function goalProgress(value, goal) {
 function renderGoals() {
   const campaign = campaigns.find((item) => item.id === document.getElementById("campaignSelect").value) || campaigns[0];
   const today = new Date().toDateString();
-  const callsToday = callLog.filter((entry) => entry.campaign === campaign.name && new Date(entry.at).getTime() >= statsResetAt && new Date(entry.at).toDateString() === today).length;
+  const sharedCallsToday = contractorReport?.key === contractorReportKey() && statsMode === "campaign" && new Date(`${contractorReport.from}T12:00:00`).toDateString() === today ? contractorReport.totals.calls : 0;
+  const callsToday = sharedCallsToday + callLog.filter((entry) => entry.campaign === campaign.name && new Date(entry.at).getTime() >= statsResetAt && new Date(entry.at).toDateString() === today).length;
   const appointmentsToday = [...appointments, ...sharedAppointments].filter((entry) => entry.campaign === campaign.name && entry.createdAt && new Date(entry.createdAt).toDateString() === today).length;
   const callGoal = (goals.callGoals || {})[campaign.id] ?? 120;
   const appointmentGoal = (goals.appointmentGoals || {})[campaign.id] ?? 0;
@@ -1533,22 +1619,26 @@ document.getElementById("contractorForm").onsubmit = async (event) => {
     inviteButton.textContent = editingContractorEmail ? "Save changes" : "Send invite";
   }
 };
-document.getElementById("campaignSelect").onchange = (event) => { updateMetrics(event.target.value); renderGoals(); };
+document.getElementById("campaignSelect").onchange = (event) => { sharedCallPage = 0; updateMetrics(event.target.value); renderGoals(); refreshContractorActivity(); };
 document.getElementById("settingsGoalCampaign").onchange = (event) => {
   document.getElementById("campaignSelect").value = event.target.value;
   updateMetrics(event.target.value);
   renderGoals();
   renderMiningProfile(event.target.value);
+  sharedCallPage = 0; refreshContractorActivity();
 };
-document.getElementById("showCampaignStats").onclick = () => { statsMode = "campaign"; updateMetrics(document.getElementById("campaignSelect").value); };
-document.getElementById("showOverallStats").onclick = () => { statsMode = "overall"; updateMetrics(document.getElementById("campaignSelect").value); };
-document.getElementById("statsDate").onchange = () => updateMetrics(document.getElementById("campaignSelect").value);
+document.getElementById("showCampaignStats").onclick = () => { statsMode = "campaign"; sharedCallPage = 0; updateMetrics(document.getElementById("campaignSelect").value); refreshContractorActivity(); };
+document.getElementById("showOverallStats").onclick = () => { statsMode = "overall"; sharedCallPage = 0; updateMetrics(document.getElementById("campaignSelect").value); refreshContractorActivity(); };
+document.getElementById("statsDate").onchange = () => { updateMetrics(document.getElementById("campaignSelect").value); refreshContractorActivity(); };
+document.getElementById("refreshContractorActivity").onclick = () => refreshContractorActivity();
+document.getElementById("sharedCallsPrevious").onclick = () => { sharedCallPage = Math.max(0, sharedCallPage - 1); refreshContractorActivity(); };
+document.getElementById("sharedCallsNext").onclick = () => { sharedCallPage++; refreshContractorActivity(); };
 document.getElementById("openCampaign").onclick = () => openCampaign(document.getElementById("campaignSelect").value);
 document.getElementById("leadSearch").onkeydown = (event) => { if (event.key === "Enter") openSearchResult(event.currentTarget.value); };
 document.getElementById("toggleCallHistory").onclick = () => {
   const panel = document.getElementById("callHistoryPanel");
   panel.hidden = !panel.hidden;
-  document.getElementById("toggleCallHistory").textContent = panel.hidden ? "View call history" : "Hide call history";
+  document.getElementById("toggleCallHistory").textContent = panel.hidden ? "View Admin call history" : "Hide Admin call history";
 };
 document.getElementById("toggleCalendar").onclick = () => {
   const panel = document.getElementById("calendarPanel");

@@ -49,6 +49,7 @@
     "semi": true
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.15",
     "prettier": "^3.0.1"
   }
 }

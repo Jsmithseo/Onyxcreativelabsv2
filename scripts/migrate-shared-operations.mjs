@@ -42,7 +42,7 @@ const statements = [
       time_zone TEXT NOT NULL DEFAULT '',
       source TEXT NOT NULL DEFAULT '',
       stage TEXT NOT NULL DEFAULT 'New'
-        CHECK (stage IN ('New', 'Contacted', 'Qualified', 'Appointment Set', 'Won', 'Lost', 'Do Not Call')),
+        CHECK (stage IN ('New', 'Contacted', 'Qualified', 'Appointment Set', 'Pitched', 'Won', 'Lost', 'Do Not Call')),
       disposition TEXT NOT NULL DEFAULT '',
       notes TEXT NOT NULL DEFAULT '',
       next_follow_up_at TIMESTAMPTZ,

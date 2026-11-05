@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { previewContractorCsv } from '../../lib/contractorLeadImport.mjs';
 import LeadBriefing from '../../components/bdr/LeadBriefing';
+import { belongsInCallQueue, nextQueueLead } from '../../lib/callQueue.mjs';
+import CallHistory from '../../components/bdr/CallHistory';
 import PipelineComponent from './PipelineComponent';
 
 const workableStages = ['New', 'Contacted', 'Qualified', 'Appointment Set', 'Pitched', 'Do Not Call'];
@@ -11,6 +13,12 @@ const lanes = [['appointments', 'Appointments'], ['followups', 'Follow-ups'], ['
 const emptyDashboard = { stats: { calls_today: 0, talk_seconds: 0, appointments_today: 0, deals_closed: 0, connect_rate: 0, follow_ups_due: 0 }, calls: [], followUps: [] };
 const zoneDefinitions = [['PT', 'Pacific', 'America/Los_Angeles'], ['MT', 'Mountain', 'America/Denver'], ['CT', 'Central', 'America/Chicago'], ['ET', 'Eastern', 'America/New_York']];
 const queuePageSize = 20;
+
+function bdrFetch(url, options = {}) {
+  const headers = new Headers(options.headers);
+  headers.set('X-Onyx-Workspace', 'bdr');
+  return fetch(url, { ...options, headers });
+}
 
 async function responseJson(response, fallbackMessage) {
   const contentType = response.headers.get('content-type') || '';
@@ -55,18 +63,19 @@ function leadIndustry(lead) {
 }
 
 function pipelineLane(lead) {
+  if (lead.pipeline_lane) return lead.pipeline_lane;
   if (lead.deal_status === 'won' || lead.stage === 'Won') return 'won';
   if (lead.deal_status === 'lost' || lead.stage === 'Lost') return 'lost';
   const followUp = lead.next_follow_up_at ? new Date(lead.next_follow_up_at).valueOf() : NaN;
   if (Number.isFinite(followUp) && followUp <= Date.now()) return 'followups';
   if (lead.disposition === 'Connected — follow up' && !lead.next_follow_up_at) return 'followups';
   if (lead.stage === 'Appointment Set') return 'appointments';
-  if (lead.stage === 'Pitched' || lead.stage === 'Qualified') return 'pitched';
+  if (lead.stage === 'Pitched') return 'pitched';
   return 'appointments';
 }
 
 function hasCalendlyAppointment(lead) {
-  return Number(lead.calendly_appointment_count || 0) > 0;
+  return lead.pipeline_eligible ?? Number(lead.calendly_appointment_count || 0) > 0;
 }
 
 function preferredZone(leads) {
@@ -157,9 +166,9 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const [loading, setLoading] = useState(true);
   const [dashboardLoading, setDashboardLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [liveCall, setLiveCall] = useState(null);
   const [callSeconds, setCallSeconds] = useState(0);
-  const [showHistory, setShowHistory] = useState(false);
   const [queueFilters, setQueueFilters] = useState({
     query: '',
     zone: '',
@@ -168,6 +177,15 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
     activityDate: '',
   });
   const [queuePage, setQueuePage] = useState(0);
+  const [queueScope, setQueueScope] = useState('active');
+  const [callNotice, setCallNotice] = useState('');
+  const [callHistory, setCallHistory] = useState({ calls:[], total:0 });
+  const [historyPage, setHistoryPage] = useState(0);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState('');
+  const workspaceRequestRef = useRef(0);
+  const historyRequestRef = useRef(0);
+  const savingRef = useRef(false);
   const [showScheduler, setShowScheduler] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [importCsv, setImportCsv] = useState('');
@@ -179,11 +197,13 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const [activity, setActivity] = useState({ activityType: 'call', disposition: '', note: '', scheduledFor: '', nextStage: '', appointmentType: appointmentTypes[0] });
 
   async function loadWorkspace({ keepLoading = false } = {}) {
+    const requestId = ++workspaceRequestRef.current;
     if (keepLoading) setLoading(true);
     try {
-      const response = await fetch('/api/operations/workspace', { cache: 'no-store' });
+      const response = await bdrFetch('/api/operations/workspace', { cache: 'no-store' });
       const payload = await responseJson(response, 'The workspace service returned an unexpected response. Refresh and try again.');
       if (!response.ok) throw new Error(payload.error || 'Unable to load your workspace.');
+      if (requestId !== workspaceRequestRef.current) return null;
       setWorkspace(payload);
       setActiveCampaign((current) => {
         const requested = new URLSearchParams(window.location.search).get('campaign');
@@ -192,8 +212,10 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
         return payload.campaigns[0]?.id || '';
       });
       setError('');
+      return payload;
     } catch (loadError) {
-      setError(loadError.message || 'Unable to load your workspace.');
+      if (requestId === workspaceRequestRef.current) setError(loadError.message || 'Unable to load your workspace.');
+      return null;
     } finally {
       setLoading(false);
     }
@@ -203,7 +225,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
     if (!campaignId) { setDashboard(emptyDashboard); return; }
     setDashboardLoading(true);
     try {
-      const response = await fetch(`/api/operations/dashboard?campaign=${encodeURIComponent(campaignId)}`, { cache: 'no-store' });
+      const response = await bdrFetch(`/api/operations/dashboard?campaign=${encodeURIComponent(campaignId)}`, { cache: 'no-store' });
       const payload = await responseJson(response, 'Today’s activity could not be loaded. Refresh and try again.');
       if (!response.ok) throw new Error(payload.error || 'Unable to load today’s activity.');
       setDashboard(payload);
@@ -211,6 +233,23 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       setError(dashboardError.message || 'Unable to load today’s activity.');
     } finally {
       setDashboardLoading(false);
+    }
+  }
+
+  async function loadCallHistory(campaignId = activeCampaign, page = historyPage) {
+    if (!campaignId) return;
+    const request = ++historyRequestRef.current;
+    setHistoryLoading(true);
+    setHistoryError('');
+    try {
+      const response = await bdrFetch(`/api/operations/calls?campaign=${encodeURIComponent(campaignId)}&offset=${page * queuePageSize}&limit=${queuePageSize}`, { cache:'no-store' });
+      const payload = await responseJson(response, 'Call history could not be loaded.');
+      if (!response.ok) throw new Error(payload.error || 'Call history could not be loaded.');
+      if (request === historyRequestRef.current) setCallHistory(payload);
+    } catch (historyError) {
+      if (request === historyRequestRef.current) setHistoryError(historyError.message || 'Call history could not be loaded.');
+    } finally {
+      if (request === historyRequestRef.current) setHistoryLoading(false);
     }
   }
 
@@ -232,6 +271,24 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
     const interval = window.setInterval(() => setCallSeconds(Math.max(0, Math.floor((Date.now() - liveCall.startedAt) / 1000))), 1000);
     return () => window.clearInterval(interval);
   }, [liveCall]);
+
+  useEffect(() => {
+    if (!activeCampaign || (activeView !== 'operations' && !(activeView === 'leads' && queueScope === 'history'))) return undefined;
+    loadCallHistory(activeCampaign, historyPage);
+    const interval = window.setInterval(() => loadCallHistory(activeCampaign, historyPage), 15000);
+    return () => window.clearInterval(interval);
+  }, [activeView, queueScope, activeCampaign, historyPage]);
+
+  useEffect(() => {
+    setCallHistory({ calls:[], total:0 });
+    setHistoryPage(0);
+  }, [activeCampaign]);
+
+  useEffect(() => {
+    if (!callNotice) return undefined;
+    const timer = window.setTimeout(() => setCallNotice(''), 8000);
+    return () => window.clearTimeout(timer);
+  }, [callNotice]);
 
   useEffect(() => {
     if (!calendarOpen || !calendarEmbedRef.current || !selectedLead) return undefined;
@@ -292,7 +349,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       setShowScheduler(false);
       setSaving(true);
       try {
-        const response = await fetch('/api/operations/activities', {
+        const response = await bdrFetch('/api/operations/activities', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -321,17 +378,19 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   }, [selectedLead]);
 
   async function openLead(lead, { readOnlyPipeline = false } = {}) {
+    if (liveCall && liveCall.leadId !== lead.id) { setError('End the current call timer before opening another lead.'); return; }
     setSelectedLead(lead);
     setPipelineReadOnly(readOnlyPipeline);
     setDetail(null);
     setDetailError('');
+    setSaveError('');
     setCallSeconds(0);
     setShowScheduler(false);
     setCalendarOpen(false);
     calendlyBookingRef.current = '';
-    setActivity({ activityType: 'call', disposition: lead.disposition || '', note: '', scheduledFor: inputDateTime(lead.next_follow_up_at), nextStage: workableStages.includes(lead.stage) ? lead.stage : '', appointmentType: appointmentTypes[0] });
+    setActivity({ activityType: 'call', disposition:'', note:'', scheduledFor:lead.next_follow_up_at && new Date(lead.next_follow_up_at).valueOf() > Date.now() ? inputDateTime(lead.next_follow_up_at) : '', nextStage:workableStages.includes(lead.stage) ? lead.stage : '', appointmentType:appointmentTypes[0] });
     try {
-      const response = await fetch(`/api/operations/leads/${encodeURIComponent(lead.id)}`, { cache: 'no-store' });
+      const response = await bdrFetch(`/api/operations/leads/${encodeURIComponent(lead.id)}`, { cache: 'no-store' });
       const payload = await responseJson(response, 'Lead details could not be loaded. Refresh and try again.');
       if (!response.ok) throw new Error(payload.error || 'Unable to load lead details.');
       setDetail(payload);
@@ -343,9 +402,12 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   }
 
   function openCampaign(id) {
+    if (liveCall) { setError('End the current call timer before changing campaigns.'); return; }
     setActiveCampaign(id);
     setQueueFilters({ query: '', zone: '', stage: '', disposition: '', activityDate: '' });
     setQueuePage(0);
+    setQueueScope('active');
+    setHistoryPage(0);
     setSelectedLead(null);
     setPipelineReadOnly(false);
     setDetail(null);
@@ -381,7 +443,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
     setImporting(true);
     setImportResult('');
     try {
-      const response = await fetch('/api/operations/contractor-lead-import', {
+      const response = await bdrFetch('/api/operations/contractor-lead-import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ campaignId: activeCampaign, csv: importCsv }),
@@ -404,6 +466,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
     const link = phoneLink(detail?.lead.phone || selectedLead?.phone);
     if (!link) { setError('This lead does not have a callable phone number.'); return; }
     setCallSeconds(0);
+    setCallNotice('');
     setLiveCall({ leadId: selectedLead.id, startedAt: Date.now() });
     window.location.href = link;
   }
@@ -417,27 +480,51 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
 
   async function saveActivity(event) {
     event.preventDefault();
-    if (!selectedLead) return;
-    if (liveCall?.leadId === selectedLead.id) { setError('End the active call before saving its activity.'); return; }
+    if (!selectedLead || savingRef.current) return;
+    setSaveError('');
+    if (liveCall?.leadId === selectedLead.id) { setSaveError('End the current call timer before logging the call.'); return; }
     if (activity.activityType === 'call' && callSeconds > 0 && !activity.disposition) {
-      setError('Choose an outcome before saving a recorded call.');
+      setSaveError('Choose an outcome before saving a timed call.');
       return;
     }
-    if (activity.activityType === 'appointment' && !activity.scheduledFor) { setError('Choose an appointment date and time.'); return; }
+    if (activity.activityType === 'appointment' && !activity.scheduledFor) { setSaveError('Choose the booked appointment date and time.'); return; }
+    const scheduledDate = activity.scheduledFor ? new Date(activity.scheduledFor) : null;
+    if (scheduledDate && Number.isNaN(scheduledDate.valueOf())) { setSaveError('Enter a valid date and time.'); return; }
+    if (activity.activityType === 'call' && scheduledDate && scheduledDate.valueOf() <= Date.now()) { setSaveError('Choose a future callback time or clear it.'); return; }
+    const scheduledFor = scheduledDate ? scheduledDate.toISOString() : null;
+    const completedLead = selectedLead;
+    const nextLead = nextQueueLead(queueLeads, completedLead.id);
+    savingRef.current = true;
     setSaving(true);
     try {
       const appointment = activity.activityType === 'appointment';
-      const note = appointment ? [`${activity.appointmentType} scheduled.`, activity.note.trim()].filter(Boolean).join(' ') : activity.note;
-      const response = await fetch('/api/operations/activities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ leadId: selectedLead.id, activityType: activity.activityType, disposition: activity.disposition, note, durationSeconds: appointment ? 0 : callSeconds, scheduledFor: activity.scheduledFor || null, nextStage: appointment ? 'Appointment Set' : activity.nextStage }) });
+      const note = appointment ? ['Calendly appointment recorded manually.', `${activity.appointmentType} scheduled.`, activity.note.trim()].filter(Boolean).join(' ') : activity.note;
+      const response = await bdrFetch('/api/operations/activities', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ leadId:completedLead.id, activityType:activity.activityType, disposition:activity.disposition, note, durationSeconds:appointment ? 0 : callSeconds, scheduledFor, nextStage:appointment ? 'Appointment Set' : activity.nextStage }) });
       const payload = await responseJson(response, 'The lead activity could not be saved. Refresh and try again.');
       if (!response.ok) throw new Error(payload.error || 'Unable to save activity.');
       setCallSeconds(0);
-      await loadWorkspace();
-      await loadDashboard(selectedLead.campaign_id);
-      await openLead({ ...selectedLead, ...payload.lead });
+      const savedLead = { ...completedLead, ...payload.lead, ...(!appointment ? { last_call_at:payload.activity.created_at, last_called_by:payload.activity.actor_email } : {}) };
+      setWorkspace((current) => ({ ...current, leads:current.leads.map((lead) => lead.id === completedLead.id ? { ...lead, ...savedLead } : lead) }));
+      const refreshed = await loadWorkspace();
+      await loadDashboard(completedLead.campaign_id);
+      if (!appointment) {
+        setCallNotice(`Call logged for ${completedLead.name}. Saved in call history and removed from the active queue.`);
+        setCallHistory((current) => ({ ...current, total:current.total + 1 }));
+        await loadCallHistory(completedLead.campaign_id, historyPage);
+        if (activeView === 'leads' && queueScope === 'active') {
+          const next = nextLead && (refreshed?.leads.find((lead) => lead.id === nextLead.id) || nextLead);
+          if (next && belongsInCallQueue(next)) await openLead(next);
+          else { setSelectedLead(null); setDetail(null); }
+        } else {
+          await openLead(savedLead);
+        }
+      } else {
+        await openLead(savedLead);
+      }
     } catch (saveError) {
-      setError(saveError.message || 'Unable to save activity.');
+      setSaveError(saveError.message || 'Unable to save activity.');
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   }
@@ -445,12 +532,14 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const active = workspace.campaigns.find((campaign) => campaign.id === activeCampaign);
   const activeSummary = workspace.campaignSummaries?.find((summary) => summary.campaign_id === activeCampaign) || {};
   const visibleLeads = useMemo(() => workspace.leads.filter((lead) => lead.campaign_id === activeCampaign), [workspace.leads, activeCampaign]);
+  const activeQueueLeads = visibleLeads.filter((lead) => belongsInCallQueue(lead));
   const pipelineLeads = visibleLeads.filter(hasCalendlyAppointment);
   const queueLeads = useMemo(() => {
     const query = queueFilters.query.trim().toLowerCase();
     const zones = queueZoneOrder();
     return visibleLeads
       .filter((lead) => {
+        if (queueScope === 'active' && !belongsInCallQueue(lead)) return false;
         const haystack = [lead.name, lead.company, lead.phone, lead.email]
           .join(' ')
           .toLowerCase();
@@ -473,7 +562,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
         if (zoneDifference) return zoneDifference;
         return String(left.name).localeCompare(String(right.name));
       });
-  }, [queueFilters, visibleLeads]);
+  }, [queueFilters, visibleLeads, queueScope]);
   const queuePageCount = Math.max(1, Math.ceil(queueLeads.length / queuePageSize));
   const safeQueuePage = Math.min(queuePage, queuePageCount - 1);
   const queuePageLeads = queueLeads.slice(
@@ -482,13 +571,13 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   );
   const queueRangeStart = queueLeads.length ? safeQueuePage * queuePageSize + 1 : 0;
   const queueRangeEnd = Math.min((safeQueuePage + 1) * queuePageSize, queueLeads.length);
-  const queuePriority = queueZoneOrder()[0];
   const currentLead = detail?.lead || selectedLead;
   const activeCall = liveCall?.leadId === selectedLead?.id;
   const today = new Date().toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
   const campaignPicker = <label className="campaign-picker">Campaign<select value={activeCampaign} onChange={(event) => setActiveCampaign(event.target.value)}>{workspace.campaigns.map((campaign) => <option key={campaign.id} value={campaign.id}>{campaign.name}</option>)}</select></label>;
   const metrics = [['Calls today', dashboard.stats?.calls_today || 0], ['Talk time', duration(dashboard.stats?.talk_seconds)], ['Appointments', dashboard.stats?.appointments_today || 0], ['Deals closed', dashboard.stats?.deals_closed || 0], ['Connect rate', `${dashboard.stats?.connect_rate || 0}%`], ['Follow-ups due', dashboard.stats?.follow_ups_due || 0]];
   const goals = [['Calls today', dashboard.stats?.calls_today || 0, workspace.goals?.calls ?? 120], ['Appointments today', dashboard.stats?.appointments_today || 0, workspace.goals?.appointments ?? 3]];
+  const historyPanel = <CallHistory campaignName={active?.name} calls={callHistory.calls} total={callHistory.total} page={historyPage} pageSize={queuePageSize} loading={historyLoading} error={historyError} onRetry={() => loadCallHistory()} onPage={setHistoryPage} onLead={(call) => openLead(workspace.leads.find((lead) => lead.id === call.lead_id) || { id:call.lead_id, name:call.lead_name, campaign_id:call.campaign_id })} />;
 
   return <div className="bdr-workspace">
     <header className="workspace-header"><div className="header-left"><img className="logo" src="/onyx-creative-labs-logo.webp" alt="Onyx Creative Labs" width="150" height="36" /><nav><button className={activeView === 'operations' ? 'active' : ''} type="button" onClick={() => switchView('operations')}>Dashboard</button><button className={activeView === 'pipeline' ? 'active' : ''} type="button" onClick={() => switchView('pipeline')}>Pipeline</button><button className={activeView === 'leads' ? 'active' : ''} type="button" onClick={() => switchView('leads')}>Leads</button></nav></div><div className="rep"><span className="dot" />{signedInEmail}<button type="button" onClick={onSignOut}>Sign out</button></div></header>
@@ -498,19 +587,25 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
         <div className="page-head"><h1>Business development dashboard</h1><span>BDR workspace</span></div>
         <div className="home-controls"><div className="control-box campaign-control">{workspace.campaigns.length ? <>{campaignPicker}<button className="primary" type="button" disabled={!activeCampaign} onClick={() => openCampaign(activeCampaign)}>Open campaign <span aria-hidden="true">→</span></button></> : <div className="campaign-empty"><span className="campaign-empty-label">Campaign</span><strong>No campaign assigned</strong><p>Your administrator will assign a campaign before you can begin calling.</p></div>}</div><CallingWindows leads={visibleLeads} /></div>
         <div className="stats-heading"><strong>{active?.name || 'Your campaigns'} · {today}</strong><div className="stats-controls"><span>Campaign</span><button type="button" onClick={() => loadDashboard()} disabled={dashboardLoading}>{dashboardLoading ? 'Refreshing…' : 'Refresh'}</button></div></div>
-        <div className="metrics">{metrics.map(([label, value], index) => <article className={`metric ${index === 2 ? 'metric-action' : ''}`} key={label} onClick={index === 2 ? () => setShowHistory(!showHistory) : undefined}><span>{label}</span><strong>{value}</strong></article>)}</div>
+        <div className="metrics">{metrics.map(([label, value], index) => <article className={`metric ${index === 2 ? 'metric-action' : ''}`} key={label} onClick={index === 2 ? () => switchView('pipeline') : undefined}><span>{label}</span><strong>{value}</strong></article>)}</div>
         <section className="panel bdr-goals"><div className="panel-head"><span>My goals</span><span>Daily targets</span></div><div className="goals-grid">{goals.map(([label, value, target]) => <article className="goal-card" key={label}><span>{label}</span><strong>{value} / {target}</strong><div className="goal-track" aria-label={`${label}: ${value} of ${target}`}><i style={{ width: `${goalProgress(value, target)}%` }} /></div></article>)}</div></section>
         <section className="panel campaign-panel"><div className="panel-head"><span>My campaign queues</span><span>{workspace.campaigns.length} assigned</span></div>{loading ? <div className="empty">Loading assigned campaigns…</div> : workspace.campaigns.map((campaign) => { const summary = workspace.campaignSummaries?.find((row) => row.campaign_id === campaign.id) || {}; return <div className="campaign-row" key={campaign.id}><span><strong>{campaign.name}</strong><small>Assigned to your account</small></span><span>{summary.lead_count || 0} leads</span><span>{summary.call_count || 0} calls</span><span>{summary.appointment_count || 0} appts</span><span>{summary.won_count || 0} won</span><button className="campaign-open" type="button" onClick={() => openCampaign(campaign.id)}>Open queue <span aria-hidden="true">→</span></button></div>; })}{!loading && !workspace.campaigns.length && <div className="empty">Your administrator has not assigned a campaign yet.</div>}</section>
-        <div className="operations-grid"><section className="panel"><div className="panel-head"><span>Today’s calls</span><span>{dashboard.calls?.length || 0} logged</span></div>{showHistory && dashboard.calls?.length ? <div>{dashboard.calls.map((call) => <button className="history-row" type="button" key={call.id} onClick={() => openLead({ id: call.lead_id, name: call.lead_name, campaign_id: activeCampaign })}><span><strong>{call.lead_name}</strong><small>{call.disposition || 'Call logged'}</small></span><span>{duration(call.duration_seconds)}</span><span>{dateLabel(call.created_at, true)}</span></button>)}</div> : <div className="empty">Select Appointments above to view your call history.</div>}</section><section className="panel"><div className="panel-head"><span>Follow-ups due</span><span>{dashboard.stats?.follow_ups_due || 0} due</span></div>{dashboard.followUps?.length ? <div>{dashboard.followUps.map((lead) => <button className="history-row" type="button" key={lead.id} onClick={() => openLead(lead)}><span><strong>{lead.name}</strong><small>{lead.company || lead.phone || 'Open lead'}</small></span><span>Due</span><span>{dateLabel(lead.next_follow_up_at, true)}</span></button>)}</div> : <div className="empty">Scheduled follow-ups appear here on the day they are due and remain until you log the next call.</div>}</section></div>
+        {historyPanel}
+        <section className="panel dashboard-followups"><div className="panel-head"><span>Follow-ups due</span><span>{dashboard.stats?.follow_ups_due || 0} due</span></div>{dashboard.followUps?.length ? <div>{dashboard.followUps.map((lead) => <button className="history-row" type="button" key={lead.id} onClick={() => openLead(lead)}><span><strong>{lead.name}</strong><small>{lead.company || lead.phone || 'Open lead'}</small></span><span>Due</span><span>{dateLabel(lead.next_follow_up_at, true)}</span></button>)}</div> : <div className="empty">Scheduled follow-ups appear here when due and remain until the next call is logged.</div>}</section>
       </section>}
-      {activeView === 'pipeline' && <section><div className="page-head"><div><h1>{active?.name || 'Campaign'} sales pipeline</h1><p>Only leads with a Calendly-confirmed appointment appear here. This shared component reflects the Admin master pipeline; use Leads for pre-appointment work.</p></div>{campaignPicker}</div>{!activeCampaign ? <div className="empty">Choose a campaign to open its sales pipeline.</div> : <PipelineComponent lanes={lanes} leads={pipelineLeads} laneFor={pipelineLane} onLeadClick={(lead) => openLead(lead, { readOnlyPipeline: true })} dateLabel={dateLabel} money={money} />}</section>}
+      {activeView === 'pipeline' && <section><div className="page-head"><div><h1>{active?.name || 'Campaign'} sales pipeline</h1><p>Booked appointments appear here and stay in sync with the Admin sales pipeline.</p></div>{campaignPicker}</div>{!activeCampaign ? <div className="empty">Choose a campaign to open its sales pipeline.</div> : <PipelineComponent lanes={lanes} leads={pipelineLeads} laneFor={pipelineLane} onLeadClick={(lead) => openLead(lead, { readOnlyPipeline: true })} dateLabel={dateLabel} money={money} />}</section>}
       {activeView === 'leads' && (
         <section className="queue-view">
           <div className="page-head queue-page-head">
-            <h1>Call queue</h1>
-            <span>{queueLeads.length ? `${queuePriority} leads prioritized · ${queuePageSize} per page` : 'No matching leads'}</span>
+            <h1>{queueScope === 'history' ? 'Call history' : queueScope === 'all' ? 'All leads' : 'Call queue'}</h1>
+            <div className="queue-view-switch" role="group" aria-label="Lead views">
+              <button type="button" aria-pressed={queueScope === 'active'} onClick={() => { setQueueScope('active'); setQueuePage(0); }}>Call queue <span>{activeQueueLeads.length}</span></button>
+              <button type="button" aria-pressed={queueScope === 'all'} onClick={() => { setQueueScope('all'); setQueuePage(0); }}>All leads <span>{visibleLeads.length}</span></button>
+              <button type="button" aria-pressed={queueScope === 'history'} onClick={() => { setQueueScope('history'); setHistoryPage(0); }}>Call history</button>
+            </div>
           </div>
-          <section className="queue-workspace" aria-label="Campaign lead queue">
+          {callNotice && <p className="call-notice" role="status">{callNotice}</p>}
+          {queueScope === 'history' ? historyPanel : <><section className="queue-workspace" aria-label="Campaign lead queue">
             <div className="queue-title">{active?.name || 'Campaign'} · prioritized leads</div>
             <div className="queue-search">
               <label htmlFor="queue-search">Search leads</label>
@@ -555,15 +650,15 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
                     <span><i className="queue-status">{lead.stage || 'New'}</i></span>
                   </button>
                 ))}
-                {!queuePageLeads.length && <div className="queue-empty">No leads match this queue.</div>}
+                {!queuePageLeads.length && <div className="queue-empty">{queueScope === 'active' && !activeQueueLeads.length ? 'No leads waiting to be called. Logged calls are available in Call history and All leads.' : 'No leads match these filters.'}</div>}
               </div>
             </div>
             <div className="queue-footer">
               <span>{queueLeads.length ? `${queueRangeStart}–${queueRangeEnd} of ${queueLeads.length}` : '0 leads'}</span>
               <div><button type="button" disabled={safeQueuePage === 0} onClick={() => setQueuePage((page) => Math.max(0, page - 1))}>Previous</button><button type="button" disabled={safeQueuePage >= queuePageCount - 1} onClick={() => setQueuePage((page) => Math.min(queuePageCount - 1, page + 1))}>Next</button></div>
             </div>
-          </section>
-          <section className="lead-import panel" aria-label="Import leads">
+          </section></>}
+          {queueScope !== 'history' && <section className="lead-import panel" aria-label="Import leads">
             <div className="panel-head"><span>Import leads</span><span>{active?.name || 'Choose a campaign'}</span></div>
             <div className="lead-import-body">
               <p>Upload a CSV for this assigned campaign. Accepted new leads are securely assigned to you. Supported columns include name, company, title, phone, email, LinkedIn, location, time zone, industry, and notes.</p>
@@ -571,7 +666,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
               {importPreview && <div className="import-preview"><strong>{importPreview.accepted.length} ready · {importPreview.rejected.length} rejected</strong>{importPreview.rejected.slice(0, 5).map((row) => <small key={`${row.row}:${row.errors?.join('|')}`}>Row {row.row}: {row.errors.join(' ')}</small>)}<button className="primary" type="button" onClick={importLeads} disabled={!importPreview.accepted.length || importing}>{importing ? 'Importing…' : `Import ${importPreview.accepted.length} leads`}</button></div>}
               {importResult && <p className="import-result" role="status">{importResult}</p>}
             </div>
-          </section>
+          </section>}
         </section>
       )}
       {activeView === 'settings' && <section className="settings"><h1>Settings</h1><p>Your administrator controls campaign access, commission defaults, and deal closure. You can work only the campaigns listed below.</p><ul>{workspace.campaigns.map((campaign) => <li key={campaign.id}>{campaign.name}</li>)}</ul></section>}
@@ -580,18 +675,22 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       <aside className="detail queue-detail" aria-live="polite">
         <header className="queue-detail-head">
           <div><h2>{currentLead?.name || selectedLead.name}</h2><p>{currentLead?.title && currentLead?.company ? `${currentLead.title} · ${currentLead.company}` : `${active?.name || 'Campaign'} lead`}</p></div>
-          <button type="button" aria-label="Close lead details" disabled={activeCall} onClick={() => { setSelectedLead(null); setPipelineReadOnly(false); }}>×</button>
+          <button type="button" aria-label="Close lead details" disabled={activeCall || saving} onClick={() => { setSelectedLead(null); setPipelineReadOnly(false); }}>×</button>
         </header>
         {!pipelineReadOnly && <div className="queue-detail-actions">
-          {activeCall ? <button className="secondary" type="button" onClick={endCall}>End call</button> : <button className="primary" type="button" disabled={!phoneLink(currentLead?.phone)} onClick={startCall}>Call lead</button>}
-          <button className="secondary" type="button" onClick={() => { setShowScheduler(true); setCalendarOpen(true); setActivity((current) => ({ ...current, activityType: 'appointment' })); }}>Appointment scheduler</button>
+          {activeCall ? <button className="secondary" type="button" onClick={endCall}>End call timer</button> : <button className="primary" type="button" disabled={saving || !phoneLink(currentLead?.phone)} onClick={startCall}>Call lead</button>}
+          <button className="secondary" type="button" disabled={saving || activeCall} onClick={() => { setShowScheduler(true); setCalendarOpen(true); setActivity((current) => ({ ...current, activityType: 'appointment' })); }}>Appointment scheduler</button>
         </div>}
-        {activeCall && <div className="queue-call-state">Live call · {duration(callSeconds)}</div>}
+        {activeCall && <div className="queue-call-state">Call timer · {duration(callSeconds)}</div>}
         {pipelineReadOnly ? <section className="queue-read-only"><h3>Read-only pipeline record</h3><p>Administrators manage pipeline placement. Use the Leads workspace to record calls, follow-ups, and appointments.</p></section> : <form className="queue-wrap-up" onSubmit={saveActivity}>
-          <h3>{showScheduler ? 'Appointment scheduler' : 'Wrap up'}</h3>
+          <h3>{showScheduler ? 'Record booked appointment' : 'Log call'}</h3>
+          {!showScheduler && <p className="call-log-help">Manually log this call. Your BDR identity and the time are saved automatically.</p>}
           {showScheduler && <><p className="calendar-helper">Book the time in Calendly, then record the appointment here.</p><button className="secondary calendar-reopen" type="button" onClick={() => setCalendarOpen(true)}>Open Calendly calendar</button><label>Meeting type<select value={activity.appointmentType} onChange={(event) => setActivity({ ...activity, appointmentType: event.target.value })}>{appointmentTypes.map((item) => <option key={item}>{item}</option>)}</select></label><label>Appointment date and time<input type="datetime-local" value={activity.scheduledFor} onChange={(event) => setActivity({ ...activity, scheduledFor: event.target.value })} required /></label></>}
-          {!showScheduler && <div className="queue-form-row"><label>Disposition<select value={activity.disposition} onChange={(event) => setActivity({ ...activity, disposition: event.target.value })}><option value="">Choose outcome</option>{dispositions.map((item) => <option key={item}>{item}</option>)}</select></label><label>Follow-up<input type="date" value={activity.scheduledFor.slice(0, 10)} onChange={(event) => setActivity({ ...activity, scheduledFor: event.target.value })} /></label></div>}
-          <div className="queue-save-row"><button className="primary" type="submit" disabled={saving || activeCall}>{saving ? 'Saving…' : showScheduler ? 'Schedule appointment' : 'Save lead'}</button></div>
+          {!showScheduler && <div className="queue-form-row"><label>Outcome (optional)<select value={activity.disposition} onChange={(event) => setActivity({ ...activity, disposition:event.target.value })}><option value="">Choose outcome</option>{dispositions.map((item) => <option key={item}>{item}</option>)}</select></label><label>Callback time (optional)<input type="datetime-local" value={activity.scheduledFor} onChange={(event) => setActivity({ ...activity, scheduledFor:event.target.value })} /></label></div>}
+          <label className="call-note-input">{showScheduler ? 'Appointment notes (optional)' : 'Call notes (optional)'}<textarea value={activity.note} onChange={(event) => setActivity({ ...activity, note:event.target.value })} placeholder="Record the outcome or next steps." rows="3" /></label>
+          {saveError && <p className="call-save-error" role="alert">{saveError}</p>}
+          <div className="queue-save-row"><button className="primary" type="submit" disabled={saving || activeCall}>{saving ? 'Saving…' : showScheduler ? 'Record booked appointment' : activeView === 'leads' && queueScope === 'active' ? 'Log call & next lead' : 'Log call'}</button></div>
+          {!showScheduler && <p className="call-log-footnote">Saved calls move to Call history. Scheduled callbacks return to the queue when due.</p>}
         </form>}
         <div className="queue-detail-grid">
           <label className="wide">Industry<input value={leadIndustry(currentLead)} readOnly /></label>
@@ -604,9 +703,8 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
           <div className="wide"><small>Disposition</small><strong>{currentLead?.disposition || 'Not recorded'}</strong></div>
         </div>
         {currentLead?.notes && <LeadBriefing key={currentLead.id} notes={currentLead.notes} />}
-        <section className="queue-notes"><div><h3>Notes</h3><span>{detailError || (detail ? pipelineReadOnly ? 'Shared read-only' : 'Shared with your team' : 'Loading lead history…')}</span></div>{!pipelineReadOnly && <textarea value={activity.note} onChange={(event) => setActivity({ ...activity, note: event.target.value })} placeholder="Record what happened on the call." />}</section>
         {currentLead?.campaign_id === 'reviews' && <section className="review-script"><h3>15-minute review-growth call</h3><ol><li>“Could I speak with whoever handles marketing or customer reviews?”</li><li>“Hi, I’m calling from Onyx Creative Labs. I noticed you already have reviews, and we help businesses earn more of them—and more business from them.”</li><li>“Would a quick 15-minute call in the next couple of days be useful? I have tomorrow at 10 or 11.”</li></ol></section>}
-        <section className="queue-history"><h3>Lead call history</h3>{detail?.activities?.length ? detail.activities.map((item) => <article key={item.id}><strong>{item.activity_type.replace('_', ' ')}</strong><span>{dateLabel(item.created_at, true)}{item.disposition ? ` · ${item.disposition}` : ''}{item.activity_type === 'appointment' ? item.scheduled_for ? ` · Scheduled ${dateLabel(item.scheduled_for, true)}` : ' · Calendly confirmed' : ''}{item.actor_email ? ` · Booked by ${item.actor_email}` : ''}</span>{item.note && <p>{item.note}</p>}</article>) : <p>{detailError || (detail ? 'No shared activity yet.' : 'Loading lead history…')}</p>}</section>
+        <section className="queue-history"><h3>Lead call history</h3>{detail?.activities?.length ? detail.activities.map((item) => <article key={item.id}><strong>{item.activity_type === 'call' ? 'Call logged' : item.activity_type.replace('_', ' ')}</strong><span>{dateLabel(item.created_at, true)}{item.disposition ? ` · ${item.disposition}` : ''}{item.activity_type === 'appointment' ? item.scheduled_for ? ` · Scheduled ${dateLabel(item.scheduled_for, true)}` : ' · Calendly confirmed' : ''}{item.actor_email ? ` · ${item.activity_type === 'call' ? 'Called' : item.activity_type === 'appointment' ? 'Booked' : 'Updated'} by ${item.actor_email}` : ''}</span>{item.note && <p>{item.note}</p>}</article>) : <p>{detailError || (detail ? 'No shared activity yet.' : 'Loading lead history…')}</p>}</section>
       </aside>
     )}
     {calendarOpen && <div className="calendar-modal" role="dialog" aria-modal="true" aria-labelledby="calendar-modal-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setCalendarOpen(false); }}><section className="calendar-modal-card"><header><div><h2 id="calendar-modal-title">Book an appointment</h2><p>{currentLead?.name || selectedLead?.name || 'Lead'} · Calendly</p></div><button type="button" aria-label="Close calendar" onClick={() => setCalendarOpen(false)}>×</button></header><div className="calendly-embed" ref={calendarEmbedRef} /></section></div>}
@@ -645,6 +743,9 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       .bdr-workspace .queue-status{display:inline-flex;align-items:center;align-self:center;height:23px;width:max-content;margin-left:9px;padding:0 8px;border-radius:999px;background:#eef6f1;color:var(--green);font-size:11px;font-style:normal}
       .bdr-workspace .queue-empty{min-height:120px;display:grid;place-items:center;padding:24px;color:var(--muted);font-size:14px}
       .bdr-workspace .queue-footer{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 13px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}.bdr-workspace .queue-footer div{display:flex;gap:6px}.bdr-workspace .queue-footer button{min-width:68px;height:30px}.bdr-workspace .queue-footer button:disabled{cursor:default;background:var(--soft);color:#aaa}
+      .bdr-workspace .queue-view-switch{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}.bdr-workspace .queue-view-switch button{display:flex;align-items:center;gap:7px;min-height:35px;padding:5px 11px;border:0;border-right:1px solid var(--line);background:#fff;color:var(--muted);font:inherit;font-size:12px;white-space:nowrap;cursor:pointer}.bdr-workspace .queue-view-switch button:last-child{border-right:0}.bdr-workspace .queue-view-switch button[aria-pressed="true"]{background:#171717;color:#fff;font-weight:650}.bdr-workspace .queue-view-switch span{padding:1px 5px;border-radius:4px;background:#f0f0ee;color:#555;font-size:10px}.bdr-workspace .queue-view-switch button[aria-pressed="true"] span{background:#414141;color:#fff}
+      .bdr-workspace .call-notice{margin:0 0 14px;padding:10px 12px;border:1px solid #c9e4d3;border-radius:6px;background:#f0faf3;color:#28603c;font-size:13px}
+      .bdr-workspace .call-log-help,.bdr-workspace .call-log-footnote{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.5}.bdr-workspace .call-log-footnote{font-size:11px}.bdr-workspace .queue-wrap-up .call-note-input{margin-top:11px}.bdr-workspace .queue-wrap-up textarea{margin:0;min-height:78px;font-size:13px}.bdr-workspace .queue-wrap-up input{min-width:0;font-size:12px}.bdr-workspace .queue-save-row .primary{width:100%;min-height:40px}.bdr-workspace .call-save-error{margin:10px 0 0;color:#9f2e1d;font-size:12px}
       .bdr-workspace .queue-detail{position:fixed;z-index:20;top:60px;right:0;bottom:0;width:min(420px,100%);padding:22px;overflow:auto;background:#fff;border-left:1px solid var(--line);box-shadow:-12px 0 30px rgba(0,0,0,.08)}
       .bdr-workspace .queue-detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-bottom:20px;border-bottom:1px solid var(--line)}.bdr-workspace .queue-detail-head h2{margin:0;font-size:21px;letter-spacing:-.025em}.bdr-workspace .queue-detail-head p{margin:4px 0 0;color:var(--muted);font-size:14px}.bdr-workspace .queue-detail-head button{width:30px;height:30px;flex:0 0 auto;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);font-size:18px;line-height:1;cursor:pointer}
       .bdr-workspace .queue-detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:17px}.bdr-workspace .queue-detail-actions button{height:50px}.bdr-workspace .queue-call-state{display:flex;justify-content:center;margin-top:12px;padding:9px 11px;background:#edf8f2;color:var(--green);font-size:13px;font-weight:700}

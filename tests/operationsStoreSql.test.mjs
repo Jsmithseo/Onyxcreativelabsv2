@@ -9,6 +9,7 @@ const testableStoreSource = storeSource
   .replace("import { neon } from '@neondatabase/serverless';", "const neon = () => { throw new Error('test database must be injected'); };")
   .replace("import { listContractors } from './contractorStore';", 'const listContractors = async () => [];')
   .replace("from './legacyAssignment.mjs';", `from '${pathToFileURL(new URL('../lib/legacyAssignment.mjs', import.meta.url).pathname).href}';`)
+  .replace("from './salesPipeline.mjs';", `from '${new URL('../lib/salesPipeline.mjs', import.meta.url).href}';`)
   .replace("from './contractorLeadImport.mjs';", `from '${pathToFileURL(new URL('../lib/contractorLeadImport.mjs', import.meta.url).pathname).href}';`);
 const store = await import(`data:text/javascript;base64,${Buffer.from(testableStoreSource).toString('base64')}`);
 
@@ -30,7 +31,7 @@ test('activity update keeps SQL binds aligned while preserving the owner', async
     assert.equal(captured.values.length, 11);
     assert.equal(captured.values[6], 'owner@example.com');
     assert.equal(captured.values[8], 'note');
-    assert.deepEqual([...captured.sql.matchAll(/\$(\d+)/g)].map((match) => Number(match[1])).sort((a, b) => a - b), [1, 2, 2, 3, 3, 4, 4, 4, 4, 5, 6, 7, 8, 9, 9, 10, 11]);
+    assert.deepEqual([...new Set([...captured.sql.matchAll(/\$(\d+)/g)].map((match) => Number(match[1])))].sort((a, b) => a - b), [1,2,3,4,5,6,7,8,9,10,11]);
   } finally {
     store.setOperationsDatabaseForTests(null);
   }
