@@ -520,6 +520,62 @@ function escapeHtml(value) {
 
 let sharedWorkspace = { campaigns: [], leads: [] };
 let selectedSharedLeadId = "";
+
+function mergeSharedCampaigns() {
+  let addedCampaign = false;
+  for (const shared of sharedWorkspace.campaigns || []) {
+    let campaign = campaigns.find((item) => item.id === shared.id);
+    if (!campaign) {
+      campaign = { id:shared.id, name:shared.name, status:shared.is_active ? "Active" : "Inactive", sharedManaged:true, leads:0, calls:0, talk:"0m", appointments:0, deals:0, connect:"0%", followups:0 };
+      campaigns.push(campaign);
+      addedCampaign = true;
+    }
+    campaign.name = shared.name;
+    if (campaign.sharedManaged) {
+      const summary = (sharedWorkspace.campaignSummaries || []).find((item) => item.campaign_id === shared.id) || {};
+      campaign.calls = summary.call_count || 0;
+      campaign.appointments = summary.appointment_count || 0;
+      campaign.deals = summary.won_count || 0;
+    }
+    for (const selectId of ["campaignSelect", "settingsGoalCampaign", "commissionCampaign"]) {
+      const select = document.getElementById(selectId);
+      if (!select) continue;
+      let option = [...select.options].find((item) => item.value === shared.id);
+      if (!option) {
+        option = document.createElement("option");
+        option.value = shared.id;
+        select.append(option);
+      }
+      option.textContent = shared.name;
+    }
+  }
+  let nextId = leads.reduce((highest, item) => Math.max(highest, Number(item.id) || 0), -1) + 1;
+  for (const shared of sharedWorkspace.leads || []) {
+    const keys = savedLeadIdentity(shared);
+    let lead = leads.find((item) => item.sharedLeadId === shared.id) || leads.find((item) =>
+      item.campaign === shared.campaign_id && savedLeadIdentity(item).some((key) => keys.includes(key))
+    );
+    if (lead && (lead.id === activeCallLeadId || (lead.id === selectedIndex && document.getElementById("leadDetail").classList.contains("open")))) continue;
+    if (!lead) {
+      lead = { id:nextId++, attempts:0, called:false, lastContact:"" };
+      leads.push(lead);
+    }
+    Object.assign(lead, {
+      sharedLeadId:shared.id, sharedName:shared.name, sharedNotes:shared.notes || "",
+      name:shared.name, campaign:shared.campaign_id, company:shared.company || "—", title:shared.title || "—",
+      phone:shared.phone || "—", email:shared.email || "—", linkedin:shared.linkedin_url || "",
+      location:shared.location || "—", zone:shared.time_zone || "—", source:shared.source || "Shared import",
+      stage:shared.stage, disposition:shared.disposition || "", notes:shared.notes || "",
+      industry:String(shared.notes || "").match(/^Industry:\s*(.+)$/im)?.[1]?.trim() || "",
+      followAt:shared.next_follow_up_at ? new Date(shared.next_follow_up_at).getTime() : null,
+      dnc:shared.stage === "Do Not Call", assignedTo:shared.follow_up_owner_email || null,
+    });
+  }
+  campaigns.forEach((campaign) => { campaign.leads = leads.filter((lead) => lead.campaign === campaign.id).length; });
+  renderCampaigns();
+  renderRows();
+  if (addedCampaign) renderContractors();
+}
 const sharedPipelineColumns = [
   ["appointments", "Booked appointments"],
   ["followups", "Follow-ups"],
@@ -673,6 +729,26 @@ function sharedLegacyLead(lead) {
 }
 
 async function recordSharedAdminActivity(lead, activity = {}) {
+  if (lead.sharedLeadId) {
+    if (lead.name !== lead.sharedName || lead.notes !== lead.sharedNotes) {
+      const profileResponse = await fetch(`/api/operations/leads/${encodeURIComponent(lead.sharedLeadId)}`, {
+        method:"PATCH", headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ name:lead.name, notes:lead.notes || "", previousName:lead.sharedName, previousNotes:lead.sharedNotes }),
+      });
+      const profile = await profileResponse.json();
+      if (!profileResponse.ok) throw new Error(profile.error || "Unable to save lead details");
+      lead.sharedName = profile.lead.name;
+      lead.sharedNotes = profile.lead.notes;
+    }
+    if (!activity.activityType) return { lead:{ id:lead.sharedLeadId } };
+    const response = await fetch("/api/operations/activities", {
+      method:"POST", headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ ...activity, leadId:lead.sharedLeadId, note:activity.note === lead.notes ? "" : activity.note }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Unable to save lead activity");
+    return result;
+  }
   const response = await fetch("/api/operations/admin-legacy-activity", {
     method:"POST",
     headers:{ "Content-Type":"application/json" },
@@ -704,6 +780,7 @@ async function loadSharedPipeline({ quiet = false } = {}) {
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Unable to load shared pipeline");
     sharedWorkspace = payload;
+    mergeSharedCampaigns();
     if (appointmentsResponse.ok) {
       const appointmentPayload = await appointmentsResponse.json();
       sharedAppointments = (appointmentPayload.appointments || [])
@@ -976,7 +1053,7 @@ function renderMiningProfile(campaignId) {
 function renderCampaigns() {
   document.getElementById("campaignCount").textContent = `${campaigns.length} active`;
   document.getElementById("campaignRows").innerHTML = campaigns.map((campaign) => {
-    const sharedAppointmentCount = sharedAppointments.filter((appointment) => appointment.campaign === campaign.name).length;
+    const sharedAppointmentCount = campaign.sharedManaged ? 0 : sharedAppointments.filter((appointment) => appointment.campaign === campaign.name).length;
     return `<div class="campaign-row" data-campaign-row="${campaign.id}" role="button" tabindex="0"><span><strong>${escapeHtml(campaign.name)}</strong><small>${escapeHtml(campaign.status)}</small></span><span>${campaign.leads} leads</span><span>${campaign.calls} calls</span><span>${campaign.appointments + sharedAppointmentCount} appts</span><span>${campaign.deals} won</span><button data-campaign="${campaign.id}">Open</button></div>`;
   }).join("");
   document.querySelectorAll("[data-campaign-row]").forEach((row) => {
@@ -1130,9 +1207,10 @@ function selectLead(index) {
   linkedin.onclick = (event) => { if (!linkedinUrl) event.preventDefault(); };
   document.getElementById("notes").value = lead.notes;
   document.getElementById("disposition").value = lead.disposition || "";
-  const script = callScripts[lead.campaign] || callScripts.school;
+  const customScript = String(lead.notes || "").match(/(?:^|\n)Call script:\s*\n?([\s\S]*?)(?=\n(?:Source|Verified|Industry):|$)/i)?.[1]?.trim();
+  const script = callScripts[lead.campaign] || (lead.campaign.startsWith("onyx-review-") ? callScripts.reviews : callScripts.school);
   document.getElementById("scriptCampaign").textContent = campaigns.find((campaign) => campaign.id === lead.campaign)?.name || "";
-  document.getElementById("callScript").innerHTML = `<strong>Opening</strong>${escapeHtml(script.opener)}<strong>Qualifying questions</strong>${escapeHtml(script.questions)}<strong>Objections</strong>${escapeHtml(script.objections)}`;
+  document.getElementById("callScript").innerHTML = customScript ? escapeHtml(customScript).replace(/\n/g, "<br>") : `<strong>Opening</strong>${escapeHtml(script.opener)}<strong>Qualifying questions</strong>${escapeHtml(script.questions)}<strong>Objections</strong>${escapeHtml(script.objections)}`;
   renderLeadHistory(lead);
   renderCompanyOverview(lead);
   renderCompanyIntelligence(lead);
@@ -1352,7 +1430,7 @@ document.getElementById("notes").oninput = () => {
   noteTimer = setTimeout(() => {
     const lead = getLead(selectedIndex);
     if (lead) lead.notes = document.getElementById("notes").value;
-    document.getElementById("saved").textContent = "Saved";
+    document.getElementById("saved").textContent = lead?.sharedLeadId ? "Save lead to sync changes" : "Saved";
     persistActivity();
   }, 500);
 };
@@ -1777,7 +1855,7 @@ document.getElementById("saveGoals").onclick = async () => {
 // changing this interface or touching browser-local activity history.
 async function syncSharedOperations(sourceLeads = leads) {
   const sharedCampaigns = campaigns.map(({ id, name }) => ({ id, name }));
-  const sharedLeads = sourceLeads.map((lead) => ({
+  const sharedLeads = sourceLeads.filter((lead) => !lead.sharedLeadId).map((lead) => ({
     campaign: lead.campaign,
     name: lead.name,
     company: lead.company,

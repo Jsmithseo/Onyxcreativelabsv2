@@ -52,3 +52,22 @@ test('campaign lead queries expose Calendly status without adding an owner restr
     store.setOperationsDatabaseForTests(null);
   }
 });
+
+test('admin profile changes update only the selected shared lead and leave ownership and stage intact', async () => {
+  let captured;
+  store.setOperationsDatabaseForTests({
+    async query(sql, values) {
+      captured = { sql, values };
+      return [{ id: 'shared-lead-1', name: values[1], notes: values[2] }];
+    },
+  });
+  try {
+    await store.updateLeadProfile({ leadId:'shared-lead-1', name:'  Contact name  ', notes:'Call script:\nVerified briefing.', previousName:'Old name', previousNotes:'Old notes' });
+    assert.deepEqual(captured.values, ['shared-lead-1', 'Contact name', 'Call script:\nVerified briefing.', 'Old name', 'Old notes']);
+    assert.match(captured.sql, /WHERE id = \$1 AND name = \$4 AND notes = \$5/);
+    assert.doesNotMatch(captured.sql, /SET[^;]*(?:follow_up_owner_email|campaign_id|stage)\s*=/);
+    await assert.rejects(store.updateLeadProfile({ leadId:'shared-lead-1', name:' ', notes:'' }), /name is required/);
+  } finally {
+    store.setOperationsDatabaseForTests(null);
+  }
+});
