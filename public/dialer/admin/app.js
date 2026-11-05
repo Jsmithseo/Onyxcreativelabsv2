@@ -521,6 +521,7 @@ function escapeHtml(value) {
 let sharedWorkspace = { campaigns: [], leads: [] };
 let selectedSharedLeadId = "";
 const sharedPipelineColumns = [
+  ["open", "Open leads"],
   ["appointments", "Booked appointments"],
   ["followups", "Follow-ups"],
   ["pitched", "Pitched"],
@@ -598,6 +599,7 @@ async function moveSharedLead(leadId, lane) {
 
   const [laneId, laneLabel] = next;
   const stageByLane = {
+    open: "New",
     appointments: "Appointment Set",
     followups: "Contacted",
     pitched: "Pitched",

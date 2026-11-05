@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { previewContractorCsv } from '../../lib/contractorLeadImport.mjs';
 
 const workableStages = ['New', 'Contacted', 'Qualified', 'Appointment Set', 'Pitched', 'Do Not Call'];
 const dispositions = ['Connected — qualified', 'Connected — follow up', 'Left voicemail', 'No answer', 'Not interested'];
@@ -45,6 +46,10 @@ function inputDateTime(value) {
 function phoneLink(value) {
   const phone = String(value || '').replace(/[^\d+]/g, '');
   return phone.length >= 7 ? `tel:${phone}` : '';
+}
+
+function leadIndustry(lead) {
+  return String(lead?.notes || '').match(/^Industry:\s*(.+)$/im)?.[1]?.trim() || 'Not specified';
 }
 
 function pipelineLane(lead) {
@@ -159,6 +164,10 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const [queuePage, setQueuePage] = useState(0);
   const [showScheduler, setShowScheduler] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [importCsv, setImportCsv] = useState('');
+  const [importPreview, setImportPreview] = useState(null);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState('');
   const calendarEmbedRef = useRef(null);
   const calendlyBookingRef = useRef('');
   const [activity, setActivity] = useState({ activityType: 'call', disposition: '', note: '', scheduledFor: '', nextStage: '', appointmentType: appointmentTypes[0] });
@@ -351,6 +360,40 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
     setQueuePage(0);
   }
 
+  async function previewImport(event) {
+    const file = event.target.files?.[0];
+    setImportResult('');
+    if (!file) return;
+    const csv = await file.text();
+    setImportCsv(csv);
+    setImportPreview(previewContractorCsv(csv));
+    event.target.value = '';
+  }
+
+  async function importLeads() {
+    if (!activeCampaign || !importPreview?.accepted?.length || !importCsv) return;
+    setImporting(true);
+    setImportResult('');
+    try {
+      const response = await fetch('/api/operations/contractor-lead-import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ campaignId: activeCampaign, csv: importCsv }),
+      });
+      const payload = await responseJson(response, 'The lead import service returned an unexpected response.');
+      if (!response.ok) throw new Error(payload.error || 'Unable to import leads.');
+      setImportResult(`${payload.imported} imported · ${payload.skipped} skipped · ${payload.rejected} rejected`);
+      setImportCsv('');
+      setImportPreview(null);
+      await loadWorkspace();
+      await loadDashboard(activeCampaign);
+    } catch (importError) {
+      setImportResult(importError.message || 'Unable to import leads.');
+    } finally {
+      setImporting(false);
+    }
+  }
+
   function startCall() {
     const link = phoneLink(detail?.lead.phone || selectedLead?.phone);
     if (!link) { setError('This lead does not have a callable phone number.'); return; }
@@ -514,6 +557,15 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
               <div><button type="button" disabled={safeQueuePage === 0} onClick={() => setQueuePage((page) => Math.max(0, page - 1))}>Previous</button><button type="button" disabled={safeQueuePage >= queuePageCount - 1} onClick={() => setQueuePage((page) => Math.min(queuePageCount - 1, page + 1))}>Next</button></div>
             </div>
           </section>
+          <section className="lead-import panel" aria-label="Import leads">
+            <div className="panel-head"><span>Import leads</span><span>{active?.name || 'Choose a campaign'}</span></div>
+            <div className="lead-import-body">
+              <p>Upload a CSV for this assigned campaign. Accepted new leads are securely assigned to you. Supported columns include name, company, title, phone, email, LinkedIn, location, time zone, industry, and notes.</p>
+              <label className="secondary import-file">Choose CSV<input type="file" accept=".csv,text/csv" onChange={previewImport} disabled={!activeCampaign || importing} /></label>
+              {importPreview && <div className="import-preview"><strong>{importPreview.accepted.length} ready · {importPreview.rejected.length} rejected</strong>{importPreview.rejected.slice(0, 5).map((row) => <small key={`${row.row}:${row.errors?.join('|')}`}>Row {row.row}: {row.errors.join(' ')}</small>)}<button className="primary" type="button" onClick={importLeads} disabled={!importPreview.accepted.length || importing}>{importing ? 'Importing…' : `Import ${importPreview.accepted.length} leads`}</button></div>}
+              {importResult && <p className="import-result" role="status">{importResult}</p>}
+            </div>
+          </section>
         </section>
       )}
       {activeView === 'settings' && <section className="settings"><h1>Settings</h1><p>Your administrator controls campaign access, commission defaults, and deal closure. You can work only the campaigns listed below.</p><ul>{workspace.campaigns.map((campaign) => <li key={campaign.id}>{campaign.name}</li>)}</ul></section>}
@@ -536,7 +588,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
           <div className="queue-save-row"><button className="primary" type="submit" disabled={saving || activeCall}>{saving ? 'Saving…' : showScheduler ? 'Schedule appointment' : 'Save lead'}</button></div>
         </form>}
         <div className="queue-detail-grid">
-          <label className="wide">Industry<input value="Not specified" readOnly /></label>
+          <label className="wide">Industry<input value={leadIndustry(currentLead)} readOnly /></label>
           <div><small>Company</small><strong>{currentLead?.company || '—'}</strong></div><div><small>Title</small><strong>{currentLead?.title || '—'}</strong></div>
           <div><small>Phone</small><strong>{currentLead?.phone || '—'}</strong></div><div><small>Email</small><strong>{currentLead?.email || '—'}</strong></div>
           <div className="wide"><small>LinkedIn</small>{currentLead?.linkedin_url ? <a href={currentLead.linkedin_url} target="_blank" rel="noreferrer">View LinkedIn profile ↗</a> : <strong>Not specified</strong>}</div>
