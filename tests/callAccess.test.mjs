@@ -11,6 +11,7 @@ test('BDR requests keep contractor identity and access when an Admin session is 
     isActiveContractor:async () => true,
     findContractor:async () => ({ campaigns:['assigned'], dailyCallGoal:120 }),
     process:{ env:{ NODE_ENV:'production' } },
+    URL,
   };
   vm.runInNewContext(`${accessSource}\nthis.principal = currentOperationsPrincipal;`, context);
   const cookies = 'admin_session=admin; bdr_session=contractor';
@@ -20,6 +21,11 @@ test('BDR requests keep contractor identity and access when an Admin session is 
   assert.equal(bdr.email, 'sierra@example.com');
   assert.deepEqual(Array.from(bdr.campaignIds), ['assigned']);
   assert.equal(await context.principal({ headers:{ cookie:'admin_session=admin', 'x-onyx-workspace':'bdr' } }), null);
+  const legacyBdr = { cookie:cookies, host:'www.onyxcreativelabs.com', referer:'https://www.onyxcreativelabs.com/bdr?campaign=assigned' };
+  assert.equal((await context.principal({ headers:legacyBdr })).role, 'contractor');
+  assert.equal((await context.principal({ headers:{ ...legacyBdr, cookie:'admin_session=admin' } })), null);
+  assert.equal((await context.principal({ headers:{ ...legacyBdr, referer:'https://www.onyxcreativelabs.com/dialer/admin/index.html' } })).role, 'admin');
+  assert.equal((await context.principal({ headers:{ ...legacyBdr, referer:'https://other.example/bdr' } })).role, 'admin');
 });
 
 async function handlerTest(file, principal, query = {}, body) {
@@ -28,7 +34,9 @@ async function handlerTest(file, principal, query = {}, body) {
   const context = {
     currentOperationsPrincipal:async () => principal,
     allowedCampaignIds:(p) => p.role === 'admin' ? ['assigned','other'] : ['assigned'],
-    listCampaigns:async () => [],
+    listCampaigns:async () => [{id:'assigned'}, {id:'other'}],
+    listPipeline:async (campaignIds) => { seen.push({ campaignIds }); return []; },
+    listCampaignSummaries:async () => [],
     listCallHistory:async (value) => { seen.push(value); return { calls:[], total:0 }; },
     getContractorCallReport:async (value) => { seen.push(value); return {}; },
     getLeadDetail:async (id, campaignIds) => campaignIds.includes(id) ? { lead:{ id } } : null,
@@ -60,4 +68,11 @@ test('call writes use the authenticated actor, never the client-provided actor',
   const denied = await handlerTest('../pages/api/operations/activities.js', contractor, {}, { leadId:'other', activityType:'call' });
   assert.equal(denied.res.code, 404);
   assert.equal(denied.seen.length, 0);
+});
+
+test('BDR workspace returns only campaigns saved in contractor access', async () => {
+  const { res, seen } = await handlerTest('../pages/api/operations/workspace.js', contractor);
+  assert.equal(res.code, 200);
+  assert.deepEqual(Array.from(res.body.campaigns, (campaign) => campaign.id), ['assigned']);
+  assert.deepEqual(Array.from(seen[0].campaignIds), ['assigned']);
 });

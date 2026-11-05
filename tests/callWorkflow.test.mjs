@@ -72,6 +72,15 @@ test('manual calls persist, leave the queue, and feed BDR history and the Admin 
     await db.query("UPDATE lead_activities SET created_at = '2026-01-02T07:30:00Z' WHERE activity_type = 'call'");
     const pacificDay = await store.getContractorCallReport({ campaignIds:['test'], from:'2026-01-01', to:'2026-01-01' });
     assert.equal(pacificDay.totals.calls, 2, 'reports use Pacific day boundaries rather than UTC midnight');
+    await db.query("UPDATE lead_activities SET created_at = CASE WHEN id = $1 THEN '2026-11-01T07:30:00Z'::timestamptz ELSE '2026-11-08T08:00:00Z'::timestamptz END WHERE activity_type = 'call'", [call.activity.id]);
+    const weekly = await store.getContractorCallReport({ campaignIds:['test'], from:'2026-11-02', to:'2026-11-08' });
+    assert.equal(weekly.totals.calls, 1, 'only calls inside the Monday–Sunday range are counted');
+    const previousWeek = await store.getContractorCallReport({ campaignIds:['test'], from:'2026-10-26', to:'2026-11-01' });
+    assert.equal(previousWeek.totals.calls, 1, 'Pacific midnight before the DST change stays in the previous week');
+    const monthly = await store.getContractorCallReport({ campaignIds:['test'], from:'2026-11-01', to:'2026-11-30' });
+    assert.equal(monthly.contractors.find((row) => row.email === 'sierra@example.com').calls, 2);
+    assert.equal(monthly.contractors.find((row) => row.email === 'jeremy@example.com').calls, 0);
+    assert.equal((await store.getContractorCallReport({ campaignIds:['other'], from:'2026-11-01', to:'2026-11-30' })).totals.calls, 0);
   } finally {
     store.setOperationsDatabaseForTests(null);
     await db.close();

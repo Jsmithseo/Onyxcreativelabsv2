@@ -229,7 +229,7 @@ let callInterval;
 let currentPage = 0;
 let activeCampaign = "school";
 let activeCallLeadId = null;
-let statsMode = "campaign";
+let statsMode = "overall";
 const pageSize = 20;
 const getLead = (id) => leads.find((lead) => lead.id === id);
 const todayForStats = new Date();
@@ -544,8 +544,33 @@ let sharedCallPage = 0;
 let contractorActivityRequest = 0;
 const sharedCallPageSize = 20;
 
+function reportDateRange(date, period = "day") {
+  const anchor = new Date(`${date}T12:00:00Z`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(anchor.valueOf()) || anchor.toISOString().slice(0,10) !== date) throw new Error("Choose a valid stats date.");
+  const start = new Date(anchor);
+  const end = new Date(anchor);
+  if (period === "week") {
+    start.setUTCDate(start.getUTCDate() - (start.getUTCDay() + 6) % 7);
+    end.setTime(start.valueOf()); end.setUTCDate(end.getUTCDate() + 6);
+  } else if (period === "month") {
+    start.setUTCDate(1);
+    end.setUTCMonth(end.getUTCMonth() + 1, 0);
+  }
+  return { from:start.toISOString().slice(0,10), to:end.toISOString().slice(0,10) };
+}
+
+function currentReportRange() {
+  return reportDateRange(document.getElementById("statsDate").value, document.getElementById("statsPeriod").value);
+}
+
+function reportRangeLabel({ from, to }) {
+  const format = (day) => new Date(`${day}T12:00:00Z`).toLocaleDateString("en-US", { timeZone:"UTC", month:"short", day:"numeric", year:"numeric" });
+  return from === to ? format(from) : `${format(from)} – ${format(to)}`;
+}
+
 function contractorReportKey() {
-  return `${document.getElementById("statsDate").value}|${statsMode === "overall" ? "" : document.getElementById("campaignSelect").value}`;
+  const { from, to } = currentReportRange();
+  return `${from}|${to}|${statsMode === "overall" ? "" : document.getElementById("campaignSelect").value}`;
 }
 
 function renderSharedCallHistory() {
@@ -567,22 +592,33 @@ function renderSharedCallHistory() {
 
 async function refreshContractorActivity() {
   const request = ++contractorActivityRequest;
-  const key = contractorReportKey();
-  const [date, campaign] = key.split("|");
+  let key;
+  try { key = contractorReportKey(); } catch (error) {
+    document.getElementById("contractorReportScope").textContent = error.message;
+    return;
+  }
+  const [from, to, campaign] = key.split("|");
   const scope = campaign ? campaigns.find((item) => item.id === campaign)?.name || campaign : "All campaigns";
-  const params = new URLSearchParams({ from:date, to:date });
+  const params = new URLSearchParams({ from, to });
   if (campaign) params.set("campaign", campaign);
   const historyParams = new URLSearchParams({ contractorsOnly:"true", offset:String(sharedCallPage * sharedCallPageSize), limit:String(sharedCallPageSize) });
-  if (campaign) historyParams.set("campaign", campaign);
-  document.getElementById("sharedCallHistoryScope").textContent = `All dates · ${scope}`;
+  const historyCampaign = document.getElementById("sharedCallsCampaign").value;
+  if (historyCampaign) historyParams.set("campaign", historyCampaign);
+  const historyScope = campaigns.find((item) => item.id === historyCampaign)?.name || "All campaigns";
+  document.getElementById("sharedCallHistoryScope").textContent = `All dates · ${historyScope}`;
+  if (contractorReport?.key !== key) {
+    document.getElementById("contractorReportScope").textContent = `${scope} · ${reportRangeLabel({ from, to })} · Loading…`;
+    document.getElementById("contractorReportRows").innerHTML = '<div class="history-empty">Loading contractor activity…</div>';
+  }
   const results = await Promise.allSettled([
     fetch(`/api/admin/call-report?${params}`, { cache:"no-store" }).then(async (response) => { const data = await response.json(); if (!response.ok) throw new Error(data.error); return data; }),
     fetch(`/api/operations/calls?${historyParams}`, { cache:"no-store" }).then(async (response) => { const data = await response.json(); if (!response.ok) throw new Error(data.error); return data; }),
   ]);
-  if (request !== contractorActivityRequest || key !== contractorReportKey()) return;
+  if (request !== contractorActivityRequest) return;
+  try { if (key !== contractorReportKey()) return; } catch { return; }
   if (results[0].status === "fulfilled") {
     contractorReport = { ...results[0].value, key };
-    document.getElementById("contractorReportScope").textContent = `${scope} · ${date} · Pacific time`;
+    document.getElementById("contractorReportScope").textContent = `${scope} · ${reportRangeLabel({ from, to })} · Pacific time${document.getElementById("statsPeriod").value === "week" ? " · Monday–Sunday" : ""}`;
     document.getElementById("contractorReportRows").innerHTML = '<div class="contractor-report-row report-head"><span>Contractor</span><span>Calls logged</span><span>Outcomes recorded</span><span>Appointments booked</span><span>Last call</span></div>' + contractorReport.contractors.map((row) => `<div class="contractor-report-row"><span><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.email)}</small></span><span>${row.calls}</span><span>${row.outcomes}</span><span>${row.appointments}</span><span>${row.last_call_at ? escapeHtml(activityDate(row.last_call_at)) : "—"}</span></div>`).join("");
   } else {
     contractorReport = null;
@@ -617,7 +653,7 @@ function mergeSharedCampaigns() {
       campaign.appointments = summary.appointment_count || 0;
       campaign.deals = summary.won_count || 0;
     }
-    for (const selectId of ["campaignSelect", "settingsGoalCampaign", "commissionCampaign"]) {
+    for (const selectId of ["campaignSelect", "settingsGoalCampaign", "commissionCampaign", "sharedCallsCampaign"]) {
       const select = document.getElementById(selectId);
       if (!select) continue;
       let option = [...select.options].find((item) => item.value === shared.id);
@@ -881,7 +917,6 @@ async function loadSharedPipeline({ quiet = false } = {}) {
       renderCalendar();
     }
     renderSharedPipeline();
-    await refreshContractorActivity();
     syncCampaignCommissionInputs();
     if (!quiet) notify("Shared pipeline refreshed");
   } catch (error) {
@@ -1042,6 +1077,7 @@ function showView(viewId, { updateLocation = true } = {}) {
   document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active", view.id === viewId));
   document.querySelectorAll(".nav-button").forEach((button) => button.classList.toggle("active", button.dataset.view === viewId));
   if (viewId === "homeView") closeDetail();
+  if (viewId === "contractorsView" && !editingContractorEmail) loadContractors();
   if (viewId === "boardView") loadSharedPipeline({ quiet:true });
   if (viewId === "settingsView") loadSharedPipeline({ quiet:true });
   if (updateLocation) {
@@ -1073,8 +1109,14 @@ function updateTimezoneMap() {
 
 function updateMetrics(campaignId) {
   const campaign = campaigns.find((item) => item.id === campaignId);
-  const statsDate = document.getElementById("statsDate").value;
-  const matchesDate = (value) => Boolean(value) && new Date(value).toDateString() === new Date(`${statsDate}T12:00:00`).toDateString();
+  let range;
+  try { range = currentReportRange(); } catch { return; }
+  const pacificDate = new Intl.DateTimeFormat("en-CA", { timeZone:"America/Los_Angeles", year:"numeric", month:"2-digit", day:"2-digit" });
+  const matchesDate = (value) => {
+    if (!value || Number.isNaN(new Date(value).valueOf())) return false;
+    const day = pacificDate.format(new Date(value));
+    return day >= range.from && day <= range.to;
+  };
   const matchesScope = (campaignName) => statsMode === "overall" || campaignName === campaign.name;
   const dailyCalls = callLog.filter((entry) => new Date(entry.at).getTime() >= statsResetAt && matchesDate(entry.at) && matchesScope(entry.campaign));
   const dailyAppointments = [...appointments, ...sharedAppointments].filter((entry) => matchesDate(entry.createdAt) && matchesScope(entry.campaign));
@@ -1085,7 +1127,7 @@ function updateMetrics(campaignId) {
   const shared = contractorReport?.key === contractorReportKey() ? contractorReport.totals : { calls:0, connected:0, talk_seconds:0 };
   const totalCalls = dailyCalls.length + shared.calls;
   const stats = { calls:totalCalls, talk:formatTalkTime(talkSeconds + shared.talk_seconds), appointments:dailyAppointments.length, deals:dailyDeals.length, followups:dailyFollowups.length, connect:totalCalls ? `${Math.round(((connected + shared.connected) / totalCalls) * 100)}%` : "0%" };
-  const dateLabel = new Date(`${statsDate}T12:00:00`).toLocaleDateString([], { month:"short", day:"numeric", year:"numeric" });
+  const dateLabel = reportRangeLabel(range);
   document.getElementById("campaignStatsTitle").textContent = `${statsMode === "overall" ? "All campaigns" : campaign.name} · ${dateLabel}`;
   document.getElementById("metricCalls").textContent = stats.calls;
   document.getElementById("metricTalk").textContent = stats.talk;
@@ -1104,7 +1146,9 @@ function goalProgress(value, goal) {
 function renderGoals() {
   const campaign = campaigns.find((item) => item.id === document.getElementById("campaignSelect").value) || campaigns[0];
   const today = new Date().toDateString();
-  const sharedCallsToday = contractorReport?.key === contractorReportKey() && statsMode === "campaign" && new Date(`${contractorReport.from}T12:00:00`).toDateString() === today ? contractorReport.totals.calls : 0;
+  let reportKey;
+  try { reportKey = contractorReportKey(); } catch {}
+  const sharedCallsToday = contractorReport?.key === reportKey && statsMode === "campaign" && contractorReport.from === contractorReport.to && new Date(`${contractorReport.from}T12:00:00`).toDateString() === today ? contractorReport.totals.calls : 0;
   const callsToday = sharedCallsToday + callLog.filter((entry) => entry.campaign === campaign.name && new Date(entry.at).getTime() >= statsResetAt && new Date(entry.at).toDateString() === today).length;
   const appointmentsToday = [...appointments, ...sharedAppointments].filter((entry) => entry.campaign === campaign.name && entry.createdAt && new Date(entry.createdAt).toDateString() === today).length;
   const callGoal = (goals.callGoals || {})[campaign.id] ?? 120;
@@ -1630,6 +1674,8 @@ document.getElementById("settingsGoalCampaign").onchange = (event) => {
 document.getElementById("showCampaignStats").onclick = () => { statsMode = "campaign"; sharedCallPage = 0; updateMetrics(document.getElementById("campaignSelect").value); refreshContractorActivity(); };
 document.getElementById("showOverallStats").onclick = () => { statsMode = "overall"; sharedCallPage = 0; updateMetrics(document.getElementById("campaignSelect").value); refreshContractorActivity(); };
 document.getElementById("statsDate").onchange = () => { updateMetrics(document.getElementById("campaignSelect").value); refreshContractorActivity(); };
+document.getElementById("statsPeriod").onchange = () => { updateMetrics(document.getElementById("campaignSelect").value); refreshContractorActivity(); };
+document.getElementById("sharedCallsCampaign").onchange = () => { sharedCallPage = 0; refreshContractorActivity(); };
 document.getElementById("refreshContractorActivity").onclick = () => refreshContractorActivity();
 document.getElementById("sharedCallsPrevious").onclick = () => { sharedCallPage = Math.max(0, sharedCallPage - 1); refreshContractorActivity(); };
 document.getElementById("sharedCallsNext").onclick = () => { sharedCallPage++; refreshContractorActivity(); };
@@ -1995,6 +2041,8 @@ loadCelebrationClip();
 showView(viewFromLocation(), { updateLocation:false });
 setInterval(renderRows, 60000);
 setInterval(() => loadSharedPipeline({ quiet:true }), 15000);
+setInterval(refreshContractorActivity, 15000);
+refreshContractorActivity();
 // Shared operations are now the durable source of truth. Do not re-import the
 // browser's legacy sample queue on every load: real leads are added through the
 // explicit CSV import flow above, while existing shared records stay intact.

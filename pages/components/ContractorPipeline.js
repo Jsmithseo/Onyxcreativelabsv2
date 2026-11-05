@@ -205,6 +205,8 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       if (!response.ok) throw new Error(payload.error || 'Unable to load your workspace.');
       if (requestId !== workspaceRequestRef.current) return null;
       setWorkspace(payload);
+      setSelectedLead((current) => current && !payload.campaigns.some((campaign) => campaign.id === current.campaign_id) ? null : current);
+      setDetail((current) => current?.lead && !payload.campaigns.some((campaign) => campaign.id === current.lead.campaign_id) ? null : current);
       setActiveCampaign((current) => {
         const requested = new URLSearchParams(window.location.search).get('campaign');
         if (requested && payload.campaigns.some((item) => item.id === requested)) return requested;

@@ -7,7 +7,7 @@ const source = await readFile(new URL('../public/dialer/admin/app.js', import.me
 const mergeSource = source.slice(source.indexOf('function mergeSharedCampaigns()'), source.indexOf('const sharedPipelineColumns'));
 
 test('a new shared campaign and its lead become available in Admin without copying or re-importing the record', () => {
-  const selects = Object.fromEntries(['campaignSelect','settingsGoalCampaign','commissionCampaign'].map((id) => [id, { options:[], append(option) { this.options.push(option); } }]));
+  const selects = Object.fromEntries(['campaignSelect','settingsGoalCampaign','commissionCampaign','sharedCallsCampaign'].map((id) => [id, { options:[], append(option) { this.options.push(option); } }]));
   const localLead = { id:7, name:'Old name', campaign:'school', phone:'4155550100', notes:'Old notes' };
   const newLead = { id:'lead_new', name:'New business', campaign_id:'new-campaign', company:'New business', phone:'4155550101', notes:'Call script:\nA script', stage:'New', follow_up_owner_email:'sierra@example.com', time_zone:'PT' };
   const context = {
