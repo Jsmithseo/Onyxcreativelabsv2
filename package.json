@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "db:migrate:operations": "node --env-file=.env.local scripts/migrate-shared-operations.mjs",
+    "db:migrate:metadata": "node --env-file=.env.local scripts/migrate-workspace-metadata.mjs",
     "format": "prettier --write ."
   },
   "keywords": [],

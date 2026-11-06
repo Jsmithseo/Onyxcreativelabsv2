@@ -185,6 +185,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState('');
   const workspaceRequestRef = useRef(0);
+  const [workspaceError, setWorkspaceError] = useState('');
   const historyRequestRef = useRef(0);
   const savingRef = useRef(false);
   const [showScheduler, setShowScheduler] = useState(false);
@@ -206,6 +207,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       if (!response.ok) throw new Error(payload.error || 'Unable to load your workspace.');
       if (requestId !== workspaceRequestRef.current) return null;
       setWorkspace(payload);
+      setWorkspaceError('');
       setPipelineCampaign((current) => !current || payload.campaigns.some((campaign) => campaign.id === current) ? current : '');
       setSelectedLead((current) => current && !payload.campaigns.some((campaign) => campaign.id === current.campaign_id) ? null : current);
       setDetail((current) => current?.lead && !payload.campaigns.some((campaign) => campaign.id === current.lead.campaign_id) ? null : current);
@@ -218,7 +220,10 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       setError('');
       return payload;
     } catch (loadError) {
-      if (requestId === workspaceRequestRef.current) setError(loadError.message || 'Unable to load your workspace.');
+      if (requestId === workspaceRequestRef.current) {
+        setWorkspaceError(loadError.message || 'Unable to load your workspace.');
+        setError(loadError.message || 'Unable to load your workspace.');
+      }
       return null;
     } finally {
       setLoading(false);
@@ -590,11 +595,11 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       {error && <p className="error">{error}</p>}
       {activeView === 'operations' && <section>
         <div className="page-head"><h1>Business development dashboard</h1><span>BDR workspace</span></div>
-        <div className="home-controls"><div className="control-box campaign-control">{workspace.campaigns.length ? <>{campaignPicker}<button className="primary" type="button" disabled={!activeCampaign} onClick={() => openCampaign(activeCampaign)}>Open campaign <span aria-hidden="true">→</span></button></> : <div className="campaign-empty"><span className="campaign-empty-label">Campaign</span><strong>No campaign assigned</strong><p>Your administrator will assign a campaign before you can begin calling.</p></div>}</div><CallingWindows leads={visibleLeads} /></div>
+        <div className="home-controls"><div className="control-box campaign-control">{workspace.campaigns.length ? <>{campaignPicker}<button className="primary" type="button" disabled={!activeCampaign || Boolean(workspaceError)} onClick={() => openCampaign(activeCampaign)}>Open campaign <span aria-hidden="true">→</span></button></> : <div className="campaign-empty"><span className="campaign-empty-label">Campaign</span><strong>{loading ? 'Loading campaigns…' : workspaceError ? 'Campaigns unavailable' : 'No campaign assigned'}</strong><p>{workspaceError ? 'Your assigned campaigns could not be loaded. Retry to reconnect.' : loading ? 'Checking your campaign assignments.' : 'Your administrator will assign a campaign before you can begin calling.'}</p>{workspaceError && <button type="button" onClick={() => loadWorkspace({ keepLoading: true })} disabled={loading}>Retry</button>}</div>}</div><CallingWindows leads={visibleLeads} /></div>
         <div className="stats-heading"><strong>{active?.name || 'Your campaigns'} · {today}</strong><div className="stats-controls"><span>Campaign</span><button type="button" onClick={() => loadDashboard()} disabled={dashboardLoading}>{dashboardLoading ? 'Refreshing…' : 'Refresh'}</button></div></div>
         <div className="metrics">{metrics.map(([label, value], index) => <article className={`metric ${index === 2 ? 'metric-action' : ''}`} key={label} onClick={index === 2 ? () => switchView('pipeline') : undefined}><span>{label}</span><strong>{value}</strong></article>)}</div>
         <section className="panel bdr-goals"><div className="panel-head"><span>My goals</span><span>Daily targets</span></div><div className="goals-grid">{goals.map(([label, value, target]) => <article className="goal-card" key={label}><span>{label}</span><strong>{value} / {target}</strong><div className="goal-track" aria-label={`${label}: ${value} of ${target}`}><i style={{ width: `${goalProgress(value, target)}%` }} /></div></article>)}</div></section>
-        <section className="panel campaign-panel"><div className="panel-head"><span>My campaign queues</span><span>{workspace.campaigns.length} assigned</span></div>{loading ? <div className="empty">Loading assigned campaigns…</div> : workspace.campaigns.map((campaign) => { const summary = workspace.campaignSummaries?.find((row) => row.campaign_id === campaign.id) || {}; return <div className="campaign-row" key={campaign.id}><span><strong>{campaign.name}</strong><small>Assigned to your account</small></span><span>{summary.lead_count || 0} leads</span><span>{summary.call_count || 0} calls</span><span>{summary.appointment_count || 0} appts</span><span>{summary.won_count || 0} won</span><button className="campaign-open" type="button" onClick={() => openCampaign(campaign.id)}>Open queue <span aria-hidden="true">→</span></button></div>; })}{!loading && !workspace.campaigns.length && <div className="empty">Your administrator has not assigned a campaign yet.</div>}</section>
+        <section className="panel campaign-panel"><div className="panel-head"><span>My campaign queues</span><span>{workspaceError ? 'Unavailable' : `${workspace.campaigns.length} assigned`}</span></div>{loading ? <div className="empty">Loading assigned campaigns…</div> : workspace.campaigns.map((campaign) => { const summary = workspace.campaignSummaries?.find((row) => row.campaign_id === campaign.id) || {}; return <div className="campaign-row" key={campaign.id}><span><strong>{campaign.name}</strong><small>Assigned to your account</small></span><span>{summary.lead_count || 0} leads</span><span>{summary.call_count || 0} calls</span><span>{summary.appointment_count || 0} appts</span><span>{summary.won_count || 0} won</span><button className="campaign-open" type="button" disabled={Boolean(workspaceError)} onClick={() => openCampaign(campaign.id)}>Open queue <span aria-hidden="true">→</span></button></div>; })}{!loading && !workspace.campaigns.length && <div className="empty">{workspaceError ? 'Assigned campaigns are temporarily unavailable. Retry to reconnect.' : 'Your administrator has not assigned a campaign yet.'}</div>}</section>
         {historyPanel}
         <section className="panel dashboard-followups"><div className="panel-head"><span>Follow-ups due</span><span>{dashboard.stats?.follow_ups_due || 0} due</span></div>{dashboard.followUps?.length ? <div>{dashboard.followUps.map((lead) => <button className="history-row" type="button" key={lead.id} onClick={() => openLead(lead)}><span><strong>{lead.name}</strong><small>{lead.company || lead.phone || 'Open lead'}</small></span><span>Due</span><span>{dateLabel(lead.next_follow_up_at, true)}</span></button>)}</div> : <div className="empty">Scheduled follow-ups appear here when due and remain until the next call is logged.</div>}</section>
       </section>}

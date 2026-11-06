@@ -165,6 +165,7 @@ if (quantumBomFollowupWasCleared) activityState.followupResetVersion = followupR
 let voipProvider = activityState.voipProvider || "";
 let goals = { callGoals: { school: 120, business: 120, "quantum-bom": 120, reviews: 120 }, appointmentGoals: { school: 3, business: 3, "quantum-bom": 3, reviews: 0 }, closeRatios: {}, ...(activityState.goals || {}) };
 let contractors = [];
+let contractorLoadState = "loading";
 let editingContractorEmail = "";
 const legacyBoardRemoved = Array.isArray(activityState.salesBoardCards);
 if (legacyBoardRemoved) delete activityState.salesBoardCards;
@@ -272,10 +273,20 @@ function renderContractors() {
   const access = document.getElementById("contractorCampaignAccess");
   const rows = document.getElementById("contractorRows");
   if (!access || !rows) return;
+  document.getElementById("showContractorForm").disabled = contractorLoadState !== "ready";
+  document.getElementById("sendContractorInvite").disabled = contractorLoadState !== "ready";
   access.innerHTML = campaigns.map((campaign) => `<label><input type="checkbox" name="contractorCampaign" value="${escapeHtml(campaign.id)}" /> ${escapeHtml(campaign.name)}</label>`).join("");
-  document.getElementById("contractorCount").textContent = `${contractors.length} contractor${contractors.length === 1 ? "" : "s"}`;
+  document.getElementById("contractorCount").textContent = contractorLoadState === "ready" ? `${contractors.length} contractor${contractors.length === 1 ? "" : "s"}` : contractorLoadState === "error" ? "Contractor list unavailable" : "Loading contractors…";
+  if (contractorLoadState !== "ready") {
+    rows.innerHTML = contractorLoadState === "error"
+      ? '<div class="contractor-empty" role="status">Contractor records could not be loaded. This does not mean the accounts or assignments were removed. <button type="button" class="secondary" id="retryContractors">Retry</button></div>'
+      : '<div class="contractor-empty" role="status">Loading contractor records…</div>';
+    const retry = document.getElementById("retryContractors");
+    if (retry) retry.onclick = loadContractors;
+    return;
+  }
   if (!contractors.length) {
-    rows.innerHTML = '<div class="contractor-empty">No contractors added yet. Add Sierra to prepare her Onyx Reviews access.</div>';
+    rows.innerHTML = '<div class="contractor-empty">No contractors added yet.</div>';
     return;
   }
   rows.innerHTML = contractors.map((contractor) => {
@@ -311,13 +322,19 @@ function openContractorForm(contractor = null) {
 }
 
 async function loadContractors() {
+  contractorLoadState = "loading";
+  renderContractors();
   try {
     const response = await fetch("/api/admin/contractors", { cache: "no-store" });
     if (!response.ok) throw new Error("Contractor access is unavailable");
     const payload = await response.json();
-    contractors = Array.isArray(payload.contractors) ? payload.contractors : [];
+    if (!Array.isArray(payload.contractors)) throw new Error("Invalid contractor response");
+    contractors = payload.contractors;
+    contractorLoadState = "ready";
     renderContractors();
   } catch {
+    contractorLoadState = "error";
+    renderContractors();
     notify("Unable to load contractor access");
   }
 }
@@ -1720,7 +1737,7 @@ document.getElementById("contractorForm").onsubmit = async (event) => {
     notify(error.message || "Unable to send the invitation");
     await loadContractors();
   } finally {
-    inviteButton.disabled = false;
+    inviteButton.disabled = contractorLoadState !== "ready";
     inviteButton.textContent = editingContractorEmail ? "Save changes" : "Send invite";
   }
 };
