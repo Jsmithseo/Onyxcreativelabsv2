@@ -81,6 +81,10 @@ test('manual calls persist, leave the queue, and feed BDR history and the Admin 
     assert.equal(monthly.contractors.find((row) => row.email === 'sierra@example.com').calls, 2);
     assert.equal(monthly.contractors.find((row) => row.email === 'jeremy@example.com').calls, 0);
     assert.equal((await store.getContractorCallReport({ campaignIds:['other'], from:'2026-11-01', to:'2026-11-30' })).totals.calls, 0);
+    await store.recordLeadActivity({ leadId:'b', actorEmail:'jeremy@example.com', actorRole:'contractor', activityType:'call', note:'Another caller must not move Sierra’s place' });
+    assert.equal((await store.listQueueResumePositions(['test'], 'sierra@example.com'))[0].lead_id, 'a');
+    assert.equal((await store.listQueueResumePositions(['test'], 'jeremy@example.com'))[0].lead_id, 'b');
+    assert.deepEqual(await store.listQueueResumePositions(['other'], 'sierra@example.com'), []);
   } finally {
     store.setOperationsDatabaseForTests(null);
     await db.close();
@@ -90,7 +94,7 @@ test('manual calls persist, leave the queue, and feed BDR history and the Admin 
 test('queue advancement and appointment lanes keep prospecting separate from bookings', () => {
   const queue = [{id:'a'}, {id:'b'}, {id:'c'}];
   assert.equal(nextQueueLead(queue, 'a').id, 'b');
-  assert.equal(nextQueueLead(queue, 'c').id, 'b');
+  assert.equal(nextQueueLead(queue, 'c').id, 'a');
   assert.equal(nextQueueLead([{id:'a'}], 'a'), null);
   assert.equal(hasBookedAppointment({ stage:'Appointment Set' }), false);
   assert.equal(hasBookedAppointment({ booked_appointment_count:1 }), true);

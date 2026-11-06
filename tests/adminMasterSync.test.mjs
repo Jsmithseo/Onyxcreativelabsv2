@@ -77,7 +77,7 @@ test('the Admin sync endpoint requires preview and writes a private backup befor
 
 test('large shared workspaces remain readable through a compressed JSON response',async()=>{
  const source=(await readFile(new URL('../pages/api/operations/workspace.js',import.meta.url),'utf8')).replace(/import[\s\S]*?from '[^']+';/g,'').replace('export default async function workspace','async function handler');
- const context={currentOperationsPrincipal:async()=>({role:'contractor',email:'bdr@example.com'}),allowedCampaignIds:()=>['test'],listCampaigns:async()=>[{id:'test'}],listPipeline:async()=>[{id:'lead',notes:'x'.repeat(1100000)}],listCampaignSummaries:async()=>[],isAdminMasterSynced:async()=>true,SALES_PIPELINE_LANES:[['appointments','Booked appointments']],gzipSync,Buffer,console};
+ const context={currentOperationsPrincipal:async()=>({role:'contractor',email:'bdr@example.com'}),allowedCampaignIds:()=>['test'],listCampaigns:async()=>[{id:'test'}],listPipeline:async()=>[{id:'lead',notes:'x'.repeat(1100000)}],listQueueResumePositions:async()=>[],listCampaignSummaries:async()=>[],isAdminMasterSynced:async()=>true,SALES_PIPELINE_LANES:[['appointments','Booked appointments']],gzipSync,Buffer,console};
  vm.runInNewContext(source+'\nthis.handler=handler;',context);
  const headers={};
  const res={setHeader(key,value){headers[key]=value;},status(code){this.code=code;return this;},end(value){this.buffer=value;return this;},json(){throw new Error('Expected gzip for large workspace');}};

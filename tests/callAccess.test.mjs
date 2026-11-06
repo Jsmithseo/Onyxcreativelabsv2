@@ -36,6 +36,7 @@ async function handlerTest(file, principal, query = {}, body) {
     allowedCampaignIds:(p) => p.role === 'admin' ? ['assigned','other'] : ['assigned'],
     listCampaigns:async () => [{id:'assigned'}, {id:'other'}],
     listPipeline:async (campaignIds) => { seen.push({ campaignIds }); return []; },
+    listQueueResumePositions:async (campaignIds, actorEmail) => { seen.push({campaignIds,actorEmail}); return [{campaign_id:'assigned',lead_id:'last-saved-call'}]; },
     listCampaignSummaries:async () => [],
     isAdminMasterSynced:async () => false,
     SALES_PIPELINE_LANES:[],
@@ -77,4 +78,7 @@ test('BDR workspace returns only campaigns saved in contractor access', async ()
   assert.equal(res.code, 200);
   assert.deepEqual(Array.from(res.body.campaigns, (campaign) => campaign.id), ['assigned']);
   assert.deepEqual(Array.from(seen[0].campaignIds), ['assigned']);
+  assert.equal(seen[1].actorEmail, contractor.email);
+  assert.deepEqual(Array.from(seen[1].campaignIds), ['assigned']);
+  assert.equal(res.body.queueResumePositions[0].lead_id, 'last-saved-call');
 });

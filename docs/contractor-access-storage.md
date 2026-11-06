@@ -26,3 +26,10 @@ records remain intact. Keep backups outside the repository and deployment.
 Once the database is in use, contractor edits are stored there. An older Blob
 deployment would read the old roster; retain the database-backed implementation
 when rolling back unrelated changes.
+
+The next-call position is derived from each contractor's latest saved call in
+each assigned campaign. Refreshing or signing in on another device starts the
+remaining queue after that lead. Earlier skipped leads remain available after
+the queue wraps, and due callbacks retain priority. The checkpoint query is
+scoped to the authenticated caller and their permitted campaigns; another
+contractor's calls cannot move it.

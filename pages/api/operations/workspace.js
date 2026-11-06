@@ -5,6 +5,7 @@ import {
   listCampaigns,
   listCampaignSummaries,
   listPipeline,
+  listQueueResumePositions,
   isAdminMasterSynced,
 } from '../../../lib/operationsStore';
 
@@ -24,10 +25,11 @@ export default async function workspace(req, res) {
     const allCampaigns = await listCampaigns();
     const campaignIds = allowedCampaignIds(principal, allCampaigns);
     const campaigns = allCampaigns.filter((campaign) => campaignIds.includes(campaign.id));
-    const [leads, campaignSummaries, adminMasterSynced] = await Promise.all([
+    const [leads, campaignSummaries, adminMasterSynced, queueResumePositions] = await Promise.all([
       listPipeline(campaignIds),
       listCampaignSummaries(campaignIds, principal.role === 'admin' ? '' : principal.email),
       isAdminMasterSynced(),
+      principal.role === 'contractor' ? listQueueResumePositions(campaignIds, principal.email) : [],
     ]);
 
     const payload = {
@@ -35,6 +37,7 @@ export default async function workspace(req, res) {
       campaigns,
       campaignSummaries,
       leads,
+      queueResumePositions,
       goals: principal.goals || null,
       readOnlyPipeline: principal.role === 'contractor',
       adminMasterSynced,

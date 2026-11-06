@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { previewContractorCsv } from '../../lib/contractorLeadImport.mjs';
 import LeadBriefing from '../../components/bdr/LeadBriefing';
-import { belongsInCallQueue, nextQueueLead } from '../../lib/callQueue.mjs';
+import { belongsInCallQueue, nextQueueLead, compareCallQueueLeads, resumeCallQueue } from '../../lib/callQueue.mjs';
 import CallHistory from '../../components/bdr/CallHistory';
 import { SALES_PIPELINE_LANES, selectPipelineLeads } from '../../lib/salesPipeline.mjs';
 import PipelineComponent from './PipelineComponent';
@@ -93,13 +93,6 @@ function queueZoneOrder() {
       : hour < 13
         ? ['MT', 'CT', 'PT', 'ET']
         : ['PT', 'MT', 'CT', 'ET'];
-}
-
-function isDue(lead) {
-  const followUp = lead.next_follow_up_at
-    ? new Date(lead.next_follow_up_at).valueOf()
-    : NaN;
-  return Number.isFinite(followUp) && followUp <= Date.now();
 }
 
 function sameLocalDate(value, dateInput) {
@@ -517,6 +510,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       const refreshed = await loadWorkspace();
       await loadDashboard(completedLead.campaign_id);
       if (!appointment) {
+        setQueuePage(0);
         setCallNotice(`Call logged for ${completedLead.name}. Saved in call history and removed from the active queue.`);
         setCallHistory((current) => ({ ...current, total:current.total + 1 }));
         await loadCallHistory(completedLead.campaign_id, historyPage);
@@ -547,7 +541,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const queueLeads = useMemo(() => {
     const query = queueFilters.query.trim().toLowerCase();
     const zones = queueZoneOrder();
-    return visibleLeads
+    const ordered = visibleLeads
       .filter((lead) => {
         if (queueScope === 'active' && !belongsInCallQueue(lead)) return false;
         const haystack = [lead.name, lead.company, lead.phone, lead.email]
@@ -561,18 +555,11 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
           sameLocalDate(lead.last_activity_at, queueFilters.activityDate)
         );
       })
-      .sort((left, right) => {
-        const leftDue = isDue(left);
-        const rightDue = isDue(right);
-        if (leftDue !== rightDue) return leftDue ? -1 : 1;
-        if (leftDue && rightDue) {
-          return new Date(left.next_follow_up_at) - new Date(right.next_follow_up_at);
-        }
-        const zoneDifference = zones.indexOf(left.time_zone) - zones.indexOf(right.time_zone);
-        if (zoneDifference) return zoneDifference;
-        return String(left.name).localeCompare(String(right.name));
-      });
-  }, [queueFilters, visibleLeads, queueScope]);
+      .sort((left, right) => compareCallQueueLeads(left, right, zones));
+    const checkpoint = workspace.queueResumePositions?.find((position) => position.campaign_id === activeCampaign);
+    const completed = visibleLeads.find((lead) => lead.id === checkpoint?.lead_id);
+    return queueScope === 'active' ? resumeCallQueue(ordered, completed, zones) : ordered;
+  }, [queueFilters, visibleLeads, queueScope, workspace.queueResumePositions, activeCampaign]);
   const queuePageCount = Math.max(1, Math.ceil(queueLeads.length / queuePageSize));
   const safeQueuePage = Math.min(queuePage, queuePageCount - 1);
   const queuePageLeads = queueLeads.slice(
