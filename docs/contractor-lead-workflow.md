@@ -10,8 +10,10 @@ authenticated contractor profile's first name, including copied scripts.
 A confirmed appointment atomically records `leads.booked_by_email` and `booked_at`.
 Only the booking contractor and Admin can then read the lead, its history, or its
 appointment. The lead leaves prospecting queues. This rule is enforced by the
-workspace, detail, history, appointments, dashboard, and activity APIs. Campaign
-access is still required; ownership alone does not grant campaign access.
+workspace, detail, history, appointments, dashboard, and activity APIs. Unbooked
+prospects require campaign assignment. A booker retains their own booked
+opportunity if campaign assignments change, without gaining access to other
+leads in that campaign.
 
 The booking contractor has a read-only opportunity view. Admin conducts the
 meeting and presentation and manages the sales stages. Contractor calls and

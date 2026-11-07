@@ -63,7 +63,11 @@ test('a shared prospect becomes private to its booking contractor and Admin acro
     await store.recordLeadActivity({ leadId:'a', actorEmail:'admin@example.com', actorRole:'admin', activityType:'stage_change', nextStage:'Pitched' });
     assert.equal((await store.getLeadDetail('a', ['test'], jeremy)).lead.stage, 'Pitched');
     assert.equal(await store.getLeadDetail('a', ['test'], sierra), null, 'moving a sales stage cannot release privacy');
-    assert.equal(await store.getLeadDetail('c', ['test'], jeremy), null, 'booking ownership never grants campaign access');
+    assert.equal(await store.getLeadDetail('c', ['test'], jeremy), null, 'booking ownership never grants access to unrelated campaign leads');
+    assert.ok(await store.getLeadDetail('a', [], jeremy), 'the booker retains their own opportunity after campaign assignments change');
+    assert.deepEqual((await store.listPipeline([], jeremy)).map(lead => lead.id), ['a']);
+    assert.equal((await store.listAppointments([], jeremy)).length, 1);
+    assert.equal(await store.getLeadDetail('a', [], sierra), null);
     const competing = await Promise.allSettled([sierra,jeremy].map(email => store.recordLeadActivity({ leadId:'b', actorEmail:email, actorRole:'contractor', activityType:'appointment', note:'Calendly confirmed' })));
     assert.equal(competing.filter(result => result.status === 'fulfilled').length, 1);
     assert.equal((await db.query("SELECT COUNT(*)::int AS count FROM lead_activities WHERE lead_id='b' AND activity_type='appointment'")).rows[0].count, 1);

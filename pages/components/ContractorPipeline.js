@@ -209,7 +209,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       if (requestId !== workspaceRequestRef.current) return null;
       setWorkspace(payload);
       setWorkspaceError('');
-      setPipelineCampaign((current) => !current || payload.campaigns.some((campaign) => campaign.id === current) ? current : '');
+      setPipelineCampaign((current) => !current || payload.campaigns.some((campaign) => campaign.id === current) || payload.leads.some((lead) => lead.campaign_id === current && hasCalendlyAppointment(lead)) ? current : '');
       setSelectedLead((current) => current && !payload.leads.some((lead) => lead.id === current.id) ? null : current);
       setDetail((current) => current?.lead && !payload.leads.some((lead) => lead.id === current.lead.id) ? null : current);
       setActiveCampaign((current) => {
@@ -577,6 +577,10 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const visibleLeads = useMemo(() => workspace.leads.filter((lead) => lead.campaign_id === activeCampaign), [workspace.leads, activeCampaign]);
   const activeQueueLeads = visibleLeads.filter((lead) => belongsInCallQueue(lead));
   const pipelineLeads = selectPipelineLeads(workspace.leads, pipelineCampaign);
+  const pipelineCampaigns = [...new Map([
+    ...workspace.campaigns.map(campaign => [campaign.id, campaign]),
+    ...workspace.leads.filter(hasCalendlyAppointment).map(lead => [lead.campaign_id, { id:lead.campaign_id, name:lead.campaign_name }]),
+  ]).values()];
   const lanes = workspace.pipelineColumns || SALES_PIPELINE_LANES;
   const queueLeads = useMemo(() => {
     const query = queueFilters.query.trim().toLowerCase();
@@ -631,7 +635,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
         {historyPanel}
         <section className="panel dashboard-followups"><div className="panel-head"><span>Follow-ups due</span><span>{dashboard.stats?.follow_ups_due || 0} due</span></div>{dashboard.followUps?.length ? <div>{dashboard.followUps.map((lead) => <button className="history-row" type="button" key={lead.id} onClick={() => openLead(lead)}><span><strong>{lead.name}</strong><small>{lead.company || lead.phone || 'Open lead'}</small></span><span>Due</span><span>{dateLabel(lead.next_follow_up_at, true)}</span></button>)}</div> : <div className="empty">Scheduled follow-ups appear here when due and remain until the next call is logged.</div>}</section>
       </section>}
-      {activeView === 'pipeline' && <section><div className="page-head"><div><h1>Sales pipeline</h1><p>Your booked appointments. Admin conducts the meetings, presentations, and sales follow-up.</p></div><label className="campaign-picker">Campaign<select value={pipelineCampaign} onChange={(event) => setPipelineCampaign(event.target.value)}><option value="">All assigned campaigns</option>{workspace.campaigns.map((campaign) => <option key={campaign.id} value={campaign.id}>{campaign.name}</option>)}</select></label></div><PipelineComponent lanes={lanes} leads={pipelineLeads} laneFor={pipelineLane} onLeadClick={(lead) => openLead(lead, { readOnlyPipeline: true })} dateLabel={dateLabel} money={money} /></section>}
+      {activeView === 'pipeline' && <section><div className="page-head"><div><h1>Sales pipeline</h1><p>Your booked appointments. Admin conducts the meetings, presentations, and sales follow-up.</p></div><label className="campaign-picker">Campaign<select value={pipelineCampaign} onChange={(event) => setPipelineCampaign(event.target.value)}><option value="">All my appointments</option>{pipelineCampaigns.map((campaign) => <option key={campaign.id} value={campaign.id}>{campaign.name}</option>)}</select></label></div><PipelineComponent lanes={lanes} leads={pipelineLeads} laneFor={pipelineLane} onLeadClick={(lead) => openLead(lead, { readOnlyPipeline: true })} dateLabel={dateLabel} money={money} /></section>}
       {activeView === 'leads' && (
         <section className="queue-view">
           <div className="page-head queue-page-head">
