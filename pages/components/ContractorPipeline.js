@@ -5,6 +5,7 @@ import { belongsInCallQueue, nextQueueLead, compareCallQueueLeads, resumeCallQue
 import CallHistory from '../../components/bdr/CallHistory';
 import { SALES_PIPELINE_LANES, selectPipelineLeads } from '../../lib/salesPipeline.mjs';
 import PipelineComponent from './PipelineComponent';
+import { createBackgroundPoller } from '../../public/dialer/backgroundPolling.mjs';
 
 const workableStages = ['New', 'Contacted', 'Qualified', 'Appointment Set', 'Pitched', 'Do Not Call'];
 const dispositions = ['Connected — qualified', 'Connected — follow up', 'Left voicemail', 'No answer', 'Not interested'];
@@ -231,8 +232,10 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       const payload = await responseJson(response, 'Today’s activity could not be loaded. Refresh and try again.');
       if (!response.ok) throw new Error(payload.error || 'Unable to load today’s activity.');
       setDashboard(payload);
+      return true;
     } catch (dashboardError) {
       setError(dashboardError.message || 'Unable to load today’s activity.');
+      return false;
     } finally {
       setDashboardLoading(false);
     }
@@ -257,15 +260,13 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
 
   useEffect(() => {
     loadWorkspace({ keepLoading: true });
-    const interval = window.setInterval(() => loadWorkspace(), 15000);
-    return () => window.clearInterval(interval);
+    return createBackgroundPoller(async () => Boolean(await loadWorkspace()), { intervalMs:120000 });
   }, []);
 
   useEffect(() => {
     if (!activeCampaign) { setDashboard(emptyDashboard); return undefined; }
     loadDashboard(activeCampaign);
-    const interval = window.setInterval(() => loadDashboard(activeCampaign), 30000);
-    return () => window.clearInterval(interval);
+    return createBackgroundPoller(() => loadDashboard(activeCampaign), { intervalMs:60000 });
   }, [activeCampaign]);
 
   useEffect(() => {

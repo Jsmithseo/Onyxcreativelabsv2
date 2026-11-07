@@ -653,6 +653,7 @@ async function refreshContractorActivity() {
   }
   updateMetrics(document.getElementById("campaignSelect").value);
   renderGoals();
+  return results.every((result) => result.status === "fulfilled");
 }
 let selectedSharedLeadId = "";
 
@@ -963,10 +964,12 @@ async function loadSharedPipeline({ quiet = false } = {}) {
     renderSharedPipeline();
     syncCampaignCommissionInputs();
     if (!quiet) notify("Shared pipeline refreshed");
+    return appointmentsResponse.ok;
   } catch (error) {
     const board = document.getElementById("sharedPipelineBoard");
     if (board) board.innerHTML = '<div class="sales-empty">Shared campaign data is temporarily unavailable.</div>';
     if (!quiet) notify(error.message || "Unable to load shared pipeline");
+    return false;
   }
 }
 
@@ -2119,8 +2122,10 @@ loadDashboardSettings();
 loadCelebrationClip();
 showView(viewFromLocation(), { updateLocation:false });
 setInterval(renderRows, 60000);
-setInterval(() => loadSharedPipeline({ quiet:true }), 15000);
-setInterval(refreshContractorActivity, 15000);
+import('/dialer/backgroundPolling.mjs').then(({ createBackgroundPoller }) => {
+  createBackgroundPoller(() => loadSharedPipeline({ quiet:true }), { intervalMs:120000 });
+  createBackgroundPoller(refreshContractorActivity, { intervalMs:60000 });
+}).catch((error) => console.warn('Automatic refresh is unavailable; use Refresh.', error.message));
 refreshContractorActivity();
 // Shared operations are now the durable source of truth. Do not re-import the
 // browser's legacy sample queue on every load: real leads are added through the
