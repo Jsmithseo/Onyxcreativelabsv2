@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { previewContractorCsv } from '../../lib/contractorLeadImport.mjs';
 import LeadBriefing from '../../components/bdr/LeadBriefing';
-import { belongsInCallQueue, nextQueueLead, compareCallQueueLeads, resumeCallQueue } from '../../lib/callQueue.mjs';
+import { belongsInCallQueue, nextQueueLead, compareCallQueueLeads, resumeCallQueue, isDue } from '../../lib/callQueue.mjs';
 import CallHistory from '../../components/bdr/CallHistory';
 import { SALES_PIPELINE_LANES, selectPipelineLeads } from '../../lib/salesPipeline.mjs';
 import PipelineComponent from './PipelineComponent';

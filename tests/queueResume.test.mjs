@@ -1,6 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { belongsInCallQueue, compareCallQueueLeads, resumeCallQueue, nextQueueLead } from '../lib/callQueue.mjs';
+import { belongsInCallQueue, compareCallQueueLeads, resumeCallQueue, nextQueueLead, isDue } from '../lib/callQueue.mjs';
+
+test('queue follow-up indicators support the renderer calling without an explicit clock', () => {
+  assert.equal(isDue({ next_follow_up_at: '2000-01-01T00:00:00Z' }), true);
+  assert.equal(isDue({ next_follow_up_at: '2100-01-01T00:00:00Z' }), false);
+  assert.equal(isDue({}), false);
+  assert.equal(isDue({ next_follow_up_at: 'invalid' }), false);
+  const deadline = '2026-11-06T20:00:00Z';
+  assert.equal(isDue({ next_follow_up_at: deadline }, Date.parse(deadline)), true);
+  assert.equal(isDue({ next_follow_up_at: deadline }, Date.parse(deadline) - 1), false);
+});
 
 test('a fresh queue resumes after the last saved call and keeps earlier skipped leads', () => {
   const zones = ['PT','MT','CT','ET'];
