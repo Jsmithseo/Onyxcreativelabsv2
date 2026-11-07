@@ -19,7 +19,8 @@ export default async function lead(req, res) {
     const allCampaigns = await listCampaigns();
     const detail = await getLeadDetail(
       req.query.id,
-      allowedCampaignIds(principal, allCampaigns)
+      allowedCampaignIds(principal, allCampaigns),
+      principal.role === 'contractor' ? principal.email : ''
     );
     if (!detail) return res.status(404).json({ error: 'Lead not found.' });
     if (req.method === 'PATCH') {

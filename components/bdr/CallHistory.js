@@ -1,7 +1,7 @@
 export default function CallHistory({ campaignName, calls = [], total = 0, page = 0, pageSize = 20, loading = false, error = '', onRetry, onPage, onLead }) {
   const date = (value) => new Date(value).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
   return <section className="call-history" aria-label="Shared call history">
-    <header><div><h2>Call history</h2><p>{campaignName || 'Campaign'}</p></div><span>{total} calls logged</span></header>
+    <header><div><h2>Call history</h2><p>{campaignName || 'Campaign'} · All callers</p></div><span>{total} calls logged</span></header>
     {error && <p className="error" role="alert">{error} <button type="button" onClick={onRetry}>Retry</button></p>}
     <div className="scroll"><div className="table">
       <div className="grid headings"><span>Lead</span><span>Called by</span><span>Outcome</span><span>Logged at</span></div>

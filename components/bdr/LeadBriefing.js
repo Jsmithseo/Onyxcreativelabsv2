@@ -12,8 +12,8 @@ function checkedDate(value) {
   }).format(date);
 }
 
-export default function LeadBriefing({ notes }) {
-  const briefing = useMemo(() => parseLeadBriefing(notes), [notes]);
+export default function LeadBriefing({ notes, contractorName }) {
+  const briefing = useMemo(() => parseLeadBriefing(notes, { contractorName }), [notes, contractorName]);
   const [copyStatus, setCopyStatus] = useState('');
   const { fields, narrative, script, paragraphs, prompts } = briefing;
   const website = safeBriefingUrl(fields.website);

@@ -15,7 +15,10 @@ export default async function calls(req, res) {
     if (campaign && !available.includes(campaign)) return res.status(403).json({ error:'Campaign access is required.' });
     const result = await listCallHistory({
       campaignIds:campaign ? [campaign] : available,
-      actorEmail:principal.role === 'contractor' ? principal.email : '',
+      // Campaign access is the sharing boundary. Callers can see the team's
+      // history while personal dashboards and queue checkpoints remain scoped.
+      actorEmail:'',
+      viewerEmail:principal.role === 'contractor' ? principal.email : '',
       contractorsOnly:principal.role === 'admin' && req.query.contractorsOnly === 'true',
       offset:Math.max(0, parseInt(req.query.offset, 10) || 0),
       limit:Math.max(1, Math.min(100, parseInt(req.query.limit, 10) || 50)),

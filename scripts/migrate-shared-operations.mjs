@@ -1,4 +1,5 @@
 import { neon } from '@neondatabase/serverless';
+import { migrateAppointmentOwnership } from '../lib/appointmentOwnership.mjs';
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -55,7 +56,9 @@ const statements = [
   `,
   `
     ALTER TABLE leads
-    ADD COLUMN IF NOT EXISTS follow_up_owner_email TEXT
+    ADD COLUMN IF NOT EXISTS follow_up_owner_email TEXT,
+    ADD COLUMN IF NOT EXISTS booked_by_email TEXT,
+    ADD COLUMN IF NOT EXISTS booked_at TIMESTAMPTZ
   `,
   `
     CREATE INDEX IF NOT EXISTS leads_campaign_stage_idx
@@ -108,6 +111,8 @@ const statements = [
 for (const statement of statements) {
   await sql.query(statement);
 }
+
+await migrateAppointmentOwnership(sql);
 
 const campaigns = [
   ['school', 'Parsity School', 'Career-ready technology training outreach.'],

@@ -26,6 +26,7 @@ export default async function dashboard(req, res) {
     const dashboard = await getContractorDailyDashboard({
       campaignId,
       actorEmail: principal.email,
+      viewerEmail: principal.role === 'contractor' ? principal.email : '',
     });
     return res.status(200).json({ campaignId, ...dashboard });
   } catch (error) {

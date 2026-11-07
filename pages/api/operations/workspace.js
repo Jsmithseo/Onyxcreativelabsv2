@@ -26,14 +26,14 @@ export default async function workspace(req, res) {
     const campaignIds = allowedCampaignIds(principal, allCampaigns);
     const campaigns = allCampaigns.filter((campaign) => campaignIds.includes(campaign.id));
     const [leads, campaignSummaries, adminMasterSynced, queueResumePositions] = await Promise.all([
-      listPipeline(campaignIds),
+      listPipeline(campaignIds, principal.role === 'contractor' ? principal.email : ''),
       listCampaignSummaries(campaignIds, principal.role === 'admin' ? '' : principal.email),
       isAdminMasterSynced(),
       principal.role === 'contractor' ? listQueueResumePositions(campaignIds, principal.email) : [],
     ]);
 
     const payload = {
-      principal: { email: principal.email, role: principal.role },
+      principal: { email: principal.email, name: principal.name || '', role: principal.role },
       campaigns,
       campaignSummaries,
       leads,

@@ -41,6 +41,7 @@ test('manual calls persist, leave the queue, and feed BDR history and the Admin 
     assert.deepEqual(own.calls, admin.calls);
     assert.equal(own.calls[0].duration_seconds, 0, 'manual log does not fabricate a duration');
     assert.equal((await store.listCallHistory({ campaignIds:['test'], actorEmail:'jeremy@example.com' })).total, 0);
+    assert.equal((await store.getContractorDailyDashboard({ campaignId:'test', actorEmail:'jeremy@example.com' })).stats.calls_today, 0, 'shared history does not count a teammate call toward personal goals');
     assert.equal((await store.listCallHistory({ campaignIds:['other'] })).total, 0);
     assert.equal((await store.listCallHistory({ campaignIds:['test'], offset:1 })).calls.length, 0);
     const today = new Intl.DateTimeFormat('en-CA', { timeZone:'America/Los_Angeles' }).format(new Date());
@@ -82,6 +83,11 @@ test('manual calls persist, leave the queue, and feed BDR history and the Admin 
     assert.equal(monthly.contractors.find((row) => row.email === 'jeremy@example.com').calls, 0);
     assert.equal((await store.getContractorCallReport({ campaignIds:['other'], from:'2026-11-01', to:'2026-11-30' })).totals.calls, 0);
     await store.recordLeadActivity({ leadId:'b', actorEmail:'jeremy@example.com', actorRole:'contractor', activityType:'call', note:'Another caller must not move Sierra’s place' });
+    const sharedHistory = await store.listCallHistory({ campaignIds:['test'] });
+    assert.equal(sharedHistory.total, 3);
+    assert.deepEqual(new Set(sharedHistory.calls.map((item) => item.actor_email)), new Set(['sierra@example.com', 'jeremy@example.com']));
+    const sharedLead = await store.getLeadDetail('a', ['test']);
+    assert.equal(sharedLead.activities.filter((item) => item.activity_type === 'call').length, 2, 'lead history includes calls made by another contractor');
     assert.equal((await store.listQueueResumePositions(['test'], 'sierra@example.com'))[0].lead_id, 'a');
     assert.equal((await store.listQueueResumePositions(['test'], 'jeremy@example.com'))[0].lead_id, 'b');
     assert.deepEqual(await store.listQueueResumePositions(['other'], 'sierra@example.com'), []);

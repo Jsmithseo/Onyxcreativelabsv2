@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { previewContractorCsv } from '../../lib/contractorLeadImport.mjs';
 import LeadBriefing from '../../components/bdr/LeadBriefing';
-import { belongsInCallQueue, nextQueueLead, compareCallQueueLeads, resumeCallQueue, isDue } from '../../lib/callQueue.mjs';
+import { belongsInCallQueue, nextQueueLead, compareCallQueueLeads, resumeCallQueue, isDue, queueFollowUpAt } from '../../lib/callQueue.mjs';
 import CallHistory from '../../components/bdr/CallHistory';
 import { SALES_PIPELINE_LANES, selectPipelineLeads } from '../../lib/salesPipeline.mjs';
 import PipelineComponent from './PipelineComponent';
 import { createBackgroundPoller } from '../../public/dialer/backgroundPolling.mjs';
 
-const workableStages = ['New', 'Contacted', 'Qualified', 'Appointment Set', 'Pitched', 'Do Not Call'];
+const workableStages = ['New', 'Contacted', 'Qualified', 'Do Not Call'];
 const dispositions = ['Connected — qualified', 'Connected — follow up', 'Left voicemail', 'No answer', 'Not interested'];
 const appointmentTypes = ['Discovery call', 'Product demo', 'Technical review', 'Follow-up meeting'];
 const calendlyDiscoveryUrl = 'https://calendly.com/softwaresmitty/discovery';
@@ -25,6 +24,17 @@ async function responseJson(response, fallbackMessage) {
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('application/json')) throw new Error(fallbackMessage);
   return response.json();
+}
+
+async function fetchLeadDetail(id) {
+  const response = await bdrFetch(`/api/operations/leads/${encodeURIComponent(id)}`, { cache:'no-store' });
+  const payload = await responseJson(response, 'Lead details could not be loaded. Refresh and try again.');
+  if (!response.ok) {
+    const error = new Error(payload.error || 'Unable to load lead details.');
+    error.status = response.status;
+    throw error;
+  }
+  return payload;
 }
 
 function money(cents) {
@@ -76,7 +86,7 @@ function pipelineLane(lead) {
 }
 
 function hasCalendlyAppointment(lead) {
-  return lead.pipeline_eligible ?? Number(lead.calendly_appointment_count || 0) > 0;
+  return Boolean(lead?.booked_at) || (lead?.pipeline_eligible ?? Number(lead?.booked_appointment_count ?? lead?.calendly_appointment_count ?? 0) > 0);
 }
 
 function preferredZone(leads) {
@@ -181,13 +191,10 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const workspaceRequestRef = useRef(0);
   const [workspaceError, setWorkspaceError] = useState('');
   const historyRequestRef = useRef(0);
+  const detailRequestRef = useRef(0);
   const savingRef = useRef(false);
   const [showScheduler, setShowScheduler] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const [importCsv, setImportCsv] = useState('');
-  const [importPreview, setImportPreview] = useState(null);
-  const [importing, setImporting] = useState(false);
-  const [importResult, setImportResult] = useState('');
   const calendarEmbedRef = useRef(null);
   const calendlyBookingRef = useRef('');
   const [activity, setActivity] = useState({ activityType: 'call', disposition: '', note: '', scheduledFor: '', nextStage: '', appointmentType: appointmentTypes[0] });
@@ -203,8 +210,8 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       setWorkspace(payload);
       setWorkspaceError('');
       setPipelineCampaign((current) => !current || payload.campaigns.some((campaign) => campaign.id === current) ? current : '');
-      setSelectedLead((current) => current && !payload.campaigns.some((campaign) => campaign.id === current.campaign_id) ? null : current);
-      setDetail((current) => current?.lead && !payload.campaigns.some((campaign) => campaign.id === current.lead.campaign_id) ? null : current);
+      setSelectedLead((current) => current && !payload.leads.some((lead) => lead.id === current.id) ? null : current);
+      setDetail((current) => current?.lead && !payload.leads.some((lead) => lead.id === current.lead.id) ? null : current);
       setActiveCampaign((current) => {
         const requested = new URLSearchParams(window.location.search).get('campaign');
         if (requested && payload.campaigns.some((item) => item.id === requested)) return requested;
@@ -281,6 +288,30 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
     const interval = window.setInterval(() => loadCallHistory(activeCampaign, historyPage), 15000);
     return () => window.clearInterval(interval);
   }, [activeView, queueScope, activeCampaign, historyPage]);
+
+  useEffect(() => {
+    if (!selectedLead?.id) return undefined;
+    const id = selectedLead.id;
+    const request = detailRequestRef.current;
+    let cancelled = false;
+    const stop = createBackgroundPoller(async () => {
+      try {
+        const payload = await fetchLeadDetail(id);
+        if (!cancelled && request === detailRequestRef.current) {
+          setDetail(payload);
+          if (hasCalendlyAppointment(payload.lead)) setPipelineReadOnly(true);
+        }
+        return true;
+      } catch (error) {
+        if (!cancelled && request === detailRequestRef.current && error.status === 404) {
+          removeUnavailableLead(id);
+          return true;
+        }
+        return false;
+      }
+    }, { intervalMs:15000 });
+    return () => { cancelled = true; stop(); };
+  }, [selectedLead?.id]);
 
   useEffect(() => {
     setCallHistory({ calls:[], total:0 });
@@ -381,9 +412,10 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   }, [selectedLead]);
 
   async function openLead(lead, { readOnlyPipeline = false } = {}) {
+    const request = ++detailRequestRef.current;
     if (liveCall && liveCall.leadId !== lead.id) { setError('End the current call timer before opening another lead.'); return; }
     setSelectedLead(lead);
-    setPipelineReadOnly(readOnlyPipeline);
+    setPipelineReadOnly(readOnlyPipeline || hasCalendlyAppointment(lead));
     setDetail(null);
     setDetailError('');
     setSaveError('');
@@ -391,17 +423,32 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
     setShowScheduler(false);
     setCalendarOpen(false);
     calendlyBookingRef.current = '';
-    setActivity({ activityType: 'call', disposition:'', note:'', scheduledFor:lead.next_follow_up_at && new Date(lead.next_follow_up_at).valueOf() > Date.now() ? inputDateTime(lead.next_follow_up_at) : '', nextStage:workableStages.includes(lead.stage) ? lead.stage : '', appointmentType:appointmentTypes[0] });
+    const followUp = queueFollowUpAt(lead);
+    setActivity({ activityType: 'call', disposition:'', note:'', scheduledFor:followUp && new Date(followUp).valueOf() > Date.now() ? inputDateTime(followUp) : '', nextStage:workableStages.includes(lead.stage) ? lead.stage : '', appointmentType:appointmentTypes[0] });
     try {
-      const response = await bdrFetch(`/api/operations/leads/${encodeURIComponent(lead.id)}`, { cache: 'no-store' });
-      const payload = await responseJson(response, 'Lead details could not be loaded. Refresh and try again.');
-      if (!response.ok) throw new Error(payload.error || 'Unable to load lead details.');
+      const payload = await fetchLeadDetail(lead.id);
+      if (request !== detailRequestRef.current) return;
       setDetail(payload);
+      if (hasCalendlyAppointment(payload.lead)) setPipelineReadOnly(true);
     } catch (loadError) {
+      if (request !== detailRequestRef.current) return;
+      if (loadError.status === 404) { removeUnavailableLead(lead.id); return; }
       const message = loadError.message || 'Unable to load lead details.';
       setDetailError(message);
       setError(message);
     }
+  }
+
+  function removeUnavailableLead(id) {
+    ++detailRequestRef.current;
+    setSelectedLead(null);
+    setDetail(null);
+    setLiveCall(null);
+    setShowScheduler(false);
+    setCalendarOpen(false);
+    setWorkspace(current => ({ ...current, leads:current.leads.filter(lead => lead.id !== id) }));
+    setCallHistory(current => ({ ...current, calls:current.calls.filter(call => call.lead_id !== id) }));
+    setError('This lead is no longer available. It may have been booked by another contractor.');
   }
 
   function openCampaign(id) {
@@ -423,7 +470,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       return;
     }
     setActiveView(view);
-    setPipelineReadOnly(view === 'pipeline');
+    setPipelineReadOnly(view === 'pipeline' || hasCalendlyAppointment(detail?.lead || selectedLead));
   }
 
   function updateQueueFilters(updates) {
@@ -431,42 +478,34 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
     setQueuePage(0);
   }
 
-  async function previewImport(event) {
-    const file = event.target.files?.[0];
-    setImportResult('');
-    if (!file) return;
-    const csv = await file.text();
-    setImportCsv(csv);
-    setImportPreview(previewContractorCsv(csv));
-    event.target.value = '';
-  }
-
-  async function importLeads() {
-    if (!activeCampaign || !importPreview?.accepted?.length || !importCsv) return;
-    setImporting(true);
-    setImportResult('');
+  async function openAppointmentScheduler() {
+    if (!selectedLead) return;
     try {
-      const response = await bdrFetch('/api/operations/contractor-lead-import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ campaignId: activeCampaign, csv: importCsv }),
-      });
-      const payload = await responseJson(response, 'The lead import service returned an unexpected response.');
-      if (!response.ok) throw new Error(payload.error || 'Unable to import leads.');
-      setImportResult(`${payload.imported} imported · ${payload.skipped} skipped · ${payload.rejected} rejected`);
-      setImportCsv('');
-      setImportPreview(null);
-      await loadWorkspace();
-      await loadDashboard(activeCampaign);
-    } catch (importError) {
-      setImportResult(importError.message || 'Unable to import leads.');
-    } finally {
-      setImporting(false);
+      const payload = await fetchLeadDetail(selectedLead.id);
+      setDetail(payload);
+      if (hasCalendlyAppointment(payload.lead)) { setPipelineReadOnly(true); return; }
+      setShowScheduler(true);
+      setCalendarOpen(true);
+      setActivity(current => ({ ...current, activityType:'appointment' }));
+    } catch (error) {
+      if (error.status === 404) removeUnavailableLead(selectedLead.id);
+      else setError(error.message);
     }
   }
 
-  function startCall() {
-    const link = phoneLink(detail?.lead.phone || selectedLead?.phone);
+  async function startCall() {
+    if (!selectedLead) return;
+    let payload;
+    try {
+      payload = await fetchLeadDetail(selectedLead.id);
+      setDetail(payload);
+      if (hasCalendlyAppointment(payload.lead)) { setPipelineReadOnly(true); return; }
+    } catch (error) {
+      if (error.status === 404) removeUnavailableLead(selectedLead.id);
+      else setError(error.message);
+      return;
+    }
+    const link = phoneLink(payload.lead.phone);
     if (!link) { setError('This lead does not have a callable phone number.'); return; }
     setCallSeconds(0);
     setCallNotice('');
@@ -506,7 +545,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
       const payload = await responseJson(response, 'The lead activity could not be saved. Refresh and try again.');
       if (!response.ok) throw new Error(payload.error || 'Unable to save activity.');
       setCallSeconds(0);
-      const savedLead = { ...completedLead, ...payload.lead, ...(!appointment ? { last_call_at:payload.activity.created_at, last_called_by:payload.activity.actor_email } : {}) };
+      const savedLead = { ...completedLead, ...payload.lead, ...(!appointment ? { last_call_at:payload.activity.created_at, last_called_by:payload.activity.actor_email, caller_last_call_at:payload.activity.created_at, caller_next_follow_up_at:scheduledFor } : {}) };
       setWorkspace((current) => ({ ...current, leads:current.leads.map((lead) => lead.id === completedLead.id ? { ...lead, ...savedLead } : lead) }));
       const refreshed = await loadWorkspace();
       await loadDashboard(completedLead.campaign_id);
@@ -570,6 +609,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const queueRangeStart = queueLeads.length ? safeQueuePage * queuePageSize + 1 : 0;
   const queueRangeEnd = Math.min((safeQueuePage + 1) * queuePageSize, queueLeads.length);
   const currentLead = detail?.lead || selectedLead;
+  const bookedLead = hasCalendlyAppointment(currentLead);
   const activeCall = liveCall?.leadId === selectedLead?.id;
   const today = new Date().toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
   const campaignPicker = <label className="campaign-picker">Campaign<select value={activeCampaign} onChange={(event) => setActiveCampaign(event.target.value)}>{workspace.campaigns.map((campaign) => <option key={campaign.id} value={campaign.id}>{campaign.name}</option>)}</select></label>;
@@ -591,7 +631,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
         {historyPanel}
         <section className="panel dashboard-followups"><div className="panel-head"><span>Follow-ups due</span><span>{dashboard.stats?.follow_ups_due || 0} due</span></div>{dashboard.followUps?.length ? <div>{dashboard.followUps.map((lead) => <button className="history-row" type="button" key={lead.id} onClick={() => openLead(lead)}><span><strong>{lead.name}</strong><small>{lead.company || lead.phone || 'Open lead'}</small></span><span>Due</span><span>{dateLabel(lead.next_follow_up_at, true)}</span></button>)}</div> : <div className="empty">Scheduled follow-ups appear here when due and remain until the next call is logged.</div>}</section>
       </section>}
-      {activeView === 'pipeline' && <section><div className="page-head"><div><h1>Sales pipeline</h1><p>Booked appointments shared by Admin across your assigned campaigns.</p></div><label className="campaign-picker">Campaign<select value={pipelineCampaign} onChange={(event) => setPipelineCampaign(event.target.value)}><option value="">All assigned campaigns</option>{workspace.campaigns.map((campaign) => <option key={campaign.id} value={campaign.id}>{campaign.name}</option>)}</select></label></div><PipelineComponent lanes={lanes} leads={pipelineLeads} laneFor={pipelineLane} onLeadClick={(lead) => openLead(lead, { readOnlyPipeline: true })} dateLabel={dateLabel} money={money} /></section>}
+      {activeView === 'pipeline' && <section><div className="page-head"><div><h1>Sales pipeline</h1><p>Your booked appointments. Admin conducts the meetings, presentations, and sales follow-up.</p></div><label className="campaign-picker">Campaign<select value={pipelineCampaign} onChange={(event) => setPipelineCampaign(event.target.value)}><option value="">All assigned campaigns</option>{workspace.campaigns.map((campaign) => <option key={campaign.id} value={campaign.id}>{campaign.name}</option>)}</select></label></div><PipelineComponent lanes={lanes} leads={pipelineLeads} laneFor={pipelineLane} onLeadClick={(lead) => openLead(lead, { readOnlyPipeline: true })} dateLabel={dateLabel} money={money} /></section>}
       {activeView === 'leads' && (
         <section className="queue-view">
           <div className="page-head queue-page-head">
@@ -644,7 +684,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
                     <span>{lead.company || '—'}</span>
                     <span>{lead.phone || '—'}</span>
                     <span>{lead.time_zone || '—'}</span>
-                    <span className={isDue(lead) ? 'queue-due' : ''}>{lead.next_follow_up_at ? dateLabel(lead.next_follow_up_at) : '—'}</span>
+                    <span className={isDue(lead) ? 'queue-due' : ''}>{queueFollowUpAt(lead) ? dateLabel(queueFollowUpAt(lead)) : '—'}</span>
                     <span><i className="queue-status">{lead.stage || 'New'}</i></span>
                   </button>
                 ))}
@@ -656,15 +696,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
               <div><button type="button" disabled={safeQueuePage === 0} onClick={() => setQueuePage((page) => Math.max(0, page - 1))}>Previous</button><button type="button" disabled={safeQueuePage >= queuePageCount - 1} onClick={() => setQueuePage((page) => Math.min(queuePageCount - 1, page + 1))}>Next</button></div>
             </div>
           </section></>}
-          {queueScope !== 'history' && <section className="lead-import panel" aria-label="Import leads">
-            <div className="panel-head"><span>Import leads</span><span>{active?.name || 'Choose a campaign'}</span></div>
-            <div className="lead-import-body">
-              <p>Upload a CSV for this assigned campaign. Accepted new leads are securely assigned to you. Supported columns include name, company, title, phone, email, LinkedIn, location, time zone, industry, and notes.</p>
-              <label className="secondary import-file">Choose CSV<input type="file" accept=".csv,text/csv" onChange={previewImport} disabled={!activeCampaign || importing} /></label>
-              {importPreview && <div className="import-preview"><strong>{importPreview.accepted.length} ready · {importPreview.rejected.length} rejected</strong>{importPreview.rejected.slice(0, 5).map((row) => <small key={`${row.row}:${row.errors?.join('|')}`}>Row {row.row}: {row.errors.join(' ')}</small>)}<button className="primary" type="button" onClick={importLeads} disabled={!importPreview.accepted.length || importing}>{importing ? 'Importing…' : `Import ${importPreview.accepted.length} leads`}</button></div>}
-              {importResult && <p className="import-result" role="status">{importResult}</p>}
-            </div>
-          </section>}
+
         </section>
       )}
       {activeView === 'settings' && <section className="settings"><h1>Settings</h1><p>Your administrator controls campaign access, commission defaults, and deal closure. You can work only the campaigns listed below.</p><ul>{workspace.campaigns.map((campaign) => <li key={campaign.id}>{campaign.name}</li>)}</ul></section>}
@@ -677,10 +709,10 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
         </header>
         {!pipelineReadOnly && <div className="queue-detail-actions">
           {activeCall ? <button className="secondary" type="button" onClick={endCall}>End call timer</button> : <button className="primary" type="button" disabled={saving || !phoneLink(currentLead?.phone)} onClick={startCall}>Call lead</button>}
-          <button className="secondary" type="button" disabled={saving || activeCall} onClick={() => { setShowScheduler(true); setCalendarOpen(true); setActivity((current) => ({ ...current, activityType: 'appointment' })); }}>Appointment scheduler</button>
+          <button className="secondary" type="button" disabled={saving || activeCall} onClick={openAppointmentScheduler}>Appointment scheduler</button>
         </div>}
         {activeCall && <div className="queue-call-state">Call timer · {duration(callSeconds)}</div>}
-        {pipelineReadOnly ? <section className="queue-read-only"><h3>Read-only pipeline record</h3><p>Administrators manage pipeline placement. Use the Leads workspace to record calls, follow-ups, and appointments.</p></section> : <form className="queue-wrap-up" onSubmit={saveActivity}>
+        {pipelineReadOnly ? <section className="queue-read-only"><h3>{bookedLead ? 'Appointment booked · With Admin' : 'Read-only pipeline record'}</h3><p>{bookedLead ? 'Admin will conduct the appointment and presentation and manage sales updates. You can follow this lead’s status here. Access is limited to you and Admin.' : 'Open this lead from the Leads tab to record calls or book an appointment.'}</p></section> : <form className="queue-wrap-up" onSubmit={saveActivity}>
           <h3>{showScheduler ? 'Record booked appointment' : 'Log call'}</h3>
           {!showScheduler && <p className="call-log-help">Manually log this call. Your BDR identity and the time are saved automatically.</p>}
           {showScheduler && <><p className="calendar-helper">Book the time in Calendly, then record the appointment here.</p><button className="secondary calendar-reopen" type="button" onClick={() => setCalendarOpen(true)}>Open Calendly calendar</button><label>Meeting type<select value={activity.appointmentType} onChange={(event) => setActivity({ ...activity, appointmentType: event.target.value })}>{appointmentTypes.map((item) => <option key={item}>{item}</option>)}</select></label><label>Appointment date and time<input type="datetime-local" value={activity.scheduledFor} onChange={(event) => setActivity({ ...activity, scheduledFor: event.target.value })} required /></label></>}
@@ -700,9 +732,9 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
           <div><small>Attempts</small><strong>{detail?.activities?.filter((item) => item.activity_type === 'call').length || 0}</strong></div>{pipelineReadOnly ? <div><small>Stage</small><strong>{currentLead?.stage || 'New'}</strong></div> : <label><small>Stage</small><select value={activity.nextStage || currentLead?.stage || 'New'} onChange={(event) => setActivity({ ...activity, nextStage: event.target.value })}>{workableStages.map((stage) => <option key={stage}>{stage}</option>)}</select></label>}
           <div className="wide"><small>Disposition</small><strong>{currentLead?.disposition || 'Not recorded'}</strong></div>
         </div>
-        {currentLead?.notes && <LeadBriefing key={currentLead.id} notes={currentLead.notes} />}
+        {currentLead?.notes && <LeadBriefing key={currentLead.id} notes={currentLead.notes} contractorName={workspace.principal?.name} />}
         {currentLead?.campaign_id === 'reviews' && <section className="review-script"><h3>15-minute review-growth call</h3><ol><li>“Could I speak with whoever handles marketing or customer reviews?”</li><li>“Hi, I’m calling from Onyx Creative Labs. I noticed you already have reviews, and we help businesses earn more of them—and more business from them.”</li><li>“Would a quick 15-minute call in the next couple of days be useful? I have tomorrow at 10 or 11.”</li></ol></section>}
-        <section className="queue-history"><h3>Lead call history</h3>{detail?.activities?.length ? detail.activities.map((item) => <article key={item.id}><strong>{item.activity_type === 'call' ? 'Call logged' : item.activity_type.replace('_', ' ')}</strong><span>{dateLabel(item.created_at, true)}{item.disposition ? ` · ${item.disposition}` : ''}{item.activity_type === 'appointment' ? item.scheduled_for ? ` · Scheduled ${dateLabel(item.scheduled_for, true)}` : ' · Calendly confirmed' : ''}{item.actor_email ? ` · ${item.activity_type === 'call' ? 'Called' : item.activity_type === 'appointment' ? 'Booked' : 'Updated'} by ${item.actor_email}` : ''}</span>{item.note && <p>{item.note}</p>}</article>) : <p>{detailError || (detail ? 'No shared activity yet.' : 'Loading lead history…')}</p>}</section>
+        <section className="queue-history" aria-label="Lead call history"><h3>Lead call history</h3><p>Calls and updates from everyone in this campaign.</p>{detail?.activities?.length ? detail.activities.map((item) => <article key={item.id}><strong>{item.activity_type === 'call' ? 'Call logged' : item.activity_type.replace('_', ' ')}</strong><span>{dateLabel(item.created_at, true)}{item.disposition ? ` · ${item.disposition}` : ''}{item.activity_type === 'appointment' ? item.scheduled_for ? ` · Scheduled ${dateLabel(item.scheduled_for, true)}` : ' · Calendly confirmed' : ''}{item.actor_email ? ` · ${item.activity_type === 'call' ? 'Called' : item.activity_type === 'appointment' ? 'Booked' : 'Updated'} by ${item.actor_email}` : ''}</span>{item.note && <p>{item.note}</p>}</article>) : <p>{detailError || (detail ? 'No calls or activity have been logged for this lead yet.' : 'Loading lead history…')}</p>}</section>
       </aside>
     )}
     {calendarOpen && <div className="calendar-modal" role="dialog" aria-modal="true" aria-labelledby="calendar-modal-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setCalendarOpen(false); }}><section className="calendar-modal-card"><header><div><h2 id="calendar-modal-title">Book an appointment</h2><p>{currentLead?.name || selectedLead?.name || 'Lead'} · Calendly</p></div><button type="button" aria-label="Close calendar" onClick={() => setCalendarOpen(false)}>×</button></header><div className="calendly-embed" ref={calendarEmbedRef} /></section></div>}
