@@ -7,6 +7,7 @@ import styles from '../styles/reviews.module.css';
 const reviewCallHref = '/contact?product=reviews';
 const essentials = [
   'Automated SMS review requests',
+  'Helpful customer review-writing suggestions',
   'Google Business Profile connection',
   'Google-focused reputation monitoring',
   'Requests, feedback, and activity in one dashboard',
@@ -19,7 +20,7 @@ const plans = [
     price: 99,
     label: 'Build consistency',
     description:
-      'A practical review workflow for a business ready to turn great service into a stronger Google reputation.',
+      'Automated requests and helpful review suggestions that turn completed service into feedback new customers can learn from.',
     support: ['A focused, self-directed review workflow'],
   },
   {
@@ -28,7 +29,7 @@ const plans = [
     price: 299,
     label: 'Launch with guidance',
     description:
-      'A guided launch and hands-on support for teams that want to make customer outreach a habit.',
+      'For teams that want hands-on help building a steady review process, with a guided launch and campaign support.',
     featured: true,
     support: [
       'Custom email and SMS campaign planning',
@@ -42,7 +43,7 @@ const plans = [
     price: 499,
     label: 'Grow with a partner',
     description:
-      'A hands-on reputation and campaign partnership for businesses making reviews part of their growth strategy.',
+      'Bring review outreach, coaching, and campaign planning together as you grow your reputation across locations.',
     support: [
       'Everything in Growth',
       'Individual marketing-campaign planning',
@@ -59,24 +60,24 @@ const trialOptions = [
 ];
 const capabilities = [
   {
-    icon: 'dashboard',
-    title: 'One clear dashboard',
-    copy: 'Keep review requests, customer feedback, and Google review activity together so your team knows what to do next.',
+    icon: 'check',
+    title: 'Give new customers confidence',
+    copy: 'Real customer experiences show people what it is like to work with you. A strong review presence gives them more reasons to choose your business.',
   },
   {
     icon: 'message',
-    title: 'Timely SMS requests',
-    copy: 'Make asking for feedback part of your completed-service workflow, with less manual follow-up for your team.',
-  },
-  {
-    icon: 'locations',
-    title: 'One location or many',
-    copy: 'Start with one business location and build a consistent process as you grow. Plan a larger rollout with Onyx.',
+    title: 'Onyx does the asking',
+    copy: 'Automated SMS requests go out on your behalf after a customer interaction. You and your staff can focus on serving customers instead of remembering to ask.',
   },
   {
     icon: 'reply',
-    title: 'Thoughtful requests & replies',
-    copy: 'Use guided prompts to ask clearly, respond thoughtfully, and keep the conversation in your own voice.',
+    title: 'Make reviews easier to write',
+    copy: 'Helpful suggestions give customers a starting point for what to say about their experience. They can personalize the wording and share an honest review in their own voice.',
+  },
+  {
+    icon: 'dashboard',
+    title: 'Keep your reputation in view',
+    copy: 'Follow review requests, feedback, and Google review activity in one dashboard. See what customers are sharing and keep the conversation going with thoughtful replies.',
   },
   {
     icon: 'qr',
@@ -85,11 +86,26 @@ const capabilities = [
   },
   {
     icon: 'support',
-    title: 'A team behind your launch',
-    copy: 'Choose guided onboarding, campaign planning, or ongoing coaching with the level of Onyx support that fits your team.',
+    title: 'Support as your business grows',
+    copy: 'Start with one location or plan a rollout across several. Choose guided onboarding, campaign planning, or coaching with the level of support included in your plan.',
   },
 ];
 const faqs = [
+  {
+    question: 'How can reviews help me win more business?',
+    answer:
+      'Reviews help prospective customers understand what to expect before they contact you. Specific, honest experiences from people you have served can build trust, answer common questions, and give someone more confidence to choose your business.',
+  },
+  {
+    question: 'Do I or my staff have to keep asking for reviews?',
+    answer:
+      'Onyx sends automated SMS review requests on your behalf. We help you choose when to ask after a customer interaction, so review outreach becomes part of your process while your team focuses on serving customers.',
+  },
+  {
+    question: 'How do suggestions make leaving a review easier?',
+    answer:
+      'A customer may want to leave a review but be unsure what to write. Onyx offers helpful starting points about the service they used and their experience. Customers can personalize the suggestions and share their own honest feedback.',
+  },
   {
     question: 'How does the 7-day free trial work?',
     answer:
@@ -113,7 +129,7 @@ const faqs = [
   {
     question: 'How are customer reviews collected?',
     answer:
-      'Build a customer list and choose the right time to ask after a completed service. SMS requests and in-person QR or NFC moments make it easier for customers to share their honest experience. Your business is responsible for customer contact permissions and opt-out requests.',
+      'Onyx sends timely SMS review requests on your behalf after a completed service. Customers receive an easy path to share feedback, with helpful suggestions for writing their review. QR or NFC moments can also support in-person requests. Your business is responsible for customer contact permissions and opt-out requests.',
   },
   {
     question: 'Can I use it for multiple locations?',
@@ -279,10 +295,10 @@ export default function Reviews() {
   return (
     <>
       <Head>
-        <title>Onyx Reviews | Google Review Management &amp; Pricing</title>
+        <title>Onyx Reviews | Help More Customers Choose Your Business</title>
         <meta
           name="description"
-          content="Build a consistent Google review workflow with Onyx Reviews. Explore SMS requests, reputation monitoring, guided support, and plans from $99 per location per month with a 7-day free trial."
+          content="Build trust and help more customers choose your business. Onyx asks for Google reviews on your behalf and gives customers suggestions that make reviews easier to write."
         />
         <link rel="canonical" href="https://www.onyxcreativelabs.com/reviews" />
       </Head>
@@ -290,16 +306,18 @@ export default function Reviews() {
         <section className={styles.hero}>
           <div className={styles.container}>
             <p className={styles.eyebrow}>
-              Onyx Reviews · Google review management
+              Onyx Reviews · Turn customer trust into opportunity
             </p>
             <h1>
-              A better review process.
+              Help more customers
               <br />
-              <span>A stronger reputation.</span>
+              <span>choose your business.</span>
             </h1>
             <p className={styles.heroCopy}>
-              Bring customer requests, Google reviews, and thoughtful follow-up
-              into one consistent workflow. Backed by the team at Onyx.
+              Reviews give new customers the confidence to choose you. Onyx asks
+              for reviews on your behalf, so you and your staff can focus on
+              serving customers. Helpful suggestions make it easier for
+              customers to write an honest review.
             </p>
             <div className={styles.heroLinks}>
               <a href="#plans">
@@ -315,7 +333,7 @@ export default function Reviews() {
                 playsInline
                 preload="metadata"
                 poster="/videos/onyx-reviews-explainer.jpg"
-                aria-label="Onyx Creative Labs: a better review process"
+                aria-label="Onyx Reviews: build trust, let Onyx ask, and make reviews easier"
               >
                 <source
                   src="/videos/onyx-reviews-explainer.mp4"
@@ -335,7 +353,7 @@ export default function Reviews() {
               </video>
               <div className={styles.videoCaption}>
                 <span>Meet Onyx Reviews</span>
-                <span>A practical approach to Google review growth</span>
+                <span>More trust. Less asking. Easier reviews.</span>
               </div>
             </div>
             <Link
@@ -352,15 +370,16 @@ export default function Reviews() {
           <div className={styles.container}>
             <div className={styles.sectionHeading}>
               <p className={styles.eyebrow}>
-                A clearer way to manage your reputation
+                Make your reputation part of your growth
               </p>
               <h2 id="features-heading">
-                Everything your review
-                <br className={styles.desktopBreak} /> workflow needs.
+                Let today’s customers
+                <br className={styles.desktopBreak} /> help you reach
+                tomorrow’s.
               </h2>
               <p>
-                Less chasing. More consistency. A simple path from a customer
-                interaction to honest feedback.
+                Give people more reasons to choose you. Onyx handles the asking
+                and helps customers find the words to share their experience.
               </p>
             </div>
             <div className={styles.capabilityGrid}>
@@ -455,34 +474,35 @@ export default function Reviews() {
         <section className={styles.section} aria-labelledby="requests-heading">
           <div className={`${styles.container} ${styles.splitSection}`}>
             <div className={styles.editorialCopy}>
-              <p className={styles.eyebrow}>Make the right moment count</p>
+              <p className={styles.eyebrow}>Less asking. Easier reviews.</p>
               <h2 id="requests-heading">
-                Great service deserves
-                <br /> a clear next step.
+                Keep serving.
+                <br /> We’ll do the asking.
               </h2>
               <p>
-                Your customers have a story to share. Give them a timely,
-                straightforward invitation while the experience is still fresh.
+                You and your staff have customers to look after. Onyx sends a
+                timely review request on your behalf after a customer
+                interaction, so asking becomes part of the process.
               </p>
               <p>
-                Build review requests into your service journey, then use guided
-                prompts to respond in your own voice. A repeatable process helps
-                your team stay consistent.
+                Customers get helpful suggestions about what to mention, such as
+                the service they used and what stood out. They have a starting
+                point for an honest review and can make the words their own.
               </p>
               <Link className={styles.textLink} href={reviewCallHref}>
-                Map your review workflow
+                Put review requests to work for you
                 <Icon name="arrow" />
               </Link>
             </div>
             <div
               className={styles.conversation}
-              aria-label="Example customer feedback conversation"
+              aria-label="Illustrative automated review request and customer review-writing suggestions"
             >
               <div className={styles.conversationHeader}>
                 <span className={styles.brandMark}>O</span>
                 <div>
                   <strong>Your business</strong>
-                  <span>Example conversation</span>
+                  <span>Illustrative automated conversation</span>
                 </div>
                 <Icon name="message" />
               </div>
@@ -491,19 +511,19 @@ export default function Reviews() {
                   After a completed service
                 </span>
                 <p>
-                  Thanks for working with us today! Would you share a little
-                  about your experience?
+                  Thanks for choosing us today! Would you share your experience
+                  in a Google review?
                 </p>
                 <p className={styles.customerReply}>
-                  Of course. Where can I leave my feedback?
+                  I’d love to. I’m not sure what to write.
                 </p>
                 <p>
-                  We’d appreciate your honest review on Google. Here’s a direct
-                  link to get started.
+                  Here are a few ideas: Which service did you use? What stood
+                  out? What would you tell someone considering us?
                 </p>
               </div>
               <div className={styles.conversationFooter}>
-                <Icon name="check" /> A timely request. An easier next step.
+                <Icon name="check" /> Onyx asks. Customers use their own words.
               </div>
             </div>
           </div>
@@ -515,15 +535,16 @@ export default function Reviews() {
         >
           <div className={`${styles.container} ${styles.splitSection}`}>
             <div className={styles.editorialCopy}>
-              <p className={styles.eyebrow}>One location. Or your next five.</p>
+              <p className={styles.eyebrow}>Build trust at every location</p>
               <h2 id="locations-heading">
-                Your locations grow.
+                More locations.
                 <br />
-                Your process stays clear.
+                The same easy ask.
               </h2>
               <p>
-                Choose a plan and see your monthly estimate for up to five
-                locations. Every location receives the same selected plan.
+                Give every location a consistent way to request reviews while
+                your staff focuses on customers. Choose a plan and see your
+                monthly estimate for up to five locations.
               </p>
               <p>
                 Onyx will help confirm the reporting, access, and rollout that
@@ -621,11 +642,13 @@ export default function Reviews() {
         >
           <div className={styles.container}>
             <div className={styles.sectionHeading}>
-              <p className={styles.eyebrow}>A practical path to launch</p>
-              <h2 id="setup-heading">From setup to your next request.</h2>
+              <p className={styles.eyebrow}>A practical path to more reviews</p>
+              <h2 id="setup-heading">
+                Great service. A timely ask. An easier review.
+              </h2>
               <p>
-                Bring the process into your everyday business, one clear step at
-                a time.
+                Make it easier for customers to share the experiences that help
+                your next customer choose you.
               </p>
             </div>
             <ol className={styles.setupSteps}>
@@ -633,24 +656,25 @@ export default function Reviews() {
                 <span>01</span>
                 <h3>Connect your business</h3>
                 <p>
-                  Confirm your Google Business Profile, your locations, and the
-                  customer journey you want to support.
+                  Connect your Google Business Profile and choose when Onyx
+                  should ask after a completed service or customer interaction.
                 </p>
               </li>
               <li>
                 <span>02</span>
-                <h3>Choose your review moment</h3>
+                <h3>Let Onyx send the request</h3>
                 <p>
-                  Prepare your customer list and decide when an SMS request or
-                  an in-person review link makes sense.
+                  Automated SMS messages ask on your behalf, taking recurring
+                  review outreach off your team’s daily to-do list.
                 </p>
               </li>
               <li>
                 <span>03</span>
-                <h3>Request. Respond. Improve.</h3>
+                <h3>Give customers a starting point</h3>
                 <p>
-                  Send timely requests, follow your Google review activity, and
-                  use feedback to improve the customer experience.
+                  Helpful suggestions make it easier for customers to describe
+                  their experience. Follow new reviews and respond thoughtfully
+                  as your reputation grows.
                 </p>
               </li>
             </ol>
@@ -702,14 +726,17 @@ export default function Reviews() {
 
         <section className={styles.closing}>
           <div className={styles.container}>
-            <p className={styles.eyebrow}>Build trust with every interaction</p>
+            <p className={styles.eyebrow}>
+              Give your next customer a reason to choose you
+            </p>
             <h2>
-              Find the right plan
-              <br /> for your next chapter.
+              Let your reviews
+              <br /> help win your next customer.
             </h2>
             <p>
-              Let’s look at your customer journey, your locations, and the
-              support your team needs to build a review process that lasts.
+              Onyx handles the asking and helps customers share their
+              experience. Build the trust that makes it easier for new customers
+              to choose your business.
             </p>
             <div className={styles.closingActions}>
               <Link
