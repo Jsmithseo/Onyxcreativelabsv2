@@ -1,387 +1,732 @@
-import React, { useMemo, useState } from "react";
-import Head from "next/head";
-import Link from "next/link";
-import BaseLayout from "../components/layouts/BaseLayouts";
-import { Container, Row, Col, Button } from "reactstrap";
+import React, { useState } from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
+import BaseLayout from '../components/layouts/BaseLayouts';
+import styles from '../styles/reviews.module.css';
 
+const reviewCallHref = '/contact?product=reviews';
+const essentials = [
+  'Automated SMS review requests',
+  'Google Business Profile connection',
+  'Google-focused reputation monitoring',
+  'Requests, feedback, and activity in one dashboard',
+  'Customer-list workflow and basic reporting',
+];
 const plans = [
   {
-    id: "starter",
-    name: "Starter",
+    id: 'starter',
+    name: 'Starter',
     price: 99,
-    eyebrow: "One location",
-    description: "A practical Google review workflow for a business that is ready to build consistency.",
-    features: [
-      "Automated SMS review requests",
-      "Google-focused reputation monitoring",
-      "Google Business Profile connection and review moments",
-      "Review requests, feedback, and activity in one dashboard",
-      "Customer-list workflow and basic reporting",
-    ],
+    label: 'Build consistency',
+    description:
+      'A practical review workflow for a business ready to turn great service into a stronger Google reputation.',
+    support: ['A focused, self-directed review workflow'],
   },
   {
-    id: "growth",
-    name: "Growth",
+    id: 'growth',
+    name: 'Growth',
     price: 299,
-    eyebrow: "One location · guided",
-    description: "For teams that want a more hands-on launch and support for ongoing outreach.",
+    label: 'Launch with guidance',
+    description:
+      'A guided launch and hands-on support for teams that want to make customer outreach a habit.',
     featured: true,
-    features: [
-      "Everything in Starter",
-      "Custom email and SMS campaign planning",
-      "Guided launch and hands-on Onyx support",
-      "QR or NFC review-stand strategy for your location",
+    support: [
+      'Custom email and SMS campaign planning',
+      'Guided launch and hands-on Onyx support',
+      'QR or NFC review-stand strategy',
     ],
   },
   {
-    id: "enterprise",
-    name: "Enterprise",
+    id: 'enterprise',
+    name: 'Enterprise',
     price: 499,
-    eyebrow: "One location · white-glove",
-    description: "A white-glove reputation and campaign partnership for businesses ready to make reviews part of growth.",
-    features: [
-      "Everything in Growth",
-      "Individual marketing-campaign planning",
-      "One-on-one coaching and performance reviews",
-      "A QR review stand for each location",
-      "Group visibility for multi-location review activity",
-      "Custom campaign strategy and lead-generation planning when appropriate",
+    label: 'Grow with a partner',
+    description:
+      'A hands-on reputation and campaign partnership for businesses making reviews part of their growth strategy.',
+    support: [
+      'Everything in Growth',
+      'Individual marketing-campaign planning',
+      'One-on-one coaching and performance reviews',
+      'A QR review stand for each location',
+      'Group visibility across locations',
+      'Custom campaign and lead-generation planning when appropriate',
     ],
   },
 ];
-
 const trialOptions = [
+  { id: '7', label: '7-day free trial' },
+  { id: 'now', label: 'Start today' },
+];
+const capabilities = [
   {
-    id: "7",
-    label: "7-day free trial",
-    summary: "Start free for 7 days. Monthly billing begins after the trial.",
+    icon: 'dashboard',
+    title: 'One clear dashboard',
+    copy: 'Keep review requests, customer feedback, and Google review activity together so your team knows what to do next.',
   },
   {
-    id: "now",
-    label: "Start today",
-    summary: "No trial. Your monthly subscription starts today.",
+    icon: 'message',
+    title: 'Timely SMS requests',
+    copy: 'Make asking for feedback part of your completed-service workflow, with less manual follow-up for your team.',
+  },
+  {
+    icon: 'locations',
+    title: 'One location or many',
+    copy: 'Start with one business location and build a consistent process as you grow. Plan a larger rollout with Onyx.',
+  },
+  {
+    icon: 'reply',
+    title: 'Thoughtful requests & replies',
+    copy: 'Use guided prompts to ask clearly, respond thoughtfully, and keep the conversation in your own voice.',
+  },
+  {
+    icon: 'qr',
+    title: 'QR & NFC review moments',
+    copy: 'Give customers a simple way to share their experience in person. Review-stand strategy and hardware vary by plan.',
+  },
+  {
+    icon: 'support',
+    title: 'A team behind your launch',
+    copy: 'Choose guided onboarding, campaign planning, or ongoing coaching with the level of Onyx support that fits your team.',
+  },
+];
+const faqs = [
+  {
+    question: 'How does the 7-day free trial work?',
+    answer:
+      'Choose a plan and the 7-day free trial option, then send your inquiry to Onyx. We will confirm your setup, trial start, first billing date, and monthly price before enrollment. Sending an inquiry does not start a subscription or collect payment.',
+  },
+  {
+    question: 'What happens after my trial?',
+    answer:
+      'An enrolled trial moves to the monthly plan you selected unless you cancel before the trial ends. Your first paid billing date and recurring-charge authorization will be provided before enrollment. The prices shown are per location, per month.',
+  },
+  {
+    question: 'Which plan is right for my business?',
+    answer:
+      'Starter is for a focused review workflow. Growth adds a guided launch, campaign planning, and review-stand strategy. Enterprise adds coaching, a QR stand for each location, and more individual campaign support. If you are unsure, book a review growth call and we will help you choose.',
+  },
+  {
+    question: 'Does Onyx Reviews focus on Google?',
+    answer:
+      'Yes. The published plans focus on your Google Business Profile, Google review activity, customer feedback, and reputation monitoring. Ask Onyx about your specific business setup before choosing a plan.',
+  },
+  {
+    question: 'How are customer reviews collected?',
+    answer:
+      'Build a customer list and choose the right time to ask after a completed service. SMS requests and in-person QR or NFC moments make it easier for customers to share their honest experience. Your business is responsible for customer contact permissions and opt-out requests.',
+  },
+  {
+    question: 'Can I use it for multiple locations?',
+    answer:
+      'Yes. Use the calculator to estimate the monthly price for one to five locations on the same plan. Onyx will confirm reporting, access, and rollout details with you. For more than five locations or a custom arrangement, contact the team.',
+  },
+  {
+    question: 'Can I cancel my subscription?',
+    answer: (
+      <>
+        Onyx Reviews is month-to-month. You can cancel at any time. The{' '}
+        <Link href="/refund-policy">Refund Policy</Link> explains pro-rated
+        refunds for monthly subscriptions and separate terms for custom
+        services. Your cancellation route will be provided before enrollment.
+      </>
+    ),
+  },
+  {
+    question: 'Will I get a guaranteed rating or number of reviews?',
+    answer:
+      'Onyx helps you build a consistent process for honest customer feedback. Review counts, star ratings, search placement, and revenue are not guaranteed. Customers choose what to write, and Google controls its own platform and policies.',
   },
 ];
 
-const blue = "var(--onyx-accent)";
-const ink = "#101828";
-const reviewCallHref = "/contact?product=reviews";
-
-function inquiryHref(plan, trial, locations) {
-  const params = new URLSearchParams({
-    product: "reviews",
+function inquiryHref(plan, trial, locations = 1) {
+  return `/contact?${new URLSearchParams({
+    product: 'reviews',
     plan,
     trial,
     locations: String(locations),
-  });
-  return `/contact?${params.toString()}`;
+  }).toString()}`;
+}
+
+function Icon({ name, className = '' }) {
+  const paths = {
+    dashboard: (
+      <>
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <path d="M3 9h18M9 9v12M13 13h4M13 17h4" />
+      </>
+    ),
+    message: (
+      <>
+        <path d="M21 11a8 8 0 0 1-8 8H7l-4 3V5a2 2 0 0 1 2-2h8a8 8 0 0 1 8 8Z" />
+        <path d="M7 8h10M7 12h7" />
+      </>
+    ),
+    locations: (
+      <>
+        <path d="M19 9c0 5-7 12-7 12S5 14 5 9a7 7 0 1 1 14 0Z" />
+        <circle cx="12" cy="9" r="2" />
+      </>
+    ),
+    reply: <path d="m9 5-6 6 6 6M3 11h10a8 8 0 0 1 8 8" />,
+    qr: (
+      <>
+        <path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h3v3h-6zM21 12v3M12 3v3M12 12h3M3 12h3M12 18v3" />
+      </>
+    ),
+    support: (
+      <>
+        <path d="M4 13V10a8 8 0 0 1 16 0v3M20 17v2a2 2 0 0 1-2 2h-4" />
+        <rect x="2" y="11" width="4" height="7" rx="2" />
+        <rect x="18" y="11" width="4" height="7" rx="2" />
+      </>
+    ),
+    check: <path d="m5 12 4 4L19 6" />,
+    arrow: <path d="M4 12h16m-6-6 6 6-6 6" />,
+  };
+  return (
+    <svg
+      className={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {paths[name]}
+    </svg>
+  );
+}
+
+function FeatureList({ items }) {
+  return (
+    <ul className={styles.featureList}>
+      {items.map((item) => (
+        <li key={item}>
+          <Icon name="check" />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 function PriceCard({ plan, trialId, termsAccepted }) {
-  const trial = trialOptions.find((option) => option.id === trialId);
-  const href = inquiryHref(plan.id, trialId, 1);
-
   return (
     <article
-      className="h-100 p-4 rounded-4 border"
-      style={{
-        background: plan.featured ? ink : "#fff",
-        color: plan.featured ? "#fff" : ink,
-        borderColor: plan.featured ? ink : "#d0d5dd",
-        boxShadow: plan.featured ? "0 20px 48px rgba(16, 24, 40, .18)" : "0 12px 32px rgba(16, 24, 40, .06)",
-      }}
+      className={`${styles.planCard} ${
+        plan.featured ? styles.featuredPlan : ''
+      }`}
     >
-      {plan.featured && (
-        <p className="mb-3 text-uppercase fw-bold" style={{ color: "var(--onyx-accent)", fontSize: ".75rem", letterSpacing: ".08em" }}>
-          Most hands-on
-        </p>
-      )}
-      <p className="text-uppercase fw-bold mb-2" style={{ color: plan.featured ? "#cbd5e1" : "#667085", fontSize: ".75rem", letterSpacing: ".08em" }}>
-        {plan.eyebrow}
-      </p>
-      <h3 className="mb-1">{plan.name}</h3>
-      <p className="mb-3" style={{ minHeight: "3rem", color: plan.featured ? "#e2e8f0" : "#475467" }}>{plan.description}</p>
-      <div className="d-flex align-items-end gap-1 mb-2">
-        <strong style={{ fontSize: "2.65rem", lineHeight: 1 }}>${plan.price}</strong>
-        <span style={{ color: plan.featured ? "#cbd5e1" : "#667085" }}>/ location / month</span>
+      <div className={styles.planTopline}>
+        {plan.featured ? 'Guided by Onyx' : plan.label}
       </div>
-      <p className="fw-semibold mb-4" style={{ color: plan.featured ? "var(--onyx-accent)" : blue }}>{trial.label}</p>
-      <ul className="ps-3 mb-4" style={{ minHeight: "10.5rem", color: plan.featured ? "#f8fafc" : "#344054" }}>
-        {plan.features.map((feature) => <li key={feature} className="mb-2">{feature}</li>)}
-      </ul>
-      {termsAccepted ? (
-        <Link href={href}>
-          <Button
-            size="lg"
-            block
-            style={{
-              background: plan.featured ? blue : ink,
-              borderColor: plan.featured ? blue : ink,
-              color: "#fff",
-            }}
-          >
-            Continue with {plan.name}
-          </Button>
-        </Link>
-      ) : (
-        <Button size="lg" block disabled>
-          Review terms to continue
-        </Button>
-      )}
+      <div className={styles.planBody}>
+        <h3>{plan.name}</h3>
+        <p className={styles.planDescription}>{plan.description}</p>
+        <p className={styles.price}>
+          <strong>${plan.price}</strong>
+          <span>/ month</span>
+        </p>
+        <p className={styles.priceUnit}>Per location · billed monthly</p>
+        <p className={styles.trialNote}>
+          {trialId === '7'
+            ? 'Start with a 7-day free trial'
+            : 'Start without a trial'}
+        </p>
+        <h4>Review essentials</h4>
+        <FeatureList items={essentials} />
+        <h4>Support &amp; growth</h4>
+        <FeatureList items={plan.support} />
+        <div className={styles.planAction}>
+          {termsAccepted ? (
+            <Link
+              className={`${styles.button} ${
+                plan.featured ? styles.primaryButton : styles.outlineButton
+              }`}
+              href={inquiryHref(plan.id, trialId)}
+            >
+              Choose {plan.name}
+              <Icon name="arrow" />
+            </Link>
+          ) : (
+            <a
+              className={`${styles.button} ${styles.outlineButton}`}
+              href="#review-plan-terms"
+            >
+              Review terms to continue
+              <Icon name="arrow" />
+            </a>
+          )}
+          <span>One location. Add more below.</span>
+        </div>
+      </div>
     </article>
   );
 }
 
 export default function Reviews() {
-  const [trialId, setTrialId] = useState("7");
-  const [calculatorPlanId, setCalculatorPlanId] = useState("starter");
+  const [trialId, setTrialId] = useState('7');
+  const [calculatorPlanId, setCalculatorPlanId] = useState('starter');
   const [locationCount, setLocationCount] = useState(1);
   const [termsAccepted, setTermsAccepted] = useState(false);
-
-  const trial = trialOptions.find((option) => option.id === trialId);
   const calculatorPlan = plans.find((plan) => plan.id === calculatorPlanId);
-  const monthlyTotal = useMemo(
-    () => calculatorPlan.price * locationCount,
-    [calculatorPlan, locationCount],
-  );
+  const monthlyTotal = calculatorPlan.price * locationCount;
 
   return (
     <>
       <Head>
-        <title>Onyx Reviews | Review growth for service businesses</title>
+        <title>Onyx Reviews | Google Review Management &amp; Pricing</title>
         <meta
           name="description"
-          content="Onyx Reviews gives service businesses a practical, Google-focused review-growth workflow, from timely requests and customer feedback to multi-location visibility."
+          content="Build a consistent Google review workflow with Onyx Reviews. Explore SMS requests, reputation monitoring, guided support, and plans from $99 per location per month with a 7-day free trial."
         />
+        <link rel="canonical" href="https://www.onyxcreativelabs.com/reviews" />
       </Head>
-
-      <BaseLayout>
-        <section className="onyx-hero onyx-reviews-hero">
-          <Container>
-            <p className="onyx-lab-eyebrow">Onyx Reviews / Google reputation growth</p>
-            <h1 className="onyx-hero-title">Turn completed work into public proof.</h1>
-            <p className="onyx-hero-copy">
-              Build a repeatable, Google-focused review workflow with timely customer
-              requests, a clear feedback loop, and support that can grow with your locations.
+      <BaseLayout className={styles.page}>
+        <section className={styles.hero}>
+          <div className={styles.container}>
+            <p className={styles.eyebrow}>
+              Onyx Reviews · Google review management
             </p>
-            <div className="onyx-hero-actions" style={{ flexWrap: "wrap", gap: "1rem" }}>
-              <Link href="#plans">
-                <Button color="primary" size="lg">See 7-Day Trial Plans</Button>
-              </Link>
-              <Link href={reviewCallHref}>
-                <Button color="outline-dark" size="lg">Book a Review Growth Call</Button>
-              </Link>
+            <h1>
+              A better review process.
+              <br />
+              <span>A stronger reputation.</span>
+            </h1>
+            <p className={styles.heroCopy}>
+              Bring customer requests, Google reviews, and thoughtful follow-up
+              into one consistent workflow. Backed by the team at Onyx.
+            </p>
+            <div className={styles.heroLinks}>
+              <a href="#plans">
+                Explore plans from $99 / month
+                <Icon name="arrow" />
+              </a>
+              <span>7-day free trial available</span>
             </div>
-            <p className="mt-3 mb-0">
-              Start with one location today. Scale to five locations online, then talk with
-              Onyx for a custom rollout.
-            </p>
-          </Container>
+            <div className={styles.videoFrame}>
+              <video
+                className={styles.video}
+                controls
+                playsInline
+                preload="metadata"
+                poster="/videos/onyx-reviews-explainer.jpg"
+                aria-label="Onyx Creative Labs: a better review process"
+              >
+                <source
+                  src="/videos/onyx-reviews-explainer.mp4"
+                  type="video/mp4"
+                />
+                <track
+                  kind="captions"
+                  src="/videos/onyx-reviews-explainer.vtt"
+                  srcLang="en"
+                  label="English"
+                  default
+                />
+                Your browser does not support embedded video.{' '}
+                <a href="/videos/onyx-reviews-explainer.mp4">
+                  Download the Onyx Reviews explainer.
+                </a>
+              </video>
+              <div className={styles.videoCaption}>
+                <span>Meet Onyx Reviews</span>
+                <span>A practical approach to Google review growth</span>
+              </div>
+            </div>
+            <Link
+              className={`${styles.button} ${styles.primaryButton}`}
+              href={reviewCallHref}
+            >
+              Book a personalized review growth call
+              <Icon name="arrow" />
+            </Link>
+          </div>
         </section>
 
-        <Container className="onyx-reviews-section">
-          <Row className="g-5 align-items-start">
-            <Col lg="4">
-              <p className="onyx-lab-eyebrow">The opportunity</p>
-              <h2>Good work deserves to be easy to find.</h2>
-            </Col>
-            <Col lg="8">
-              <p className="onyx-reviews-lead">
-                Your best customers are often willing to share their experience. They just
-                need an easy moment to do it. Onyx Reviews creates that moment without
-                putting your team in the uncomfortable position of repeatedly asking.
+        <section className={styles.section} aria-labelledby="features-heading">
+          <div className={styles.container}>
+            <div className={styles.sectionHeading}>
+              <p className={styles.eyebrow}>
+                A clearer way to manage your reputation
               </p>
-              <p className="mb-0">
-                The result is a more consistent review process that supports how people
-                evaluate local businesses online: through customer experiences, clear signals
-                of trust, and a responsive Google reputation.
+              <h2 id="features-heading">
+                Everything your review
+                <br className={styles.desktopBreak} /> workflow needs.
+              </h2>
+              <p>
+                Less chasing. More consistency. A simple path from a customer
+                interaction to honest feedback.
               </p>
-              <div className="onyx-review-stats" aria-label="Consumer review statistics">
-                <article><strong>96%</strong><span>of consumers are open to writing a business review.</span></article>
-                <article><strong>63%</strong><span>expect a review response within two to seven days.</span></article>
-              </div>
-              <p className="onyx-review-stats-source">
-                Source: <a href="https://www.brightlocal.com/research/local-consumer-review-survey-2025/" target="_blank" rel="noreferrer">BrightLocal Local Consumer Review Survey 2025</a>
-              </p>
-            </Col>
-          </Row>
-        </Container>
+            </div>
+            <div className={styles.capabilityGrid}>
+              {capabilities.map((feature) => (
+                <article key={feature.title} className={styles.capability}>
+                  <span className={styles.iconTile}>
+                    <Icon name={feature.icon} />
+                  </span>
+                  <div>
+                    <h3>{feature.title}</h3>
+                    <p>{feature.copy}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        <section id="plans" style={{ background: "#f8fafc", padding: "5rem 0" }}>
-          <Container>
-            <Row className="justify-content-center text-center mb-4">
-              <Col lg="8">
-                <p className="onyx-lab-eyebrow">Simple, scalable pricing</p>
-                <h2>Start with the plan that matches your team.</h2>
-                <p className="mb-0 text-muted">
-                  The 7-day trial is selected by default. Choose Start today if you prefer no trial;
-                  the plan and monthly price stay the same.
-                </p>
-              </Col>
-            </Row>
-
-            <div className="d-flex flex-wrap justify-content-center gap-2 mb-5" role="group" aria-label="Enrollment timing">
+        <section
+          id="plans"
+          className={`${styles.section} ${styles.pricingSection}`}
+          aria-labelledby="plans-heading"
+        >
+          <div className={styles.container}>
+            <div className={styles.sectionHeading}>
+              <p className={styles.eyebrow}>Simple plans. Room to grow.</p>
+              <h2 id="plans-heading">Start with 7 days free.</h2>
+              <p>
+                Choose the workflow and level of support that fit your business.
+                <br className={styles.desktopBreak} /> Every plan is priced per
+                location, per month.
+              </p>
+            </div>
+            <div
+              className={styles.timingSwitch}
+              role="group"
+              aria-label="Enrollment timing"
+            >
               {trialOptions.map((option) => (
                 <button
                   key={option.id}
                   type="button"
+                  aria-pressed={trialId === option.id}
                   onClick={() => setTrialId(option.id)}
-                  className="btn rounded-pill px-4 py-2"
-                  style={{
-                    background: trialId === option.id ? ink : "#fff",
-                    border: `1px solid ${trialId === option.id ? ink : "#d0d5dd"}`,
-                    color: trialId === option.id ? "#fff" : ink,
-                    fontWeight: 700,
-                  }}
                 >
                   {option.label}
                 </button>
               ))}
             </div>
-
-            <Row className="g-4">
-              {plans.map((plan) => <Col lg="4" key={plan.id}><PriceCard plan={plan} trialId={trialId} termsAccepted={termsAccepted} /></Col>)}
-            </Row>
-            <div className="d-flex justify-content-center mt-4">
-              <label className="d-flex align-items-start gap-2 text-muted" style={{ maxWidth: "46rem", cursor: "pointer" }}>
+            <p className={styles.enrollmentSummary}>
+              {trialId === '7'
+                ? '7 days free, then your selected monthly plan.'
+                : 'Skip the trial and choose your monthly plan.'}{' '}
+              Confirm enrollment details with Onyx before you start.
+            </p>
+            <div className={styles.planGrid}>
+              {plans.map((plan) => (
+                <PriceCard
+                  key={plan.id}
+                  plan={plan}
+                  trialId={trialId}
+                  termsAccepted={termsAccepted}
+                />
+              ))}
+            </div>
+            <div className={styles.policyBox} id="review-plan-terms">
+              <label className={styles.policyLabel}>
                 <input
                   type="checkbox"
-                  className="mt-1"
                   checked={termsAccepted}
                   onChange={(event) => setTermsAccepted(event.target.checked)}
                 />
                 <span>
-                  I have reviewed the <Link href="/terms-and-conditions">Terms &amp; Conditions</Link>, <Link href="/refund-policy">Refund Policy</Link>, and <Link href="/privacy-policy">Privacy Policy</Link> for my selected Onyx Reviews plan.
+                  I have reviewed the{' '}
+                  <Link href="/terms-and-conditions">
+                    Terms &amp; Conditions
+                  </Link>
+                  , <Link href="/refund-policy">Refund Policy</Link>, and{' '}
+                  <Link href="/privacy-policy">Privacy Policy</Link> for my
+                  selected Onyx Reviews plan.
                 </span>
               </label>
-            </div>
-            <p className="text-center mt-4 mb-0 text-muted">
-              {trial.summary} This inquiry does not enroll you or collect payment. Before direct checkout is activated, Onyx Reviews will show the selected plan, monthly price, trial timing, cancellation route, and a separate required recurring-charge authorization.
-            </p>
-          </Container>
-        </section>
-
-        <Container className="onyx-reviews-section">
-          <Row className="g-5 align-items-center">
-            <Col lg="6">
-              <p className="onyx-lab-eyebrow">How Onyx Reviews works</p>
-              <h2>One workflow for requests, reputation, and repeatable growth.</h2>
               <p>
-                Onyx Reviews helps you manage customer feedback and Google review activity in
-                one place. Onyx helps you choose the right moment to ask, shape the outreach,
-                and turn the system into a customer-growth habit.
+                Choosing a plan opens an inquiry. No payment is collected and no
+                subscription begins here. Onyx will confirm your plan, trial
+                dates, billing, and cancellation details before enrollment.
               </p>
-              <div className="d-grid gap-3">
-                <div className="p-3 rounded-3 border"><strong>Guided requests and replies</strong><br /><span className="text-muted">Create thoughtful prompts for customer feedback and responses without starting from a blank screen.</span></div>
-                <div className="p-3 rounded-3 border"><strong>QR and NFC review moments</strong><br /><span className="text-muted">Give happy customers an easy in-store path to leave a Google review after the interaction.</span></div>
-                <div className="p-3 rounded-3 border"><strong>Google reputation visibility</strong><br /><span className="text-muted">Track review activity and feedback trends so your team knows what is working and what needs attention.</span></div>
-              </div>
-            </Col>
-            <Col lg="6">
-              <div className="rounded-4 p-4 p-lg-5" style={{ background: ink, color: "#fff" }}>
-                <p className="text-uppercase fw-bold mb-2" style={{ color: "var(--onyx-accent)", fontSize: ".75rem", letterSpacing: ".08em" }}>Multi-location plan</p>
-                <h3 className="mb-2">See your price and track review growth through five locations.</h3>
-                <p className="mb-4" style={{ color: "#cbd5e1" }}>
-                  Every location receives the plan you select. Choose a plan and location count;
-                  the price below is transparent, per location, per month. We will configure the
-                  right reporting and access for your location setup.
-                </p>
-
-                <label className="fw-semibold mb-2" htmlFor="calculatorPlan">Plan</label>
-                <select
-                  id="calculatorPlan"
-                  className="form-select mb-4"
-                  value={calculatorPlanId}
-                  onChange={(event) => setCalculatorPlanId(event.target.value)}
-                >
-                  {plans.map((plan) => <option key={plan.id} value={plan.id}>{plan.name} — ${plan.price}/location/month</option>)}
-                </select>
-
-                <span className="fw-semibold d-block mb-2">Locations</span>
-                <div className="d-flex flex-wrap gap-2 mb-4" role="group" aria-label="Location count">
-                  {[1, 2, 3, 4, 5].map((count) => (
-                    <button
-                      key={count}
-                      type="button"
-                      onClick={() => setLocationCount(count)}
-                      className="btn rounded-circle"
-                      style={{
-                        width: "2.75rem",
-                        height: "2.75rem",
-                        padding: 0,
-                        background: locationCount === count ? blue : "transparent",
-                        border: `1px solid ${locationCount === count ? blue : "#98a2b3"}`,
-                        color: "#fff",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {count}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="rounded-3 p-4 mb-4" style={{ background: "#1d2939" }}>
-                  <span className="d-block" style={{ color: "#cbd5e1" }}>{calculatorPlan.name} · {locationCount} {locationCount === 1 ? "location" : "locations"}</span>
-                  <strong style={{ fontSize: "2.5rem" }}>${monthlyTotal}/mo</strong>
-                  <span className="d-block mt-1" style={{ color: "#cbd5e1" }}>
-                    {trialId === "now" ? "Billed today" : `${trial.label}, then billed monthly`}
-                  </span>
-                </div>
-
-                {termsAccepted ? (
-                  <Link href={inquiryHref(calculatorPlan.id, trialId, locationCount)}>
-                    <Button size="lg" block style={{ background: blue, borderColor: blue }}>Build My Location Plan</Button>
-                  </Link>
-                ) : (
-                  <Button size="lg" block disabled>Review terms to continue</Button>
-                )}
-                <Link href={reviewCallHref}>
-                  <Button size="lg" block color="link" className="mt-3 text-white">More than five locations? Talk to Onyx</Button>
-                </Link>
-              </div>
-            </Col>
-          </Row>
-        </Container>
-
-        <section id="how-it-works" className="onyx-muted-section">
-          <Container className="onyx-reviews-section">
-            <Row className="g-4 align-items-center mb-5">
-              <Col lg="6">
-                <div className="onyx-reviews-heading mb-0"><p className="onyx-lab-eyebrow">Your launch path</p><h2>Turn completed business into a clear next step.</h2></div>
-              </Col>
-              <Col lg="6">
-                <div className="onyx-review-flow" aria-label="Onyx Reviews process: customer list, review request, feedback loop">
-                  <div className="onyx-review-flow-step"><span>01</span><strong>Customer list</strong></div><div className="onyx-review-flow-line" aria-hidden="true" />
-                  <div className="onyx-review-flow-step onyx-review-flow-step-active"><span>02</span><strong>Review request</strong></div><div className="onyx-review-flow-line" aria-hidden="true" />
-                  <div className="onyx-review-flow-step"><span>03</span><strong>Feedback loop</strong></div>
-                </div>
-              </Col>
-            </Row>
-            <Row className="g-4">
-              <Col md="4"><article className="onyx-review-card h-100"><p>01</p><h3>Start with customers you have served</h3><span>Build a clean customer list and decide where review requests belong in your completed-service workflow.</span></article></Col>
-              <Col md="4"><article className="onyx-review-card h-100"><p>02</p><h3>Send a timely request</h3><span>Use clear, timely messaging and a simple QR or NFC moment to make feedback easy while the experience is fresh.</span></article></Col>
-              <Col md="4"><article className="onyx-review-card h-100"><p>03</p><h3>Learn, respond, improve</h3><span>Review feedback and Google reputation activity with your team, then improve the customer experience over time.</span></article></Col>
-            </Row>
-          </Container>
+            </div>
+          </div>
         </section>
 
-        <section className="onyx-reviews-sms">
-          <Container>
-            <Row className="g-5 align-items-center">
-              <Col lg="7">
-                <p className="onyx-lab-eyebrow">Start with a practical plan</p>
-                <h2>Build a review process your team can actually keep up.</h2>
+        <section className={styles.section} aria-labelledby="requests-heading">
+          <div className={`${styles.container} ${styles.splitSection}`}>
+            <div className={styles.editorialCopy}>
+              <p className={styles.eyebrow}>Make the right moment count</p>
+              <h2 id="requests-heading">
+                Great service deserves
+                <br /> a clear next step.
+              </h2>
+              <p>
+                Your customers have a story to share. Give them a timely,
+                straightforward invitation while the experience is still fresh.
+              </p>
+              <p>
+                Build review requests into your service journey, then use guided
+                prompts to respond in your own voice. A repeatable process helps
+                your team stay consistent.
+              </p>
+              <Link className={styles.textLink} href={reviewCallHref}>
+                Map your review workflow
+                <Icon name="arrow" />
+              </Link>
+            </div>
+            <div
+              className={styles.conversation}
+              aria-label="Example customer feedback conversation"
+            >
+              <div className={styles.conversationHeader}>
+                <span className={styles.brandMark}>O</span>
+                <div>
+                  <strong>Your business</strong>
+                  <span>Example conversation</span>
+                </div>
+                <Icon name="message" />
+              </div>
+              <div className={styles.conversationBody}>
+                <span className={styles.conversationDate}>
+                  After a completed service
+                </span>
                 <p>
-                  We will look at your customer journey, the right moment to ask, and the
-                  launch steps needed for a clear feedback workflow. If managed campaigns make
-                  sense, we can also map return visits, seasonal offers, and targeted outreach.
+                  Thanks for working with us today! Would you share a little
+                  about your experience?
                 </p>
-              </Col>
-              <Col lg="5" className="text-lg-end">
-                <Link href={reviewCallHref}><Button color="primary" size="lg">Book a Review Growth Call</Button></Link>
-              </Col>
-            </Row>
-          </Container>
+                <p className={styles.customerReply}>
+                  Of course. Where can I leave my feedback?
+                </p>
+                <p>
+                  We’d appreciate your honest review on Google. Here’s a direct
+                  link to get started.
+                </p>
+              </div>
+              <div className={styles.conversationFooter}>
+                <Icon name="check" /> A timely request. An easier next step.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          className={`${styles.section} ${styles.locationSection}`}
+          aria-labelledby="locations-heading"
+        >
+          <div className={`${styles.container} ${styles.splitSection}`}>
+            <div className={styles.editorialCopy}>
+              <p className={styles.eyebrow}>One location. Or your next five.</p>
+              <h2 id="locations-heading">
+                Your locations grow.
+                <br />
+                Your process stays clear.
+              </h2>
+              <p>
+                Choose a plan and see your monthly estimate for up to five
+                locations. Every location receives the same selected plan.
+              </p>
+              <p>
+                Onyx will help confirm the reporting, access, and rollout that
+                fit your setup. Enterprise includes group visibility for review
+                activity across locations.
+              </p>
+              <Link className={styles.textLink} href={reviewCallHref}>
+                More than five locations? Talk to Onyx
+                <Icon name="arrow" />
+              </Link>
+            </div>
+            <div className={styles.calculator}>
+              <p className={styles.calculatorTitle}>Build your location plan</p>
+              <label htmlFor="calculatorPlan">Choose your plan</label>
+              <select
+                id="calculatorPlan"
+                value={calculatorPlanId}
+                onChange={(event) => setCalculatorPlanId(event.target.value)}
+              >
+                {plans.map((plan) => (
+                  <option key={plan.id} value={plan.id}>
+                    {plan.name} — ${plan.price}/location/month
+                  </option>
+                ))}
+              </select>
+              <span className={styles.controlLabel}>Number of locations</span>
+              <div
+                className={styles.locationButtons}
+                role="group"
+                aria-label="Location count"
+              >
+                {[1, 2, 3, 4, 5].map((count) => (
+                  <button
+                    key={count}
+                    type="button"
+                    aria-pressed={locationCount === count}
+                    aria-label={`${count} ${
+                      count === 1 ? 'location' : 'locations'
+                    }`}
+                    onClick={() => setLocationCount(count)}
+                  >
+                    {count}
+                  </button>
+                ))}
+              </div>
+              <div
+                className={styles.total}
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                <span>
+                  {calculatorPlan.name} · {locationCount}{' '}
+                  {locationCount === 1 ? 'location' : 'locations'}
+                </span>
+                <p>
+                  <strong>${monthlyTotal.toLocaleString('en-US')}</strong>
+                  <span>/ month</span>
+                </p>
+                <span>
+                  ${calculatorPlan.price} × {locationCount}{' '}
+                  {locationCount === 1 ? 'location' : 'locations'} ·{' '}
+                  {trialId === '7'
+                    ? '7-day free trial available'
+                    : 'No trial selected'}
+                </span>
+              </div>
+              {termsAccepted ? (
+                <Link
+                  className={`${styles.button} ${styles.primaryButton}`}
+                  href={inquiryHref(calculatorPlan.id, trialId, locationCount)}
+                >
+                  Build my location plan
+                  <Icon name="arrow" />
+                </Link>
+              ) : (
+                <a
+                  className={`${styles.button} ${styles.outlineButton}`}
+                  href="#review-plan-terms"
+                >
+                  Review terms to continue
+                  <Icon name="arrow" />
+                </a>
+              )}
+              <p className={styles.calculatorNote}>
+                An estimate for your inquiry. Enrollment is confirmed with Onyx.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="how-it-works"
+          className={styles.section}
+          aria-labelledby="setup-heading"
+        >
+          <div className={styles.container}>
+            <div className={styles.sectionHeading}>
+              <p className={styles.eyebrow}>A practical path to launch</p>
+              <h2 id="setup-heading">From setup to your next request.</h2>
+              <p>
+                Bring the process into your everyday business, one clear step at
+                a time.
+              </p>
+            </div>
+            <ol className={styles.setupSteps}>
+              <li>
+                <span>01</span>
+                <h3>Connect your business</h3>
+                <p>
+                  Confirm your Google Business Profile, your locations, and the
+                  customer journey you want to support.
+                </p>
+              </li>
+              <li>
+                <span>02</span>
+                <h3>Choose your review moment</h3>
+                <p>
+                  Prepare your customer list and decide when an SMS request or
+                  an in-person review link makes sense.
+                </p>
+              </li>
+              <li>
+                <span>03</span>
+                <h3>Request. Respond. Improve.</h3>
+                <p>
+                  Send timely requests, follow your Google review activity, and
+                  use feedback to improve the customer experience.
+                </p>
+              </li>
+            </ol>
+            <div className={styles.setupAction}>
+              <Link
+                className={`${styles.button} ${styles.outlineButton}`}
+                href={reviewCallHref}
+              >
+                Plan your launch with Onyx
+                <Icon name="arrow" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section
+          className={`${styles.section} ${styles.faqSection}`}
+          aria-labelledby="faq-heading"
+        >
+          <div className={`${styles.container} ${styles.faqLayout}`}>
+            <div className={styles.editorialCopy}>
+              <p className={styles.eyebrow}>A few things to know</p>
+              <h2 id="faq-heading">
+                Your questions,
+                <br /> answered.
+              </h2>
+              <p>
+                Need help choosing a plan or mapping your setup? We’re happy to
+                walk through it with you.
+              </p>
+              <Link className={styles.textLink} href={reviewCallHref}>
+                Talk to the Onyx team
+                <Icon name="arrow" />
+              </Link>
+            </div>
+            <div className={styles.faqList}>
+              {faqs.map((faq) => (
+                <details key={faq.question} className={styles.faqItem}>
+                  <summary>
+                    {faq.question}
+                    <span aria-hidden="true">+</span>
+                  </summary>
+                  <div>{faq.answer}</div>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.closing}>
+          <div className={styles.container}>
+            <p className={styles.eyebrow}>Build trust with every interaction</p>
+            <h2>
+              Find the right plan
+              <br /> for your next chapter.
+            </h2>
+            <p>
+              Let’s look at your customer journey, your locations, and the
+              support your team needs to build a review process that lasts.
+            </p>
+            <div className={styles.closingActions}>
+              <Link
+                className={`${styles.button} ${styles.primaryButton}`}
+                href={reviewCallHref}
+              >
+                Book a review growth call
+                <Icon name="arrow" />
+              </Link>
+              <a
+                className={`${styles.button} ${styles.lightButton}`}
+                href="#plans"
+              >
+                Compare plans
+              </a>
+            </div>
+          </div>
         </section>
       </BaseLayout>
     </>
