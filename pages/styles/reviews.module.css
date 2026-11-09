@@ -230,43 +230,21 @@
 .pricingSection .sectionHeading {
   margin-bottom: 28px;
 }
-.timingSwitch {
-  display: flex;
-  padding: 4px;
-  width: fit-content;
-  margin: 0 auto;
-  background: #e5eaf0;
-  border: 1px solid #d8e0e9;
-  gap: 4px;
-}
-.timingSwitch button {
-  padding: 11px 22px;
-  min-height: 44px;
-  background: transparent;
-  border: 0;
-  color: #4b596a;
-  font-size: 14px;
-  font-weight: 600;
-}
-.timingSwitch button[aria-pressed='true'] {
-  background: #fff;
-  color: var(--reviews-ink);
-  box-shadow: 0 1px 4px #1c365015;
-}
-.timingSwitch button:hover {
-  background: #f8fafc;
-}
 .enrollmentSummary {
   color: #5b6573;
   text-align: center;
-  font-size: 12px;
-  margin: 16px auto 38px;
+  font-size: 13px;
+  line-height: 1.8;
+  max-width: 620px;
+  margin: 0 auto 32px;
 }
 .planGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
   align-items: stretch;
+  max-width: 940px;
+  margin: 0 auto;
 }
 .planCard {
   display: flex;
@@ -331,7 +309,13 @@
 .priceUnit {
   color: #576171;
   font-size: 12px;
-  margin: 0 0 16px;
+  margin: 0 0 8px;
+}
+.startupFee {
+  color: #425b79;
+  font-size: 12px;
+  line-height: 1.65;
+  margin: 0 0 14px;
 }
 .trialNote {
   color: #345d8c;
@@ -621,6 +605,11 @@
   font-size: 13px;
   color: #5c6b7e;
 }
+.total .calculatorStartup {
+  color: #345d8c;
+  font-weight: 600;
+  margin: 10px 0 7px;
+}
 .calculator .button {
   width: 100%;
 }
@@ -894,13 +883,9 @@
   .capability h3 {
     font-size: 16px;
   }
-  .timingSwitch button {
-    padding: 10px 16px;
-    font-size: 12px;
-  }
   .enrollmentSummary {
     font-size: 11px;
-    max-width: 270px;
+    max-width: 310px;
     margin-bottom: 28px;
   }
   .planBody {

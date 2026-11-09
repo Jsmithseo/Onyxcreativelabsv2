@@ -3,6 +3,11 @@ import Head from 'next/head';
 import Link from 'next/link';
 import BaseLayout from '../components/layouts/BaseLayouts';
 import styles from '../styles/reviews.module.css';
+import {
+  REVIEW_PLANS as plans,
+  REVIEW_STARTUP_FEE,
+  REVIEW_TRIAL_DAYS,
+} from '../../lib/reviewsPricing';
 
 const reviewCallHref = '/contact?product=reviews';
 const essentials = [
@@ -11,52 +16,6 @@ const essentials = [
   'Google Business Profile connection',
   'Google-focused reputation monitoring',
   'Requests, feedback, and activity in one dashboard',
-  'Customer-list workflow and basic reporting',
-];
-const plans = [
-  {
-    id: 'starter',
-    name: 'Starter',
-    price: 99,
-    label: 'Build consistency',
-    description:
-      'Automated requests and helpful review suggestions that turn completed service into feedback new customers can learn from.',
-    support: ['A focused, self-directed review workflow'],
-  },
-  {
-    id: 'growth',
-    name: 'Growth',
-    price: 299,
-    label: 'Launch with guidance',
-    description:
-      'For teams that want hands-on help building a steady review process, with a guided launch and campaign support.',
-    featured: true,
-    support: [
-      'Custom email and SMS campaign planning',
-      'Guided launch and hands-on Onyx support',
-      'QR or NFC review-stand strategy',
-    ],
-  },
-  {
-    id: 'enterprise',
-    name: 'Enterprise',
-    price: 499,
-    label: 'Grow with a partner',
-    description:
-      'Bring review outreach, coaching, and campaign planning together as you grow your reputation across locations.',
-    support: [
-      'Everything in Growth',
-      'Individual marketing-campaign planning',
-      'One-on-one coaching and performance reviews',
-      'A QR review stand for each location',
-      'Group visibility across locations',
-      'Custom campaign and lead-generation planning when appropriate',
-    ],
-  },
-];
-const trialOptions = [
-  { id: '7', label: '7-day free trial' },
-  { id: 'now', label: 'Start today' },
 ];
 const capabilities = [
   {
@@ -82,12 +41,12 @@ const capabilities = [
   {
     icon: 'qr',
     title: 'QR & NFC review moments',
-    copy: 'Give customers a simple way to share their experience in person. Review-stand strategy and hardware vary by plan.',
+    copy: 'Give customers a simple way to share their experience in person. Ask Onyx about QR and NFC review-stand options during setup.',
   },
   {
     icon: 'support',
     title: 'Support as your business grows',
-    copy: 'Start with one location or plan a rollout across several. Choose guided onboarding, campaign planning, or coaching with the level of support included in your plan.',
+    copy: 'Start with one location or plan a rollout across several. Premium Location adds guided onboarding and campaign planning, and Onyx can help you map a larger rollout.',
   },
 ];
 const faqs = [
@@ -107,19 +66,20 @@ const faqs = [
       'A customer may want to leave a review but be unsure what to write. Onyx offers helpful starting points about the service they used and their experience. Customers can personalize the suggestions and share their own honest feedback.',
   },
   {
-    question: 'How does the 7-day free trial work?',
-    answer:
-      'Choose a plan and the 7-day free trial option, then send your inquiry to Onyx. We will confirm your setup, trial start, first billing date, and monthly price before enrollment. Sending an inquiry does not start a subscription or collect payment.',
+    question: 'How does the 7-day subscription trial work?',
+    answer: `An enrolled trial includes ${REVIEW_TRIAL_DAYS} days of subscription access before monthly billing begins. The $${REVIEW_STARTUP_FEE} one-time startup fee is separate from the subscription trial. Onyx will confirm your trial dates, fee timing, and billing details before enrollment. Sending an inquiry does not start a subscription or collect payment.`,
+  },
+  {
+    question: 'Is the $50 startup fee a monthly charge?',
+    answer: `No. The $${REVIEW_STARTUP_FEE} startup fee applies once per new account. It is separate from the recurring monthly plan price and is not multiplied by the number of locations. Onyx will confirm the fee and when it is due before enrollment.`,
   },
   {
     question: 'What happens after my trial?',
-    answer:
-      'An enrolled trial moves to the monthly plan you selected unless you cancel before the trial ends. Your first paid billing date and recurring-charge authorization will be provided before enrollment. The prices shown are per location, per month.',
+    answer: `After an enrolled trial, your selected plan is $${plans[0].price} or $${plans[1].price} per location, per month unless you cancel before the trial ends. Onyx will confirm your first monthly billing date and recurring-charge authorization before enrollment. The startup fee is charged once per account.`,
   },
   {
     question: 'Which plan is right for my business?',
-    answer:
-      'Starter is for a focused review workflow. Growth adds a guided launch, campaign planning, and review-stand strategy. Enterprise adds coaching, a QR stand for each location, and more individual campaign support. If you are unsure, book a review growth call and we will help you choose.',
+    answer: `Single Location is $${plans[0].price} per month for the review essentials. Premium Location is $${plans[1].price} per month and adds a guided launch, team onboarding, campaign planning, and review-stand strategy. Both prices are per location, plus a $${REVIEW_STARTUP_FEE} one-time startup fee per account.`,
   },
   {
     question: 'Does Onyx Reviews focus on Google?',
@@ -133,8 +93,7 @@ const faqs = [
   },
   {
     question: 'Can I use it for multiple locations?',
-    answer:
-      'Yes. Use the calculator to estimate the monthly price for one to five locations on the same plan. Onyx will confirm reporting, access, and rollout details with you. For more than five locations or a custom arrangement, contact the team.',
+    answer: `Yes. The calculator shows the monthly subscription for one to five locations on the same plan. A $${REVIEW_STARTUP_FEE} startup fee applies once per account, regardless of the location count. Onyx will confirm your rollout details; contact the team for more than five locations.`,
   },
   {
     question: 'Can I cancel my subscription?',
@@ -154,11 +113,11 @@ const faqs = [
   },
 ];
 
-function inquiryHref(plan, trial, locations = 1) {
+function inquiryHref(plan, locations = 1) {
   return `/contact?${new URLSearchParams({
     product: 'reviews',
     plan,
-    trial,
+    trial: String(REVIEW_TRIAL_DAYS),
     locations: String(locations),
   }).toString()}`;
 }
@@ -230,16 +189,14 @@ function FeatureList({ items }) {
   );
 }
 
-function PriceCard({ plan, trialId, termsAccepted }) {
+function PriceCard({ plan, termsAccepted }) {
   return (
     <article
       className={`${styles.planCard} ${
         plan.featured ? styles.featuredPlan : ''
       }`}
     >
-      <div className={styles.planTopline}>
-        {plan.featured ? 'Guided by Onyx' : plan.label}
-      </div>
+      <div className={styles.planTopline}>{plan.label}</div>
       <div className={styles.planBody}>
         <h3>{plan.name}</h3>
         <p className={styles.planDescription}>{plan.description}</p>
@@ -248,14 +205,15 @@ function PriceCard({ plan, trialId, termsAccepted }) {
           <span>/ month</span>
         </p>
         <p className={styles.priceUnit}>Per location · billed monthly</p>
+        <p className={styles.startupFee}>
+          + ${REVIEW_STARTUP_FEE} one-time startup fee per account
+        </p>
         <p className={styles.trialNote}>
-          {trialId === '7'
-            ? 'Start with a 7-day free trial'
-            : 'Start without a trial'}
+          {REVIEW_TRIAL_DAYS}-day subscription trial available
         </p>
         <h4>Review essentials</h4>
         <FeatureList items={essentials} />
-        <h4>Support &amp; growth</h4>
+        <h4>{plan.featured ? 'Premium support' : 'Included in your plan'}</h4>
         <FeatureList items={plan.support} />
         <div className={styles.planAction}>
           {termsAccepted ? (
@@ -263,7 +221,7 @@ function PriceCard({ plan, trialId, termsAccepted }) {
               className={`${styles.button} ${
                 plan.featured ? styles.primaryButton : styles.outlineButton
               }`}
-              href={inquiryHref(plan.id, trialId)}
+              href={inquiryHref(plan.id)}
             >
               Choose {plan.name}
               <Icon name="arrow" />
@@ -285,8 +243,7 @@ function PriceCard({ plan, trialId, termsAccepted }) {
 }
 
 export default function Reviews() {
-  const [trialId, setTrialId] = useState('7');
-  const [calculatorPlanId, setCalculatorPlanId] = useState('starter');
+  const [calculatorPlanId, setCalculatorPlanId] = useState(plans[0].id);
   const [locationCount, setLocationCount] = useState(1);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const calculatorPlan = plans.find((plan) => plan.id === calculatorPlanId);
@@ -324,7 +281,7 @@ export default function Reviews() {
                 Explore plans from $99 / month
                 <Icon name="arrow" />
               </a>
-              <span>7-day free trial available</span>
+              <span>${REVIEW_STARTUP_FEE} one-time startup fee</span>
             </div>
             <div className={styles.videoFrame}>
               <video
@@ -405,42 +362,26 @@ export default function Reviews() {
         >
           <div className={styles.container}>
             <div className={styles.sectionHeading}>
-              <p className={styles.eyebrow}>Simple plans. Room to grow.</p>
-              <h2 id="plans-heading">Start with 7 days free.</h2>
+              <p className={styles.eyebrow}>Simple monthly pricing</p>
+              <h2 id="plans-heading">Two plans. Room to grow.</h2>
               <p>
-                Choose the workflow and level of support that fit your business.
-                <br className={styles.desktopBreak} /> Every plan is priced per
-                location, per month.
+                Choose ${plans[0].price} or ${plans[1].price} per location, per
+                month.
+                <br className={styles.desktopBreak} /> Both plans include
+                automated review requests and helpful customer review
+                suggestions.
               </p>
             </div>
-            <div
-              className={styles.timingSwitch}
-              role="group"
-              aria-label="Enrollment timing"
-            >
-              {trialOptions.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  aria-pressed={trialId === option.id}
-                  onClick={() => setTrialId(option.id)}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
             <p className={styles.enrollmentSummary}>
-              {trialId === '7'
-                ? '7 days free, then your selected monthly plan.'
-                : 'Skip the trial and choose your monthly plan.'}{' '}
-              Confirm enrollment details with Onyx before you start.
+              A ${REVIEW_STARTUP_FEE} startup fee applies once per new account.{' '}
+              {REVIEW_TRIAL_DAYS}-day subscription trial available; the startup
+              fee is separate.
             </p>
             <div className={styles.planGrid}>
               {plans.map((plan) => (
                 <PriceCard
                   key={plan.id}
                   plan={plan}
-                  trialId={trialId}
                   termsAccepted={termsAccepted}
                 />
               ))}
@@ -464,8 +405,9 @@ export default function Reviews() {
               </label>
               <p>
                 Choosing a plan opens an inquiry. No payment is collected and no
-                subscription begins here. Onyx will confirm your plan, trial
-                dates, billing, and cancellation details before enrollment.
+                subscription begins here. Onyx will confirm your monthly price,
+                one-time startup fee, trial dates, and cancellation details
+                before enrollment.
               </p>
             </div>
           </div>
@@ -547,9 +489,10 @@ export default function Reviews() {
                 monthly estimate for up to five locations.
               </p>
               <p>
-                Onyx will help confirm the reporting, access, and rollout that
-                fit your setup. Enterprise includes group visibility for review
-                activity across locations.
+                Monthly pricing scales with your location count. The $
+                {REVIEW_STARTUP_FEE} startup fee is charged once per account.
+                Onyx will confirm the reporting, access, and rollout that fit
+                your setup.
               </p>
               <Link className={styles.textLink} href={reviewCallHref}>
                 More than five locations? Talk to Onyx
@@ -605,16 +548,20 @@ export default function Reviews() {
                 </p>
                 <span>
                   ${calculatorPlan.price} × {locationCount}{' '}
-                  {locationCount === 1 ? 'location' : 'locations'} ·{' '}
-                  {trialId === '7'
-                    ? '7-day free trial available'
-                    : 'No trial selected'}
+                  {locationCount === 1 ? 'location' : 'locations'} · billed
+                  monthly
+                </span>
+                <span className={styles.calculatorStartup}>
+                  + ${REVIEW_STARTUP_FEE} one-time startup fee per account
+                </span>
+                <span>
+                  {REVIEW_TRIAL_DAYS}-day subscription trial available
                 </span>
               </div>
               {termsAccepted ? (
                 <Link
                   className={`${styles.button} ${styles.primaryButton}`}
-                  href={inquiryHref(calculatorPlan.id, trialId, locationCount)}
+                  href={inquiryHref(calculatorPlan.id, locationCount)}
                 >
                   Build my location plan
                   <Icon name="arrow" />

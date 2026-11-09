@@ -12,24 +12,28 @@ import {
 } from 'reactstrap';
 import BaseLayout from '../components/layouts/BaseLayouts';
 import { useRouter } from 'next/router';
+import { findReviewPlan, REVIEW_STARTUP_FEE, REVIEW_TRIAL_DAYS } from '../../lib/reviewsPricing';
 
 const REVIEW_INTEREST = 'Onyx Reviews';
 const REVIEW_MESSAGE = 'I’d like to learn how Onyx Reviews can help us earn more customer feedback and grow our reputation.';
 const INTEREST_OPTIONS = ['CRO', 'Web Development', 'Email Marketing', 'Research & Strategy', 'Paid Marketing', REVIEW_INTEREST];
-const REVIEW_PLAN_NAMES = { starter: 'Starter', growth: 'Growth', enterprise: 'Enterprise' };
-const REVIEW_TRIAL_NAMES = { '14': '14-day free trial', '7': '7-day free trial', now: 'start today' };
 
 function buildReviewMessage(plan, trial, locations) {
-  const planName = REVIEW_PLAN_NAMES[plan];
-  const trialName = REVIEW_TRIAL_NAMES[trial];
+  const selectedPlan = findReviewPlan(plan);
   const parsedLocations = Number.parseInt(locations, 10);
   const locationText = Number.isInteger(parsedLocations) && parsedLocations > 0
     ? ` for ${parsedLocations} ${parsedLocations === 1 ? 'location' : 'locations'}`
     : '';
 
-  if (!planName && !trialName) return REVIEW_MESSAGE;
+  if (!selectedPlan && trial !== String(REVIEW_TRIAL_DAYS) && trial !== 'now') return REVIEW_MESSAGE;
 
-  return `${REVIEW_MESSAGE} I’m interested in the ${planName || 'Onyx Reviews'} plan${locationText}${trialName ? ` with the ${trialName}` : ''}.`;
+  const priceText = selectedPlan
+    ? ` at $${selectedPlan.price} per location per month, plus the $${REVIEW_STARTUP_FEE} one-time startup fee per account`
+    : '';
+  const trialText = trial === String(REVIEW_TRIAL_DAYS)
+    ? ` with a ${REVIEW_TRIAL_DAYS}-day subscription trial (startup fee separate)`
+    : trial === 'now' ? ' without a subscription trial' : '';
+  return `${REVIEW_MESSAGE} I’m interested in the ${selectedPlan?.name || 'Onyx Reviews'} plan${locationText}${priceText}${trialText}.`;
 }
 
 export default function ContactFormPage() {
