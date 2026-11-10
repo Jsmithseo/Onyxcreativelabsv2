@@ -24,7 +24,7 @@ export default function RefundPolicy() {
 
           <h2 className="h4 mt-5">Free trials</h2>
           <p>If you enroll in a free-trial plan and cancel before the trial ends, no subscription charge is due for that trial. The specific trial length and first billing date appear at enrollment.</p>
-          <p>The subscription trial is separate from the ${REVIEW_STARTUP_FEE} one-time startup fee. Onyx will confirm when that fee is due and any applicable refund conditions before enrollment.</p>
+          <p>A separate ${REVIEW_STARTUP_FEE} one-time setup fee may apply, and Onyx may waive it for individual customers. Onyx will confirm any fee or waiver, when an applicable fee is due, and its refund conditions before enrollment. A waived fee is not charged.</p>
 
           <h2 className="h4 mt-4">Monthly subscriptions and cancellations</h2>
           <p>You may cancel at any time. We will stop future recurring charges and refund the unused portion of the current monthly subscription on a pro-rated basis from the date your cancellation request is received.</p>

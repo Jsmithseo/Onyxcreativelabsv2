@@ -67,19 +67,19 @@ const faqs = [
   },
   {
     question: 'How does the 7-day subscription trial work?',
-    answer: `An enrolled trial includes ${REVIEW_TRIAL_DAYS} days of subscription access before monthly billing begins. The $${REVIEW_STARTUP_FEE} one-time startup fee is separate from the subscription trial. Onyx will confirm your trial dates, fee timing, and billing details before enrollment. Sending an inquiry does not start a subscription or collect payment.`,
+    answer: `An enrolled trial includes ${REVIEW_TRIAL_DAYS} days of subscription access before monthly billing begins. A separate $${REVIEW_STARTUP_FEE} one-time setup fee may apply, and Onyx can waive it for your account. Onyx will confirm your trial dates, any setup fee, and billing details before enrollment. Sending an inquiry does not start a subscription or collect payment.`,
   },
   {
-    question: 'Is the $50 startup fee a monthly charge?',
-    answer: `No. The $${REVIEW_STARTUP_FEE} startup fee applies once per new account. It is separate from the recurring monthly plan price and is not multiplied by the number of locations. Onyx will confirm the fee and when it is due before enrollment.`,
+    question: 'Can the $50 setup fee be waived?',
+    answer: `Yes. Onyx can waive the $${REVIEW_STARTUP_FEE} setup fee for individual customers. When it applies, it is charged only once per account, separately from the monthly subscription, and is not multiplied by the number of locations. Your setup fee or waiver will be confirmed before enrollment.`,
   },
   {
     question: 'What happens after my trial?',
-    answer: `After an enrolled trial, your selected plan is $${plans[0].price} or $${plans[1].price} per location, per month unless you cancel before the trial ends. Onyx will confirm your first monthly billing date and recurring-charge authorization before enrollment. The startup fee is charged once per account.`,
+    answer: `After an enrolled trial, your selected plan is $${plans[0].price} or $${plans[1].price} per location, per month unless you cancel before the trial ends. Onyx will confirm your first monthly billing date and recurring-charge authorization before enrollment. Any agreed setup fee is charged once and never added to recurring monthly charges.`,
   },
   {
     question: 'Which plan is right for my business?',
-    answer: `Single Location is $${plans[0].price} per month for the review essentials. Premium Location is $${plans[1].price} per month and adds a guided launch, team onboarding, campaign planning, and review-stand strategy. Both prices are per location, plus a $${REVIEW_STARTUP_FEE} one-time startup fee per account.`,
+    answer: `Single Location is $${plans[0].price} per month for the review essentials. Premium Location is $${plans[1].price} per month and adds a guided launch, team onboarding, campaign planning, and review-stand strategy. Both prices are per location. A separate $${REVIEW_STARTUP_FEE} one-time setup fee may apply; Onyx can waive it for your account.`,
   },
   {
     question: 'Does Onyx Reviews focus on Google?',
@@ -93,7 +93,7 @@ const faqs = [
   },
   {
     question: 'Can I use it for multiple locations?',
-    answer: `Yes. The calculator shows the monthly subscription for one to five locations on the same plan. A $${REVIEW_STARTUP_FEE} startup fee applies once per account, regardless of the location count. Onyx will confirm your rollout details; contact the team for more than five locations.`,
+    answer: `Yes. The calculator shows the monthly subscription for one to five locations on the same plan. If applicable, the $${REVIEW_STARTUP_FEE} setup fee is charged once per account, regardless of the location count, and may be waived by Onyx. Onyx will confirm your rollout details; contact the team for more than five locations.`,
   },
   {
     question: 'Can I cancel my subscription?',
@@ -206,7 +206,7 @@ function PriceCard({ plan, termsAccepted }) {
         </p>
         <p className={styles.priceUnit}>Per location · billed monthly</p>
         <p className={styles.startupFee}>
-          + ${REVIEW_STARTUP_FEE} one-time startup fee per account
+          ${REVIEW_STARTUP_FEE} one-time setup fee · may be waived by Onyx
         </p>
         <p className={styles.trialNote}>
           {REVIEW_TRIAL_DAYS}-day subscription trial available
@@ -281,7 +281,7 @@ export default function Reviews() {
                 Explore plans from $99 / month
                 <Icon name="arrow" />
               </a>
-              <span>${REVIEW_STARTUP_FEE} one-time startup fee</span>
+              <span>Setup fee may be waived</span>
             </div>
             <div className={styles.videoFrame}>
               <video
@@ -313,6 +313,10 @@ export default function Reviews() {
                 <span>More trust. Less asking. Easier reviews.</span>
               </div>
             </div>
+            <p className={styles.trialNote}>
+              Pricing update: the ${REVIEW_STARTUP_FEE} setup fee mentioned in
+              this video may be waived by Onyx for your account.
+            </p>
             <Link
               className={`${styles.button} ${styles.primaryButton}`}
               href={reviewCallHref}
@@ -373,9 +377,9 @@ export default function Reviews() {
               </p>
             </div>
             <p className={styles.enrollmentSummary}>
-              A ${REVIEW_STARTUP_FEE} startup fee applies once per new account.{' '}
-              {REVIEW_TRIAL_DAYS}-day subscription trial available; the startup
-              fee is separate.
+              {REVIEW_TRIAL_DAYS}-day subscription trial available. A separate $
+              {REVIEW_STARTUP_FEE} one-time setup fee may apply; Onyx can waive
+              it for your account.
             </p>
             <div className={styles.planGrid}>
               {plans.map((plan) => (
@@ -406,7 +410,7 @@ export default function Reviews() {
               <p>
                 Choosing a plan opens an inquiry. No payment is collected and no
                 subscription begins here. Onyx will confirm your monthly price,
-                one-time startup fee, trial dates, and cancellation details
+                any setup fee or waiver, trial dates, and cancellation details
                 before enrollment.
               </p>
             </div>
@@ -489,8 +493,9 @@ export default function Reviews() {
                 monthly estimate for up to five locations.
               </p>
               <p>
-                Monthly pricing scales with your location count. The $
-                {REVIEW_STARTUP_FEE} startup fee is charged once per account.
+                Monthly pricing scales with your location count. Any $
+                {REVIEW_STARTUP_FEE} setup fee is charged once per account and
+                may be waived by Onyx.{' '}
                 Onyx will confirm the reporting, access, and rollout that fit
                 your setup.
               </p>
@@ -552,7 +557,7 @@ export default function Reviews() {
                   monthly
                 </span>
                 <span className={styles.calculatorStartup}>
-                  + ${REVIEW_STARTUP_FEE} one-time startup fee per account
+                  ${REVIEW_STARTUP_FEE} one-time setup fee if applicable · may be waived
                 </span>
                 <span>
                   {REVIEW_TRIAL_DAYS}-day subscription trial available

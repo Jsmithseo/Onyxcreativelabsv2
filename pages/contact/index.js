@@ -28,10 +28,10 @@ function buildReviewMessage(plan, trial, locations) {
   if (!selectedPlan && trial !== String(REVIEW_TRIAL_DAYS) && trial !== 'now') return REVIEW_MESSAGE;
 
   const priceText = selectedPlan
-    ? ` at $${selectedPlan.price} per location per month, plus the $${REVIEW_STARTUP_FEE} one-time startup fee per account`
+    ? ` at $${selectedPlan.price} per location per month (please confirm whether the $${REVIEW_STARTUP_FEE} one-time setup fee applies or is waived)`
     : '';
   const trialText = trial === String(REVIEW_TRIAL_DAYS)
-    ? ` with a ${REVIEW_TRIAL_DAYS}-day subscription trial (startup fee separate)`
+    ? ` with a ${REVIEW_TRIAL_DAYS}-day subscription trial (any setup fee is separate)`
     : trial === 'now' ? ' without a subscription trial' : '';
   return `${REVIEW_MESSAGE} I’m interested in the ${selectedPlan?.name || 'Onyx Reviews'} plan${locationText}${priceText}${trialText}.`;
 }

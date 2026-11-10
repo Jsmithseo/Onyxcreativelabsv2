@@ -27,7 +27,7 @@ export default function TermsAndConditions() {
 
           <h2 className="h4 mt-4">2. Trials, billing, and renewal</h2>
           <p>If a plan includes a free trial, the trial period, first paid billing date, monthly price, and recurring billing interval will be shown before you enroll. Paid plans renew on the billing interval shown at enrollment unless cancelled before the next renewal. Custom or multi-location arrangements may have separate written terms.</p>
-          <p>Published monthly plan prices apply per business location. A ${REVIEW_STARTUP_FEE} startup fee applies once per new account, in addition to the monthly subscription. This one-time fee is separate from any subscription trial and is not multiplied by the number of locations. Its due date and applicable terms will be confirmed before enrollment.</p>
+          <p>Published monthly plan prices apply per business location. A separate ${REVIEW_STARTUP_FEE} one-time setup fee may apply per account, and Onyx may waive it for individual customers. Any applicable fee is charged only once, is not multiplied by the number of locations, and is never included in recurring monthly charges. The fee or waiver, its due date, and applicable terms will be confirmed before enrollment.</p>
 
           <h2 className="h4 mt-4">3. Customer data and permissions</h2>
           <p>You are responsible for having the authority and required consent to provide customer contact information and request feedback. You agree to use Onyx Reviews in a lawful, respectful manner and to honor customer opt-out requests.</p>
