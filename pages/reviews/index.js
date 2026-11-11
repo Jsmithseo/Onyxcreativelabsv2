@@ -46,7 +46,7 @@ const capabilities = [
   {
     icon: 'support',
     title: 'Support as your business grows',
-    copy: 'Start with one location or plan a rollout across several. Premium Location adds guided onboarding and campaign planning, and Onyx can help you map a larger rollout.',
+    copy: 'Start with one location or plan a rollout across several. Premium adds guided onboarding and campaign planning, and Onyx can help you map a larger rollout.',
   },
 ];
 const faqs = [
@@ -67,7 +67,11 @@ const faqs = [
   },
   {
     question: 'How does the 7-day subscription trial work?',
-    answer: `An enrolled trial includes ${REVIEW_TRIAL_DAYS} days of subscription access before monthly billing begins. A separate $${REVIEW_STARTUP_FEE} one-time setup fee may apply, and Onyx can waive it for your account. Onyx will confirm your trial dates, any setup fee, and billing details before enrollment. Sending an inquiry does not start a subscription or collect payment.`,
+    answer: `Request a ${REVIEW_TRIAL_DAYS}-day trial through Onyx before enrollment. The Square checkout links are paid options with no free trial. An enrolled trial includes ${REVIEW_TRIAL_DAYS} days of subscription access before monthly billing begins. A separate $${REVIEW_STARTUP_FEE} one-time setup fee may apply, and Onyx can waive it for your account. Onyx will confirm your trial dates, any setup fee, and billing details before enrollment. Sending an inquiry does not start a subscription or collect payment.`,
+  },
+  {
+    question: 'How do I start monthly billing through Square?',
+    answer: `Choose your plan's Square checkout, then select Subscription and Monthly. Square also offers a one-time purchase and selects it by default, so choose Subscription for recurring billing. Your first $${plans[0].price} or $${plans[1].price} payment is due at checkout, followed by automatic monthly payments. These checkout links do not include a free trial. Any agreed setup fee is separate and may be waived by Onyx.`,
   },
   {
     question: 'Can the $50 setup fee be waived?',
@@ -79,7 +83,7 @@ const faqs = [
   },
   {
     question: 'Which plan is right for my business?',
-    answer: `Single Location is $${plans[0].price} per month for the review essentials. Premium Location is $${plans[1].price} per month and adds a guided launch, team onboarding, campaign planning, and review-stand strategy. Both prices are per location. A separate $${REVIEW_STARTUP_FEE} one-time setup fee may apply; Onyx can waive it for your account.`,
+    answer: `${plans[0].name} is $${plans[0].price} per month for the review essentials. ${plans[1].name} is $${plans[1].price} per month and adds a guided launch, team onboarding, campaign planning, and review-stand strategy. Both prices are per location. A separate $${REVIEW_STARTUP_FEE} one-time setup fee may apply; Onyx can waive it for your account.`,
   },
   {
     question: 'Does Onyx Reviews focus on Google?',
@@ -209,23 +213,36 @@ function PriceCard({ plan, termsAccepted }) {
           ${REVIEW_STARTUP_FEE} one-time setup fee · may be waived by Onyx
         </p>
         <p className={styles.trialNote}>
-          {REVIEW_TRIAL_DAYS}-day subscription trial available
+          {REVIEW_TRIAL_DAYS}-day trial by inquiry · Square checkout has no trial
         </p>
         <h4>Review essentials</h4>
         <FeatureList items={essentials} />
         <h4>{plan.featured ? 'Premium support' : 'Included in your plan'}</h4>
         <FeatureList items={plan.support} />
         <div className={styles.planAction}>
+          <p className={styles.checkoutNote}>
+            In Square, select <strong>Subscription</strong> and{' '}
+            <strong>Monthly</strong> for recurring billing. ${plan.price} is
+            charged at checkout; no free trial.
+          </p>
           {termsAccepted ? (
-            <Link
-              className={`${styles.button} ${
-                plan.featured ? styles.primaryButton : styles.outlineButton
-              }`}
-              href={inquiryHref(plan.id)}
-            >
-              Choose {plan.name}
-              <Icon name="arrow" />
-            </Link>
+            <>
+              <a
+                className={`${styles.button} ${
+                  plan.featured ? styles.primaryButton : styles.outlineButton
+                }`}
+                href={plan.checkoutHref}
+              >
+                Continue to Square — ${plan.price}
+                <Icon name="arrow" />
+              </a>
+              <Link
+                className={styles.trialInquiry}
+                href={inquiryHref(plan.id)}
+              >
+                Ask about a {REVIEW_TRIAL_DAYS}-day trial
+              </Link>
+            </>
           ) : (
             <a
               className={`${styles.button} ${styles.outlineButton}`}
@@ -377,7 +394,8 @@ export default function Reviews() {
               </p>
             </div>
             <p className={styles.enrollmentSummary}>
-              {REVIEW_TRIAL_DAYS}-day subscription trial available. A separate $
+              Square checkout starts paid service without a trial. Ask Onyx
+              about a {REVIEW_TRIAL_DAYS}-day trial before enrolling. A separate $
               {REVIEW_STARTUP_FEE} one-time setup fee may apply; Onyx can waive
               it for your account.
             </p>
@@ -408,10 +426,12 @@ export default function Reviews() {
                 </span>
               </label>
               <p>
-                Choosing a plan opens an inquiry. No payment is collected and no
-                subscription begins here. Onyx will confirm your monthly price,
-                any setup fee or waiver, trial dates, and cancellation details
-                before enrollment.
+                Square checkout collects your first payment immediately. Select
+                Subscription and Monthly in Square for recurring billing. Trial
+                and multi-location inquiries do not collect payment or start a
+                subscription. Onyx will confirm any setup fee or waiver and,
+                for trial inquiries, trial dates and billing details before
+                enrollment.
               </p>
             </div>
           </div>

@@ -354,6 +354,20 @@
   margin-top: auto;
   padding-top: 12px;
 }
+.checkoutNote {
+  color: #4c5664;
+  font-size: 12px;
+  line-height: 1.65;
+  margin: 0 0 14px;
+}
+.trialInquiry {
+  display: block;
+  color: #315b89;
+  font-size: 12px;
+  text-align: center;
+  text-decoration: underline;
+  margin-top: 14px;
+}
 .planAction .button {
   width: 100%;
   min-height: 49px;
