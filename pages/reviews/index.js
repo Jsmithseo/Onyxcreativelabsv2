@@ -71,7 +71,7 @@ const faqs = [
   },
   {
     question: 'How do I start monthly billing through Square?',
-    answer: `Choose your plan's Square checkout, then select Subscription and Monthly. Square also offers a one-time purchase and selects it by default, so choose Subscription for recurring billing. Your first $${plans[0].price} or $${plans[1].price} payment is due at checkout, followed by automatic monthly payments. These checkout links do not include a free trial. Any agreed setup fee is separate and may be waived by Onyx.`,
+    answer: `Choose your plan's Square checkout to start monthly billing. Your first $${plans[0].price} or $${plans[1].price} payment is due at checkout, followed by automatic monthly payments. You can cancel anytime. These checkout links do not include a free trial. Any agreed setup fee is separate and may be waived by Onyx.`,
   },
   {
     question: 'Can the $50 setup fee be waived?',
@@ -221,9 +221,8 @@ function PriceCard({ plan, termsAccepted }) {
         <FeatureList items={plan.support} />
         <div className={styles.planAction}>
           <p className={styles.checkoutNote}>
-            In Square, select <strong>Subscription</strong> and{' '}
-            <strong>Monthly</strong> for recurring billing. ${plan.price} is
-            charged at checkout; no free trial.
+            ${plan.price} is charged at checkout, then automatically every
+            month. Cancel anytime. No free trial at checkout.
           </p>
           {termsAccepted ? (
             <>
@@ -233,7 +232,7 @@ function PriceCard({ plan, termsAccepted }) {
                 }`}
                 href={plan.checkoutHref}
               >
-                Continue to Square — ${plan.price}
+                Start Now
                 <Icon name="arrow" />
               </a>
               <Link
@@ -426,12 +425,12 @@ export default function Reviews() {
                 </span>
               </label>
               <p>
-                Square checkout collects your first payment immediately. Select
-                Subscription and Monthly in Square for recurring billing. Trial
-                and multi-location inquiries do not collect payment or start a
-                subscription. Onyx will confirm any setup fee or waiver and,
-                for trial inquiries, trial dates and billing details before
-                enrollment.
+                Square checkout collects your first payment immediately and
+                renews automatically every month. You can cancel anytime.
+                Trial and multi-location inquiries do not collect payment or
+                start a subscription. Onyx will confirm any setup fee or waiver
+                and, for trial inquiries, trial dates and billing details
+                before enrollment.
               </p>
             </div>
           </div>
