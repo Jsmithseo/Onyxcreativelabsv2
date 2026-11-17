@@ -8,7 +8,8 @@ import {
   Label,
   Input,
   Button,
-  FormFeedback
+  FormFeedback,
+  Alert
 } from 'reactstrap';
 import BaseLayout from '../components/layouts/BaseLayouts';
 import { useRouter } from 'next/router';
@@ -97,12 +98,14 @@ export default function ContactFormPage() {
       setErrors(validationErrors);
     } else {
       try {
-        const res = await fetch('https://api.hsforms.com/submissions/v3/integration/submit/46783071/79f2cfd0-1beb-4264-9f0f-d9b7d728cf95', {
+        const res = await fetch('/api/lead', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
+            source: 'Website contact inquiry',
+            context: { pageUri: window.location.href, pageName: document.title },
             fields: [
               { name: 'firstname', value: formData.full_name },
               { name: 'email', value: formData.email },
@@ -120,10 +123,10 @@ export default function ContactFormPage() {
           setErrors({});
           router.push('/thankyou');
         } else {
-          console.error('HubSpot submission failed');
+          setErrors({ submit: 'We could not submit your inquiry. Please try again in a moment.' });
         }
       } catch (error) {
-        console.error('Error submitting to HubSpot:', error);
+        setErrors({ submit: 'We could not submit your inquiry. Please try again in a moment.' });
       }
     }
   };
@@ -144,6 +147,7 @@ export default function ContactFormPage() {
       <Container className="py-5">
         <Row className="justify-content-center">
           <Col md="8">
+            {errors.submit && <Alert color="danger">{errors.submit}</Alert>}
             <Form onSubmit={handleSubmit}>
               <FormGroup>
                 <Label for="name">Full Name *</Label>

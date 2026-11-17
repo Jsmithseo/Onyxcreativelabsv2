@@ -43,6 +43,8 @@ const ApprenticeshipForm = () => {
     e.preventDefault();
 
     const hubspotFormData = {
+      source: 'Apprenticeship application',
+      hubspotFormId: '952f60aa-30ae-4ba4-a588-cc20fbd06eb7',
       fields: [
         { name: 'email', value: formData.email },
         { name: 'firstname', value: formData.fullName },
@@ -70,7 +72,7 @@ const ApprenticeshipForm = () => {
 
     try {
       await axios.post(
-        'https://api.hsforms.com/submissions/v3/integration/submit/46783071/952f60aa-30ae-4ba4-a588-cc20fbd06eb7',
+        '/api/lead',
         hubspotFormData,
         {
           headers: {
@@ -81,6 +83,7 @@ const ApprenticeshipForm = () => {
       setSubmitted(true);
     } catch (error) {
       console.error('There was an error submitting the form:', error);
+      window.alert('We could not submit your request. Please try again in a moment.');
     }
   };
 

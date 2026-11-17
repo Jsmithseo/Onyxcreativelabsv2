@@ -23,10 +23,13 @@ const ContactForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const hubspotEndpoint =
-      'https://api.hsforms.com/submissions/v3/integration/submit/46783071/952f60aa-30ae-4ba4-a588-cc20fbd06eb7';
+    const leadEndpoint =
+      '/api/lead';
 
     const payload = {
+      source: 'Project inquiry',
+      hubspotFormId: '952f60aa-30ae-4ba4-a588-cc20fbd06eb7',
+      context: { pageUri: window.location.href, pageName: document.title },
       fields: [
         { name: 'firstname', value: formData.firstName },
         { name: 'lastname', value: formData.lastName },
@@ -39,7 +42,7 @@ const ContactForm = () => {
     };
 
     try {
-      await axios.post(hubspotEndpoint, payload, {
+      await axios.post(leadEndpoint, payload, {
         headers: {
           'Content-Type': 'application/json',
         },

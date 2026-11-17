@@ -84,11 +84,13 @@ export default function AiCloserPage() {
 
     try {
       const response = await fetch(
-        'https://api.hsforms.com/submissions/v3/integration/submit/46783071/79f2cfd0-1beb-4264-9f0f-d9b7d728cf95',
+        '/api/lead',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            source: 'AI Closer early access',
+            context: { pageUri: window.location.href, pageName: document.title },
             fields: [
               { name: 'firstname', value: formData.name },
               { name: 'email', value: formData.email },

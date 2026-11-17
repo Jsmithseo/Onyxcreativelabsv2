@@ -1,18 +1,11 @@
-import { sendContactEmail } from '../../lib/bdrMail';
+import leadHandler from './lead';
 
-export default async (req, res) => {
-  if (req.method === 'POST') {
-    const { email, name, message } = req.body;
-
-    try {
-      await sendContactEmail({ email, name, message });
-
-      return res.status(200).send({ done: true });
-    } catch (err) {
-      console.error('Unable to send contact email', err.message);
-      return res.status(500).send({ error: 'Failed to send email.' });
-    }
-  }
-
-  return res.status(404).send();
-};
+// Older contact forms allowed an email without a name.
+export default function sendMailHandler(req, res) {
+  req.body = {
+    ...req.body,
+    name: req.body?.name || 'Website visitor',
+    source: req.body?.source || 'Website contact form',
+  };
+  return leadHandler(req, res);
+}
