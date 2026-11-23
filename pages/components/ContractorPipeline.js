@@ -1,3 +1,5 @@
+import Head from 'next/head';
+import { communicationsStatus, dialProspect, mountTextComposer } from '../../public/dialer/communications.mjs';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import LeadBriefing from '../../components/bdr/LeadBriefing';
 import { belongsInCallQueue, nextQueueLead, compareCallQueueLeads, resumeCallQueue, isDue, queueFollowUpAt } from '../../lib/callQueue.mjs';
@@ -157,6 +159,15 @@ function CallingWindows({ leads }) {
   </>;
 }
 
+function ProspectText({ leadId }) {
+  const container = useRef(null);
+  useEffect(() => mountTextComposer(container.current, {
+    resolveLeadId: async () => leadId,
+    workspace: 'bdr',
+  }), [leadId]);
+  return <div ref={container} />;
+}
+
 export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const [workspace, setWorkspace] = useState({ campaigns: [], campaignSummaries: [], leads: [] });
   const [dashboard, setDashboard] = useState(emptyDashboard);
@@ -174,6 +185,9 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const [saveError, setSaveError] = useState('');
   const [liveCall, setLiveCall] = useState(null);
   const [callSeconds, setCallSeconds] = useState(0);
+  const [callMessage, setCallMessage] = useState('');
+  const [communications, setCommunications] = useState(null);
+  const voiceCall = useRef(null);
   const [queueFilters, setQueueFilters] = useState({
     query: '',
     zone: '',
@@ -277,7 +291,27 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   }, [activeCampaign]);
 
   useEffect(() => {
-    if (!liveCall) return undefined;
+    let mounted = true;
+    communicationsStatus().then((status) => {
+      if (mounted) setCommunications(status);
+    }).catch(() => {
+      if (mounted) setCommunications({ unavailable: true });
+    });
+    return () => {
+      mounted = false;
+      voiceCall.current?.dispose();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (selectedLead || !liveCall) return;
+    voiceCall.current?.dispose();
+    voiceCall.current = null;
+    setLiveCall(null);
+  }, [selectedLead, liveCall]);
+
+  useEffect(() => {
+    if (!liveCall?.startedAt) return undefined;
     const interval = window.setInterval(() => setCallSeconds(Math.max(0, Math.floor((Date.now() - liveCall.startedAt) / 1000))), 1000);
     return () => window.clearInterval(interval);
   }, [liveCall]);
@@ -413,13 +447,14 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
 
   async function openLead(lead, { readOnlyPipeline = false } = {}) {
     const request = ++detailRequestRef.current;
-    if (liveCall && liveCall.leadId !== lead.id) { setError('End the current call timer before opening another lead.'); return; }
+    if (liveCall) { setError('End the current call before opening another lead.'); return; }
     setSelectedLead(lead);
     setPipelineReadOnly(readOnlyPipeline || hasCalendlyAppointment(lead));
     setDetail(null);
     setDetailError('');
     setSaveError('');
     setCallSeconds(0);
+    setCallMessage('');
     setShowScheduler(false);
     setCalendarOpen(false);
     calendlyBookingRef.current = '';
@@ -443,6 +478,8 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
     ++detailRequestRef.current;
     setSelectedLead(null);
     setDetail(null);
+    voiceCall.current?.dispose();
+    voiceCall.current = null;
     setLiveCall(null);
     setShowScheduler(false);
     setCalendarOpen(false);
@@ -452,7 +489,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   }
 
   function openCampaign(id) {
-    if (liveCall) { setError('End the current call timer before changing campaigns.'); return; }
+    if (liveCall) { setError('End the current call before changing campaigns.'); return; }
     setActiveCampaign(id);
     setQueueFilters({ query: '', zone: '', stage: '', disposition: '', activityDate: '' });
     setQueuePage(0);
@@ -494,37 +531,72 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   }
 
   async function startCall() {
-    if (!selectedLead) return;
-    let payload;
-    try {
-      payload = await fetchLeadDetail(selectedLead.id);
-      setDetail(payload);
-      if (hasCalendlyAppointment(payload.lead)) { setPipelineReadOnly(true); return; }
-    } catch (error) {
-      if (error.status === 404) removeUnavailableLead(selectedLead.id);
-      else setError(error.message);
-      return;
-    }
-    const link = phoneLink(payload.lead.phone);
-    if (!link) { setError('This lead does not have a callable phone number.'); return; }
+    if (!selectedLead || !canContact || liveCall || !communications || communications.unavailable) return;
+    const leadId = selectedLead.id;
     setCallSeconds(0);
     setCallNotice('');
-    setLiveCall({ leadId: selectedLead.id, startedAt: Date.now() });
-    window.location.href = link;
+    setCallMessage('');
+    setLiveCall({ leadId, phase: 'connecting' });
+
+    if (communications.voice) {
+      voiceCall.current = dialProspect({
+        leadId,
+        expectedPhone: currentLead.phone,
+        workspace: 'bdr',
+        onState(state) {
+          if (state.phase === 'ended') {
+            voiceCall.current = null;
+            setCallMessage(state.message);
+            finishCall(state.durationSeconds, state.attempted);
+          } else {
+            setLiveCall((current) => current?.leadId === leadId ? { ...current, ...state } : current);
+          }
+        },
+      });
+      return;
+    }
+
+    try {
+      const payload = await fetchLeadDetail(leadId);
+      setDetail(payload);
+      if (hasCalendlyAppointment(payload.lead)) {
+        setPipelineReadOnly(true);
+        setLiveCall(null);
+        return;
+      }
+      const link = phoneLink(payload.lead.phone);
+      if (!link || payload.lead.stage === 'Do Not Call') {
+        throw new Error('This lead is unavailable for calling.');
+      }
+      setLiveCall({ leadId, phase: 'manual', startedAt: Date.now() });
+      window.location.href = link;
+    } catch (error) {
+      setLiveCall(null);
+      if (error.status === 404) removeUnavailableLead(leadId);
+      else setCallMessage(error.message);
+    }
+  }
+
+  function finishCall(seconds, attempted) {
+    setCallSeconds(seconds);
+    setLiveCall(null);
+    if (attempted) {
+      setActivity((current) => ({ ...current, activityType: 'call', nextStage: current.nextStage || 'Contacted' }));
+    }
   }
 
   function endCall() {
-    if (!liveCall) return;
-    setCallSeconds(Math.max(0, Math.floor((Date.now() - liveCall.startedAt) / 1000)));
-    setLiveCall(null);
-    setActivity((current) => ({ ...current, activityType: 'call', nextStage: current.nextStage || 'Contacted' }));
+    if (voiceCall.current) voiceCall.current.hangUp();
+    else if (liveCall?.startedAt) {
+      finishCall(Math.max(0, Math.floor((Date.now() - liveCall.startedAt) / 1000)), true);
+    }
   }
 
   async function saveActivity(event) {
     event.preventDefault();
     if (!selectedLead || savingRef.current) return;
     setSaveError('');
-    if (liveCall?.leadId === selectedLead.id) { setSaveError('End the current call timer before logging the call.'); return; }
+    if (liveCall?.leadId === selectedLead.id) { setSaveError('End the current call before logging it.'); return; }
     if (activity.activityType === 'call' && callSeconds > 0 && !activity.disposition) {
       setSaveError('Choose an outcome before saving a timed call.');
       return;
@@ -614,7 +686,10 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const queueRangeEnd = Math.min((safeQueuePage + 1) * queuePageSize, queueLeads.length);
   const currentLead = detail?.lead || selectedLead;
   const bookedLead = hasCalendlyAppointment(currentLead);
-  const activeCall = liveCall?.leadId === selectedLead?.id;
+  const activeCall = Boolean(liveCall && liveCall.leadId === selectedLead?.id);
+  const canContact = Boolean(phoneLink(currentLead?.phone) && currentLead.stage !== 'Do Not Call');
+  const callPhase = { connecting: 'Connecting…', ringing: 'Ringing…', reconnecting: 'Reconnecting…',
+    connected: `Live call · ${duration(callSeconds)}`, manual: `Call timer · ${duration(callSeconds)}` };
   const today = new Date().toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
   const campaignPicker = <label className="campaign-picker">Campaign<select value={activeCampaign} onChange={(event) => setActiveCampaign(event.target.value)}>{workspace.campaigns.map((campaign) => <option key={campaign.id} value={campaign.id}>{campaign.name}</option>)}</select></label>;
   const metrics = [['Calls today', dashboard.stats?.calls_today || 0], ['Talk time', duration(dashboard.stats?.talk_seconds)], ['Appointments', dashboard.stats?.appointments_today || 0], ['Deals closed', dashboard.stats?.deals_closed || 0], ['Connect rate', `${dashboard.stats?.connect_rate || 0}%`], ['Follow-ups due', dashboard.stats?.follow_ups_due || 0]];
@@ -622,6 +697,7 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
   const historyPanel = <CallHistory campaignName={active?.name} calls={callHistory.calls} total={callHistory.total} page={historyPage} pageSize={queuePageSize} loading={historyLoading} error={historyError} onRetry={() => loadCallHistory()} onPage={setHistoryPage} onLead={(call) => openLead(workspace.leads.find((lead) => lead.id === call.lead_id) || { id:call.lead_id, name:call.lead_name, campaign_id:call.campaign_id })} />;
 
   return <div className="bdr-workspace">
+    <Head><link rel="stylesheet" href="/dialer/communications.css" /></Head>
     <header className="workspace-header"><div className="header-left"><img className="logo" src="/onyx-creative-labs-logo.webp" alt="Onyx Creative Labs" width="150" height="36" /><nav><button className={activeView === 'operations' ? 'active' : ''} type="button" onClick={() => switchView('operations')}>Dashboard</button><button className={activeView === 'pipeline' ? 'active' : ''} type="button" onClick={() => switchView('pipeline')}>Pipeline</button><button className={activeView === 'leads' ? 'active' : ''} type="button" onClick={() => switchView('leads')}>Leads</button></nav></div><div className="rep"><span className="dot" />{signedInEmail}<button type="button" onClick={onSignOut}>Sign out</button></div></header>
     <main>
       {error && <p className="error">{error}</p>}
@@ -712,10 +788,12 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
           <button type="button" aria-label="Close lead details" disabled={activeCall || saving} onClick={() => { setSelectedLead(null); setPipelineReadOnly(false); }}>×</button>
         </header>
         {!pipelineReadOnly && <div className="queue-detail-actions">
-          {activeCall ? <button className="secondary" type="button" onClick={endCall}>End call timer</button> : <button className="primary" type="button" disabled={saving || !phoneLink(currentLead?.phone)} onClick={startCall}>Call lead</button>}
+          {activeCall ? <button className="secondary" type="button" onClick={endCall} disabled={!communications?.voice && !liveCall.startedAt}>{liveCall.phase === 'manual' ? 'End call timer' : 'End call'}</button> : <button className="primary" type="button" disabled={saving || !canContact || !communications || communications.unavailable} onClick={startCall}>Call lead</button>}
+          {communications?.sms && canContact && !activeCall && <ProspectText leadId={currentLead.id} />}
           <button className="secondary" type="button" disabled={saving || activeCall} onClick={openAppointmentScheduler}>Appointment scheduler</button>
         </div>}
-        {activeCall && <div className="queue-call-state">Call timer · {duration(callSeconds)}</div>}
+        {activeCall && <div className="queue-call-state">{callPhase[liveCall.phase]}</div>}
+        {(callMessage || communications?.unavailable) && <div className="queue-call-state" role="status">{callMessage || 'Calling settings could not be loaded. Refresh to try again.'}</div>}
         {pipelineReadOnly ? <section className="queue-read-only"><h3>{bookedLead ? 'Appointment booked · With Admin' : 'Read-only pipeline record'}</h3><p>{bookedLead ? 'Admin will conduct the appointment and presentation and manage sales updates. You can follow this lead’s status here. Access is limited to you and Admin.' : 'Open this lead from the Leads tab to record calls or book an appointment.'}</p></section> : <form className="queue-wrap-up" onSubmit={saveActivity}>
           <h3>{showScheduler ? 'Record booked appointment' : 'Log call'}</h3>
           {!showScheduler && <p className="call-log-help">Manually log this call. Your BDR identity and the time are saved automatically.</p>}

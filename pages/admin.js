@@ -104,6 +104,7 @@ export default function AdminPage() {
           ref={dialerFrame}
           title="Onyx Dialer administrator workspace"
           src="/dialer/admin/index.html"
+          allow="microphone 'self'; autoplay 'self'"
           style={{
             border: 0,
             display: 'block',

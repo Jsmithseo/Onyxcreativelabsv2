@@ -225,11 +225,14 @@ campaigns.forEach((campaign) => { campaign.leads = leads.filter((lead) => lead.c
 const toast = document.getElementById("toast");
 let toastTimer;
 let selectedIndex = -1;
-let callSeconds = 0;
 let callInterval;
 let currentPage = 0;
 let activeCampaign = "school";
 let activeCallLeadId = null;
+let endActiveCall;
+let adminCommunications;
+let adminCommunicationsStatus;
+let unmountTextComposer;
 let statsMode = "overall";
 const pageSize = 20;
 const getLead = (id) => leads.find((lead) => lead.id === id);
@@ -1154,6 +1157,10 @@ function viewFromLocation() {
 }
 
 function showView(viewId, { updateLocation = true } = {}) {
+  if (activeCallLeadId !== null && viewId !== "leadsView") {
+    notify("End the current call before switching views");
+    return;
+  }
   if (!Object.values(adminViewRoutes).includes(viewId)) viewId = "homeView";
   document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active", view.id === viewId));
   document.querySelectorAll(".nav-button").forEach((button) => button.classList.toggle("active", button.dataset.view === viewId));
@@ -1297,6 +1304,9 @@ function openSearchResult(query) {
 }
 
 function openCampaign(campaignId) {
+  if (activeCallLeadId !== null) { notify("End the current call before changing campaigns"); return; }
+  unmountTextComposer?.();
+  unmountTextComposer = null;
   activeCampaign = campaignId;
   const campaign = campaigns.find((item) => item.id === campaignId);
   document.getElementById("campaignSelect").value = campaignId;
@@ -1387,9 +1397,12 @@ function renderRows() {
 }
 
 function selectLead(index) {
-  selectedIndex = index;
+  if (activeCallLeadId !== null) { notify("End the current call before opening a lead"); return; }
   const lead = getLead(index);
   if (!lead) return;
+  unmountTextComposer?.();
+  unmountTextComposer = null;
+  selectedIndex = index;
   const detail = document.getElementById("leadDetail");
   document.getElementById("detailName").textContent = lead.name;
   document.getElementById("detailNameInput").value = lead.name;
@@ -1407,9 +1420,7 @@ function selectLead(index) {
   document.getElementById("detailStage").value = lead.stage;
   document.getElementById("detailAttempts").textContent = `${lead.attempts || 0}`;
   document.getElementById("doNotCall").checked = Boolean(lead.dnc);
-  const callButton = document.getElementById("callLead");
-  callButton.disabled = Boolean(lead.dnc);
-  callButton.textContent = lead.dnc ? "Do not call" : "Call lead";
+  syncLeadContactControls(lead);
   const linkedin = document.getElementById("detailLinkedin");
   const linkedinUrl = normalizeLinkedInUrl(lead.linkedin);
   linkedin.textContent = linkedinUrl ? "View LinkedIn profile ↗" : "No LinkedIn profile";
@@ -1432,6 +1443,9 @@ function selectLead(index) {
 }
 
 function closeDetail() {
+  if (activeCallLeadId !== null) { notify("End the current call before closing this lead"); return; }
+  unmountTextComposer?.();
+  unmountTextComposer = null;
   selectedIndex = -1;
   clearInterval(callInterval);
   document.getElementById("callState").classList.remove("show");
@@ -1464,57 +1478,134 @@ document.getElementById("editContactName").onclick = () => {
 document.getElementById("detailNameInput").onkeydown = (event) => {
   if (event.key === "Enter") { event.preventDefault(); document.getElementById("editContactName").click(); }
 };
-document.addEventListener("keydown", (event) => { if (event.key === "Escape") { closeDetail(); if (typeof closeCalendlyScheduler === "function") closeCalendlyScheduler(); if (typeof closeCallDetails === "function") closeCallDetails(); } });
-document.getElementById("callLead").onclick = () => {
+document.addEventListener("keydown", (event) => { if (event.key === "Escape" && !document.querySelector(".onyx-text-dialog[open]")) { closeDetail(); if (typeof closeCalendlyScheduler === "function") closeCalendlyScheduler(); if (typeof closeCallDetails === "function") closeCallDetails(); } });
+async function resolveContactLeadId(lead) {
+  if (lead.sharedLeadId) return lead.sharedLeadId;
+  const resolved = await recordSharedAdminActivity(lead);
+  return resolved.lead.id;
+}
+
+function syncLeadContactControls(lead) {
+  const blocked = lead.dnc || lead.stage === "Do Not Call";
+  const call = document.getElementById("callLead");
+  call.disabled = blocked || !adminCommunicationsStatus || (activeCallLeadId !== null);
+  call.textContent = blocked ? "Do not call" : adminCommunicationsStatus?.voice ? "Call lead" : "Start call timer";
+  const text = document.getElementById("textLead");
+  text.hidden = blocked || !lead.phone || !adminCommunicationsStatus?.sms || (activeCallLeadId !== null);
+  if (!text.hidden && !unmountTextComposer) {
+    unmountTextComposer = adminCommunications.mountTextComposer(text, {
+      resolveLeadId: () => resolveContactLeadId(lead),
+    });
+  }
+  document.getElementById("closeDetail").disabled = (activeCallLeadId !== null);
+  document.getElementById("toggleScheduler").disabled = (activeCallLeadId !== null);
+  document.getElementById("saveLead").disabled = (activeCallLeadId !== null);
+}
+
+import("../communications.mjs?v=twilio-1").then(async (module) => {
+  adminCommunications = module;
+  adminCommunicationsStatus = await module.communicationsStatus();
+  renderVoipProvider();
   const lead = getLead(selectedIndex);
-  const campaign = campaigns.find((item) => item.id === lead.campaign);
-  if (lead.dnc) { notify("This lead is marked Do Not Call"); return; }
-  if (activeCallLeadId === lead.id) return;
+  if (lead) syncLeadContactControls(lead);
+}).catch(() => {
+  document.getElementById("voipStatus").textContent = "Unable to check Twilio configuration. Refresh to try again.";
+});
+
+function updateLiveTimer(label, startedAt) {
+  const timer = document.getElementById("callTimer");
+  const render = () => {
+    const callSeconds = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
+    timer.textContent = `${label} · ${String(Math.floor(callSeconds / 60)).padStart(2, "0")}:${String(callSeconds % 60).padStart(2, "0")}`;
+  };
   clearInterval(callInterval);
-  callSeconds = 0;
-  activeCallLeadId = lead.id;
+  render();
+  callInterval = setInterval(render, 1000);
+}
+
+function finishAdminCall(lead, { durationSeconds, attempted, message }) {
+  clearInterval(callInterval);
+  activeCallLeadId = null;
+  endActiveCall = null;
+  document.getElementById("callState").classList.remove("show");
+  syncLeadContactControls(lead);
+  notify(message);
+  if (!attempted) return;
+
+  const campaign = campaigns.find((item) => item.id === lead.campaign);
+  if (!campaign) return;
+  const now = new Date();
   lead.called = true;
   lead.attempts += 1;
   lead.stage = lead.stage === "New" ? "Contacted" : lead.stage;
-  lead.lastContact = new Date().toISOString().slice(0,10);
-  callLog.push({ leadId: lead.id, name: lead.name, phone: lead.phone, campaign: campaigns.find((item) => item.id === lead.campaign)?.name || "—", at: new Date().toISOString(), duration: 0, disposition: "", note: "", appointment: "" });
+  lead.lastContact = now.toISOString().slice(0, 10);
+  callLog.push({ leadId: lead.id, name: lead.name, phone: lead.phone, campaign: campaign.name,
+    at: now.toISOString(), duration: durationSeconds, disposition: lead.disposition || "", note: "" });
   campaign.calls += 1;
+  campaign.talkSeconds = (campaign.talkSeconds || 0) + durationSeconds;
+  campaign.talk = formatTalkTime(campaign.talkSeconds);
   updateConnectRate(campaign);
+  document.getElementById("detailAttempts").textContent = String(lead.attempts);
+  document.getElementById("detailStage").value = lead.stage;
   persistActivity();
   refreshActivityViews();
+  renderLeadHistory(lead);
+  recordSharedAdminActivity(lead, {
+    activityType: "call",
+    disposition: lead.disposition,
+    durationSeconds,
+    scheduledFor: lead.followAt ? new Date(lead.followAt).toISOString() : null,
+    nextStage: ["Won", "Lost"].includes(lead.stage) ? "" : lead.stage,
+  }).then(() => loadSharedPipeline({ quiet:true })).catch((error) => {
+    notify(`${error.message || "Unable to sync call"} · call retained in this browser`);
+  });
+}
+
+document.getElementById("callLead").onclick = async () => {
+  const lead = getLead(selectedIndex);
+  if (!lead || lead.dnc || lead.stage === "Do Not Call" || activeCallLeadId !== null || !adminCommunicationsStatus) return;
+  activeCallLeadId = lead.id;
+  syncLeadContactControls(lead);
   document.getElementById("callState").classList.add("show");
-  callInterval = setInterval(() => {
-    callSeconds += 1;
-    document.getElementById("callTimer").textContent = `Live call · ${String(Math.floor(callSeconds / 60)).padStart(2, "0")}:${String(callSeconds % 60).padStart(2, "0")}`;
-  }, 1000);
-  notify(`Calling ${lead.name}`);
-};
-document.getElementById("endCall").onclick = () => {
-  clearInterval(callInterval);
-  const lead = leads.find((item) => item.id === activeCallLeadId);
-  const campaign = lead && campaigns.find((item) => item.id === lead.campaign);
-  if (campaign) {
-    campaign.talkSeconds = (campaign.talkSeconds || 0) + callSeconds;
-    campaign.talk = formatTalkTime(campaign.talkSeconds);
-    const latest = [...callLog].reverse().find((entry) => entry.leadId === lead.id);
-    if (latest) latest.duration = callSeconds;
-    persistActivity();
-    refreshActivityViews();
-    recordSharedAdminActivity(lead, {
-      activityType:"call",
-      disposition:lead.disposition,
-      note:latest?.note || "",
-      durationSeconds:callSeconds,
-      scheduledFor:lead.followAt ? new Date(lead.followAt).toISOString() : null,
-      nextStage:lead.stage
-    }).then(() => loadSharedPipeline({ quiet:true })).catch((error) => {
-      notify(`${error.message || "Unable to sync call"} · call retained in this browser`);
+  const timer = document.getElementById("callTimer");
+
+  if (!adminCommunicationsStatus.voice) {
+    const startedAt = Date.now();
+    updateLiveTimer("Call timer", startedAt);
+    endActiveCall = () => finishAdminCall(lead, {
+      durationSeconds: Math.floor((Date.now() - startedAt) / 1000),
+      attempted: true,
+      message: "Call timer ended.",
     });
+    return;
   }
-  activeCallLeadId = null;
-  document.getElementById("callState").classList.remove("show");
-  notify("Call ended");
+
+  timer.textContent = "Connecting…";
+  const canceled = () => finishAdminCall(lead, { attempted: false, message: "Call canceled." });
+  endActiveCall = canceled;
+  try {
+    const leadId = await resolveContactLeadId(lead);
+    if (endActiveCall !== canceled) return;
+    const voice = adminCommunications.dialProspect({
+      leadId,
+      expectedPhone: lead.phone,
+      onState(state) {
+        if (state.phase === "ended") finishAdminCall(lead, state);
+        if (state.phase === "ringing") timer.textContent = "Ringing…";
+        if (state.phase === "reconnecting") {
+          clearInterval(callInterval);
+          timer.textContent = "Reconnecting…";
+        }
+        if (state.phase === "connected") updateLiveTimer("Live call", state.startedAt);
+      },
+    });
+    endActiveCall = voice.hangUp;
+  } catch (error) {
+    if (endActiveCall === canceled) finishAdminCall(lead, { attempted: false, message: error.message });
+  }
 };
+
+document.getElementById("endCall").onclick = () => endActiveCall?.();
 const leadTimeZones = { ET: "America/New_York", CT: "America/Chicago", MT: "America/Denver", PT: "America/Los_Angeles" };
 const leadZoneNames = { ET: "Eastern", CT: "Central", MT: "Mountain", PT: "Pacific" };
 let calendlyTimeContextTimer;
@@ -1802,8 +1893,8 @@ document.getElementById("doNotCall").onchange = async (event) => {
     delete lead.stageBeforeDnc;
   }
   document.getElementById("detailStage").value = lead.stage;
-  document.getElementById("callLead").disabled = lead.dnc;
-  document.getElementById("callLead").textContent = lead.dnc ? "Do not call" : "Call lead";
+  if (lead.dnc && activeCallLeadId === lead.id) endActiveCall?.();
+  syncLeadContactControls(lead);
   persistActivity();
   try {
     await recordSharedAdminActivity(lead, {
@@ -1970,8 +2061,12 @@ document.getElementById("exportWeeklyReport").onclick = () => {
   notify("Weekly client report exported");
 };
 function renderVoipProvider() {
-  document.getElementById("voipProvider").value = voipProvider;
-  document.getElementById("voipStatus").textContent = voipProvider ? `${voipProvider} selected` : "Not connected";
+  if (!adminCommunicationsStatus) return;
+  const { voice, sms } = adminCommunicationsStatus;
+  document.getElementById("voipStatus").textContent = [
+    voice ? "Browser calling configured" : "Browser calling setup required",
+    sms ? "Texting configured" : "Texting setup required",
+  ].join(" · ");
 }
 
 async function saveDashboardSettings() {
@@ -1999,26 +2094,12 @@ async function loadDashboardSettings() {
       closeRatios: { ...(goals.closeRatios || {}), ...(settings.goals?.closeRatios || {}) },
     };
     voipProvider = settings.voipProvider || "";
-    renderVoipProvider();
     renderGoals();
   } catch (error) {
-    renderVoipProvider();
     notify(error.message || "Dashboard settings are unavailable");
   }
 }
 
-renderVoipProvider();
-document.getElementById("saveVoipProvider").onclick = async () => {
-  voipProvider = document.getElementById("voipProvider").value;
-  renderVoipProvider();
-  persistActivity();
-  try {
-    await saveDashboardSettings();
-    notify(voipProvider ? `${voipProvider} selected` : "Provider selection cleared");
-  } catch (error) {
-    notify(`${error.message || "Unable to save provider"} · saved in this browser`);
-  }
-};
 document.getElementById("celebrationClip").onchange = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
