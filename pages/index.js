@@ -11,11 +11,11 @@ import FeaturedCaseStudies from './components/FeaturedCaseStudies';
 
 const storytellingReels = [
   {
-    title: 'Storytelling in action',
-    category: 'Storytelling example',
-    videoSrc: '/videos/storytelling-in-action.mp4',
-    poster: '/storytelling-in-action-still.jpg',
-    posterPosition: '50% 50%',
+    title: 'Roll-b Founder Story',
+    category: 'Brand story',
+    videoSrc: '/videos/roll-b-founder-story.mp4',
+    poster: '/videos/roll-b-founder-story.jpg',
+    posterFit: 'contain',
   },
   {
     title: 'STLR Entertainment commercial',
@@ -65,7 +65,7 @@ function StorytellingCard({ reel }) {
               alt=""
               className="w-100 h-100"
               loading="lazy"
-              style={{ objectFit: 'cover', objectPosition: reel.posterPosition || '50% 50%' }}
+              style={{ objectFit: reel.posterFit || 'cover', objectPosition: reel.posterPosition || '50% 50%' }}
             />
             <span className="storytelling-poster-shade" aria-hidden="true" />
             <span className="storytelling-play" aria-hidden="true">▶</span>
