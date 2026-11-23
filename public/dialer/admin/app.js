@@ -230,6 +230,7 @@ let currentPage = 0;
 let activeCampaign = "school";
 let activeCallLeadId = null;
 let endActiveCall;
+let unmountTrainingRecording;
 let adminCommunications;
 let adminCommunicationsStatus;
 let unmountTextComposer;
@@ -1502,7 +1503,7 @@ function syncLeadContactControls(lead) {
   document.getElementById("saveLead").disabled = (activeCallLeadId !== null);
 }
 
-import("../communications.mjs?v=twilio-1").then(async (module) => {
+import("../communications.mjs?v=twilio-2").then(async (module) => {
   adminCommunications = module;
   adminCommunicationsStatus = await module.communicationsStatus();
   renderVoipProvider();
@@ -1527,6 +1528,9 @@ function finishAdminCall(lead, { durationSeconds, attempted, message }) {
   clearInterval(callInterval);
   activeCallLeadId = null;
   endActiveCall = null;
+  unmountTrainingRecording?.();
+  unmountTrainingRecording = null;
+  document.getElementById("trainingRecording").hidden = true;
   document.getElementById("callState").classList.remove("show");
   syncLeadContactControls(lead);
   notify(message);
@@ -1596,7 +1600,14 @@ document.getElementById("callLead").onclick = async () => {
           clearInterval(callInterval);
           timer.textContent = "Reconnecting…";
         }
-        if (state.phase === "connected") updateLiveTimer("Live call", state.startedAt);
+        if (state.phase === "connected") {
+          updateLiveTimer("Live call", state.startedAt);
+          if (adminCommunicationsStatus.recordings && !unmountTrainingRecording) {
+            const controls = document.getElementById("trainingRecording");
+            controls.hidden = false;
+            unmountTrainingRecording = adminCommunications.mountTrainingRecording(controls, voice);
+          }
+        }
       },
     });
     endActiveCall = voice.hangUp;

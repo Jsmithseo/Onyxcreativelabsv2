@@ -41,6 +41,7 @@ export function dialProspect({ leadId, expectedPhone, workspace, onState }) {
   let device;
   let call;
   let startedAt;
+  let grantId;
   let attempted = false;
   let ended = false;
 
@@ -63,7 +64,8 @@ export function dialProspect({ leadId, expectedPhone, workspace, onState }) {
       if (!Device.isSupported) throw new Error('This browser does not support VoIP calling.');
       device = new Device(session.token, { closeProtection: true });
       device.on('error', () => finish('Could not connect. Check your microphone permissions and try again.'));
-      call = await device.connect({ params: { GrantId: session.grantId } });
+      grantId = session.grantId;
+      call = await device.connect({ params: { GrantId: grantId } });
       if (ended) return;
       function ringing() {
         if (ended) return;
@@ -93,6 +95,10 @@ export function dialProspect({ leadId, expectedPhone, workspace, onState }) {
   })();
 
   return {
+    trainingRecording(action, consentConfirmed) {
+      if (ended || !grantId || !startedAt) throw new Error('Connect the call before using training recording.');
+      return request('call-recording', { workspace, body: { grantId, action, consentConfirmed } });
+    },
     hangUp() {
       finish(startedAt ? 'Call ended.' : 'Call canceled.');
     },
@@ -102,6 +108,50 @@ export function dialProspect({ leadId, expectedPhone, workspace, onState }) {
       device?.destroy();
     },
   };
+}
+
+export function mountTrainingRecording(container, voice) {
+  container.innerHTML = `
+    <label><input type="checkbox"> The prospect agreed to recording for training.</label>
+    <button type="button" disabled>Start recording</button>
+    <p role="status"></p>`;
+  const confirmation = container.querySelector('label');
+  const consent = confirmation.querySelector('input');
+  const action = container.querySelector('button');
+  const notice = container.querySelector('p');
+  let recording = false;
+
+  consent.onchange = () => { action.disabled = !consent.checked; };
+  action.onclick = async () => {
+    if (action.disabled) return;
+    action.disabled = true;
+    consent.disabled = true;
+    const command = recording ? 'stop' : 'start';
+    try {
+      const { status } = await voice.trainingRecording(command, consent.checked);
+      if (status === 'failed' || status === 'absent') {
+        notice.textContent = 'Twilio could not create a recording.';
+        return;
+      }
+      if (status === 'stopped' || status === 'completed') {
+        notice.textContent = 'Recording ended. It will appear in the training library when ready.';
+        confirmation.hidden = true;
+        action.hidden = true;
+        return;
+      }
+      recording = true;
+      confirmation.hidden = true;
+      action.textContent = 'Stop recording';
+      notice.textContent = status === 'in-progress' ? 'Recording for training'
+        : 'Recording status is pending. End the call if recording needs to stop now.';
+      action.disabled = false;
+    } catch (error) {
+      notice.textContent = error.message;
+      action.disabled = false;
+      if (command === 'start') consent.disabled = false;
+    }
+  };
+  return () => container.replaceChildren();
 }
 
 const textStatuses = {

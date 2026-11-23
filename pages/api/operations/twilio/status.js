@@ -6,6 +6,6 @@ export default function status(req, res) {
     res.setHeader('Allow', 'GET');
     return res.status(405).end();
   }
-  const { voice, sms } = twilioConfig();
-  return res.status(200).json({ voice, sms });
+  const { voice, sms, recordings } = twilioConfig();
+  return res.status(200).json({ voice, sms, recordings });
 }

@@ -30,9 +30,18 @@ const twilioUrl = pathToFileURL(createRequire(import.meta.url).resolve('twilio')
 const communications = moduleUrl(replaceImports(
   (await readFile(here('../lib/twilioCommunications.js'), 'utf8')).replace(
     'return twilio(settings.accountSid, settings.authToken, { timeout: 8000, autoRetry: false });',
-    'return { messages: { create: globalThis.twilioSendForTest } };'
+    'return { messages: { create: globalThis.twilioSendForTest }, ...globalThis.twilioClientForTest };'
   ),
   { twilio: twilioUrl, './operationsAccess': moduleUrl(principalSource), './operationsStore': operationsStore }
+));
+
+const recordingsStore = moduleUrl(replaceImports(
+  await readFile(here('../lib/twilioRecordingsStore.js'), 'utf8'),
+  { './operationsStore': operationsStore }
+));
+const recordingAccess = moduleUrl(replaceImports(
+  await readFile(here('../lib/twilioRecordingAccess.js'), 'utf8'),
+  { './operationsAccess': moduleUrl(principalSource) }
 ));
 
 async function loadHandler(name) {
@@ -41,13 +50,18 @@ async function loadHandler(name) {
     twilio: twilioUrl,
     '../../../../lib/twilioCommunications': communications,
     '../../../../lib/twilioCommunicationsStore': communicationsStore,
+    '../../../../lib/twilioRecordingsStore': recordingsStore,
+    '../../../../../lib/twilioCommunications': communications,
+    '../../../../../lib/twilioRecordingsStore': recordingsStore,
+    '../../../../../lib/twilioRecordingAccess': recordingAccess,
   })));
   return module.default;
 }
 
 async function run(handler, { method = 'POST', body, query = {}, testPrincipal, headers = {} }) {
   const res = {
-    setHeader() {},
+    headers: {},
+    setHeader(name, value) { this.headers[name] = value; },
     status(code) { this.code = code; return this; },
     json(data) { this.data = data; return this; },
     send(data) { this.data = data; return this; },
@@ -57,7 +71,7 @@ async function run(handler, { method = 'POST', body, query = {}, testPrincipal, 
   return res;
 }
 
-test('Twilio routes enforce prospect access, authorize one call and preserve idempotent delivery history', async () => {
+test('Twilio routes enforce call access, preserve SMS history and record training only after consent', async () => {
   const sid = (prefix, digit) => prefix + digit.repeat(32);
   const settings = {
     TWILIO_ACCOUNT_SID: sid('AC', '1'),
@@ -68,6 +82,7 @@ test('Twilio routes enforce prospect access, authorize one call and preserve ide
     TWILIO_VOICE_NUMBER: '+12025550101',
     TWILIO_MESSAGING_SERVICE_SID: sid('MG', '4'),
     TWILIO_WEBHOOK_ORIGIN: 'https://onyx.example',
+    TWILIO_TRAINING_RECORDINGS: 'true',
   };
   const previous = Object.fromEntries(Object.keys(settings).map((name) => [name, process.env[name]]));
   Object.assign(process.env, settings);
@@ -159,8 +174,98 @@ test('Twilio routes enforce prospect access, authorize one call and preserve ide
     assert.equal(history.data.messages[0].status, 'delivered');
     const proof = await db.query('SELECT consent_reference, actor_email FROM prospect_sms WHERE id = $1', [outbound.id]);
     assert.deepEqual(proof.rows[0], { consent_reference: outbound.consentReference, actor_email: contractor.email });
+
+    const control = await loadHandler('call-recording');
+    const recordingCallback = await loadHandler('recording-status');
+    const library = await loadHandler('recordings/index');
+    const audio = await loadHandler('recordings/audio');
+    const recordingSid = sid('RE', '8');
+    let answered = false;
+    let recordingCount = 0;
+    let stopped = false;
+    const calls = (callSid) => {
+      assert.equal(callSid, call.CallSid);
+      const recordings = (id) => ({
+        async update({ status }) {
+          assert.equal(id, recordingSid);
+          assert.equal(status, 'stopped');
+          stopped = true;
+        },
+      });
+      recordings.create = async (options) => {
+        recordingCount++;
+        assert.equal(options.recordingTrack, 'both');
+        assert.equal(options.recordingChannels, 'dual');
+        assert.equal(options.recordingStatusCallback, `${settings.TWILIO_WEBHOOK_ORIGIN}/api/operations/twilio/recording-status?id=${call.GrantId}`);
+        return { sid: recordingSid };
+      };
+      return { recordings };
+    };
+    calls.list = async (filters) => {
+      assert.deepEqual(filters, { parentCallSid: call.CallSid, status: 'in-progress', limit: 1 });
+      return answered ? [{ sid: sid('CA', '9') }] : [];
+    };
+    globalThis.twilioClientForTest = { calls };
+
+    const start = { grantId: call.GrantId, action: 'start', consentConfirmed: true };
+    assert.equal((await run(control, { testPrincipal: contractor, body: { ...start, consentConfirmed: false } })).code, 400);
+    assert.equal((await run(control, { testPrincipal: admin, body: start })).code, 404);
+    assert.equal((await run(control, { testPrincipal: contractor, body: start })).code, 409);
+    assert.equal(recordingCount, 0);
+    answered = true;
+    const started = await Promise.all([1, 2].map(() => run(control, { testPrincipal: contractor, body: start })));
+    assert.ok(started.every((response) => response.code === 200));
+    assert.equal(recordingCount, 1);
+    assert.equal((await run(control, { testPrincipal: contractor, body: { ...start, action: 'stop' } })).data.status, 'stopped');
+    assert.equal(stopped, true);
+
+    const recordingQuery = { id: call.GrantId };
+    const recordingPath = `recording-status?id=${call.GrantId}`;
+    const completed = { AccountSid: settings.TWILIO_ACCOUNT_SID, CallSid: call.CallSid,
+      RecordingSid: recordingSid, RecordingStatus: 'completed', RecordingDuration: '38' };
+    assert.equal((await run(recordingCallback, { body: completed, query: recordingQuery })).code, 403);
+    assert.equal((await run(recordingCallback, {
+      body: completed, query: recordingQuery, headers: signed(completed, recordingPath),
+    })).code, 204);
+
+    assert.equal((await run(library, { method: 'GET' })).code, 401);
+    assert.equal((await run(library, { method: 'GET', testPrincipal: contractor })).code, 403);
+    assert.equal((await run(audio, { method: 'GET', query: recordingQuery, testPrincipal: contractor })).code, 403);
+    assert.equal((await run(library, {
+      method: 'PATCH', testPrincipal: admin, body: { id: call.GrantId, notes: 'Handle the 20% price objection' },
+    })).code, 200);
+    for (const q of ['price objection', 'Example contact', 'rep@example.test', '20%']) {
+      const rows = await run(library, { method: 'GET', testPrincipal: admin, query: { q } });
+      assert.equal(rows.data.recordings.length, 1);
+      assert.equal(rows.data.recordings[0].id, call.GrantId);
+      assert.equal(rows.data.recordings[0].duration_seconds, 38);
+      assert.equal(rows.data.recordings[0].status, 'completed');
+      assert.equal(rows.data.recordings[0].recording_sid, undefined);
+    }
+    const noRows = await run(library, { method: 'GET', testPrincipal: admin, query: { q: '20%%' } });
+    assert.deepEqual(noRows.data.recordings, []);
+
+    const fetch = globalThis.fetch;
+    try {
+      globalThis.fetch = async (url, options) => {
+        assert.match(url, new RegExp(`/Recordings/${recordingSid}\\.mp3$`));
+        assert.match(options.headers.Authorization, /^Basic /);
+        assert.equal(options.headers.Range, 'bytes=0-119');
+        return new Response(null, { status: 206, headers: { 'Content-Range': 'bytes 0-119/2000' } });
+      };
+      const streamed = await run(audio, {
+        method: 'HEAD', testPrincipal: admin, query: recordingQuery, headers: { range: 'bytes=0-119' },
+      });
+      assert.equal(streamed.code, 206);
+      assert.equal(streamed.headers['Content-Type'], 'audio/mpeg');
+      assert.equal(streamed.headers['Cache-Control'], 'private, no-store');
+      assert.equal(streamed.headers['content-range'], 'bytes 0-119/2000');
+    } finally {
+      globalThis.fetch = fetch;
+    }
   } finally {
     delete globalThis.twilioSendForTest;
+    delete globalThis.twilioClientForTest;
     for (const [name, value] of Object.entries(previous)) {
       if (value === undefined) delete process.env[name];
       else process.env[name] = value;

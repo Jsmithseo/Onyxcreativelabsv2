@@ -10,6 +10,7 @@
     "db:migrate:operations": "node --env-file=.env.local scripts/migrate-shared-operations.mjs",
     "db:migrate:metadata": "node --env-file=.env.local scripts/migrate-workspace-metadata.mjs",
     "format": "prettier --write .",
+    "twilio:relay:local": "node scripts/twilio-local-webhooks.mjs",
     "db:migrate:twilio": "node --env-file=.env.local scripts/migrate-twilio-communications.mjs"
   },
   "keywords": [],

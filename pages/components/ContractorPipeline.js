@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { communicationsStatus, dialProspect, mountTextComposer } from '../../public/dialer/communications.mjs';
+import { communicationsStatus, dialProspect, mountTextComposer, mountTrainingRecording } from '../../public/dialer/communications.mjs';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import LeadBriefing from '../../components/bdr/LeadBriefing';
 import { belongsInCallQueue, nextQueueLead, compareCallQueueLeads, resumeCallQueue, isDue, queueFollowUpAt } from '../../lib/callQueue.mjs';
@@ -157,6 +157,12 @@ function CallingWindows({ leads }) {
       @media(max-width:520px){.bdr-workspace .timezone-content{gap:6px}.bdr-workspace .zone-times{grid-template-columns:repeat(2,minmax(0,1fr))}}
     `}</style>
   </>;
+}
+
+function TrainingRecording({ voiceCall }) {
+  const container = useRef(null);
+  useEffect(() => mountTrainingRecording(container.current, voiceCall.current), [voiceCall]);
+  return <div className="onyx-call-recording" ref={container} />;
 }
 
 function ProspectText({ leadId }) {
@@ -793,6 +799,9 @@ export default function ContractorPipeline({ signedInEmail, onSignOut }) {
           <button className="secondary" type="button" disabled={saving || activeCall} onClick={openAppointmentScheduler}>Appointment scheduler</button>
         </div>}
         {activeCall && <div className="queue-call-state">{callPhase[liveCall.phase]}</div>}
+        {activeCall && communications?.recordings && liveCall.startedAt && voiceCall.current && (
+          <TrainingRecording voiceCall={voiceCall} />
+        )}
         {(callMessage || communications?.unavailable) && <div className="queue-call-state" role="status">{callMessage || 'Calling settings could not be loaded. Refresh to try again.'}</div>}
         {pipelineReadOnly ? <section className="queue-read-only"><h3>{bookedLead ? 'Appointment booked · With Admin' : 'Read-only pipeline record'}</h3><p>{bookedLead ? 'Admin will conduct the appointment and presentation and manage sales updates. You can follow this lead’s status here. Access is limited to you and Admin.' : 'Open this lead from the Leads tab to record calls or book an appointment.'}</p></section> : <form className="queue-wrap-up" onSubmit={saveActivity}>
           <h3>{showScheduler ? 'Record booked appointment' : 'Log call'}</h3>
