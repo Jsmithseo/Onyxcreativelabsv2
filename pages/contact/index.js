@@ -17,7 +17,18 @@ import { findReviewPlan, REVIEW_STARTUP_FEE, REVIEW_TRIAL_DAYS } from '../../lib
 
 const REVIEW_INTEREST = 'Onyx Reviews';
 const REVIEW_MESSAGE = 'I’d like to learn how Onyx Reviews can help us earn more customer feedback and grow our reputation.';
-const INTEREST_OPTIONS = ['Fractional BDR', 'CRO', 'Web Development', 'Email Marketing', 'Research & Strategy', 'Paid Marketing', REVIEW_INTEREST];
+const INTEREST_OPTIONS = [
+  ['fractional-bdr', 'Fractional BDR'],
+  ['90-day-pilot', '90-Day Pilot'],
+  ['content-marketing', 'Content Marketing'],
+  ['growth-plan', 'Growth Plan'],
+  ['onyx-reviews', REVIEW_INTEREST],
+  ['cro', 'CRO'],
+  ['web-development', 'Web Development'],
+  ['email-marketing', 'Email Marketing'],
+  ['research-strategy', 'Research & Strategy'],
+  ['paid-marketing', 'Paid Marketing'],
+];
 
 function buildReviewMessage(plan, trial, locations) {
   const selectedPlan = findReviewPlan(plan);
@@ -41,6 +52,9 @@ export default function ContactFormPage() {
   const router = useRouter();
   const product = router.query.product;
   const isReviewsInquiry = router.isReady && product === 'reviews';
+  const selectedInterest = isReviewsInquiry
+    ? REVIEW_INTEREST
+    : INTEREST_OPTIONS.find(([id]) => id === router.query.service)?.[1];
   const selectedPlan = typeof router.query.plan === 'string' ? router.query.plan : '';
   const selectedTrial = typeof router.query.trial === 'string' ? router.query.trial : '';
   const selectedLocations = typeof router.query.locations === 'string' ? router.query.locations : '';
@@ -58,16 +72,18 @@ export default function ContactFormPage() {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (!isReviewsInquiry) return;
+    if (!router.isReady || !selectedInterest) return;
 
     setFormData((prev) => ({
       ...prev,
-      interest: prev.interest.includes(REVIEW_INTEREST)
+      interest: prev.interest.includes(selectedInterest)
         ? prev.interest
-        : [...prev.interest, REVIEW_INTEREST],
-      message: prev.message || buildReviewMessage(selectedPlan, selectedTrial, selectedLocations),
+        : [...prev.interest, selectedInterest],
+      message: isReviewsInquiry && !prev.message
+        ? buildReviewMessage(selectedPlan, selectedTrial, selectedLocations)
+        : prev.message,
     }));
-  }, [isReviewsInquiry, selectedPlan, selectedTrial, selectedLocations]);
+  }, [router.isReady, selectedInterest, isReviewsInquiry, selectedPlan, selectedTrial, selectedLocations]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -171,14 +187,17 @@ export default function ContactFormPage() {
                 <Label for="website">Website (if applicable)</Label>
                 <Input type="text" name="website" id="website" value={formData.website} onChange={handleChange} />
               </FormGroup>
-              <FormGroup>
-                <Label>Which solutions are you interested in?</Label>
-                <div>
-                  {INTEREST_OPTIONS.map((interest) => (
-                    <div key={interest} className="form-check">
-                      <Input type="checkbox" id={interest} value={interest} checked={formData.interest.includes(interest)} onChange={handleChange} />
-                      <Label className="form-check-label" htmlFor={interest}>{interest}</Label>
-                    </div>
+              <FormGroup tag="fieldset" aria-describedby="contact-interest-help">
+                <legend className="fs-6 mb-1">Which services are you interested in?</legend>
+                <p id="contact-interest-help" className="text-body-secondary mb-2">Select all that apply.</p>
+                <div className="row gy-2">
+                  {INTEREST_OPTIONS.map(([id, interest]) => (
+                    <Col sm="6" key={id}>
+                      <div className="form-check">
+                        <Input type="checkbox" name="interest" id={`contact-interest-${id}`} value={interest} checked={formData.interest.includes(interest)} onChange={handleChange} />
+                        <Label className="form-check-label" htmlFor={`contact-interest-${id}`}>{interest}</Label>
+                      </div>
+                    </Col>
                   ))}
                 </div>
               </FormGroup>

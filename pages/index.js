@@ -160,7 +160,7 @@ export default function Index() {
               Onyx gives you part-time business development support. We find the right prospects, make the calls, and follow up consistently so your team can spend more time in qualified sales conversations.
             </p>
             <div className="onyx-hero-actions flex-wrap gap-3">
-              <Link href="/contact" className="btn btn-lg fw-semibold onyx-bdr-primary">Talk about outbound</Link>
+              <Link href="/contact?service=fractional-bdr" className="btn btn-lg fw-semibold onyx-bdr-primary">Talk about outbound</Link>
               <a href="#fractional-bdr" className="btn btn-lg fw-semibold">See how it works</a>
             </div>
           </Container>

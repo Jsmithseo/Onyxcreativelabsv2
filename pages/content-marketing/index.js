@@ -212,7 +212,7 @@ export default function ContentMarketingPage() {
             your story rolling out, and gets better as we learn what connects
             with your audience.
           </p>
-          <Link href="/contact" passHref legacyBehavior>
+          <Link href="/contact?service=content-marketing" passHref legacyBehavior>
             <Button color="success" size="lg">Tell Your Story</Button>
           </Link>
         </div>

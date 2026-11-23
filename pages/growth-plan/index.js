@@ -60,7 +60,7 @@ export default function GrowthPlanPage() {
             remember.
           </p>
           <div className="mt-4">
-            <Link href="/contact" passHref legacyBehavior>
+            <Link href="/contact?service=growth-plan" passHref legacyBehavior>
               <Button color="success" size="lg">
                 Build Your Growth Plan
               </Button>
@@ -104,7 +104,7 @@ export default function GrowthPlanPage() {
                 meaningful conversations, and turn what you learn into a story
                 that keeps your product moving forward.
               </p>
-              <Link href="/contact" passHref legacyBehavior>
+              <Link href="/contact?service=growth-plan" passHref legacyBehavior>
                 <Button color="success" size="lg">
                   Build Your Growth Plan
                 </Button>
