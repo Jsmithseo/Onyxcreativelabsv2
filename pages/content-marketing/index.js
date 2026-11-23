@@ -54,6 +54,14 @@ const storyExamples = [
     poster: '/videos/roll-b-product-demo.jpg',
     posterFit: 'contain',
   },
+  {
+    title: 'Roll-b Founder Story',
+    category: 'Brand story',
+    copy: 'Co-founder Mike shares what led to Roll-b and explains the design choices behind the ear swab.',
+    videoSrc: '/videos/roll-b-founder-story.mp4',
+    poster: '/videos/roll-b-founder-story.jpg',
+    posterFit: 'contain',
+  },
 ];
 
 function StorytellingCard({ reel }) {
@@ -204,7 +212,7 @@ export default function ContentMarketingPage() {
         </div>
         <Row className="justify-content-center g-4">
           {storyExamples.map((example) => (
-            <Col md="6" key={example.videoSrc}>
+            <Col md="6" lg="4" key={example.videoSrc}>
               <StorytellingCard reel={example} />
             </Col>
           ))}
