@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import Head from 'next/head';
 import Link from 'next/link';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 import BaseLayout from './components/layouts/BaseLayouts.js';
 import { Row, Col, Button } from 'reactstrap';
-import Approach from "../pages/components/Approach";
-import Results from "../pages/components/Results";
+import Approach from './components/Approach';
+import FractionalBdrOverview from './components/Results';
 import FeaturedCaseStudies from './components/FeaturedCaseStudies';
 
 const storytellingReels = [
@@ -146,25 +147,27 @@ function StorytellingCard({ reel }) {
 export default function Index() {
   return (
     <BaseLayout>
+      <Head>
+        <title>Fractional BDR Services | Onyx Creative Labs</title>
+        <meta name="description" content="Onyx Creative Labs provides part-time business development for lean B2B teams. Get help with prospecting, cold calling, lead follow-up, and appointment setting." />
+      </Head>
       <div style={{ overflowX: 'hidden' }}>
         <CssBaseline />
         <section className="onyx-hero onyx-hero-inverse">
           <Container>
-            <h1 className="onyx-hero-title">Find your market. Tell your story. Grow with confidence.</h1>
-            <p className="onyx-hero-copy">Onyx helps you create demand in two ways: test the market with human-led business development, or turn your value into story-led content that gives people a reason to care.</p>
-            <div className="onyx-hero-actions" style={{ flexWrap: 'wrap', gap: '1rem' }}>
-              <Link href="/90-day-pilot"><Button color="success" style={{ fontWeight: '600' }}>Test Your Market</Button></Link>
-              <Link href="/content-marketing"><Button color="outline-dark" style={{ fontWeight: '600' }}>Tell Your Story</Button></Link>
+            <h1 className="onyx-hero-title">Fractional BDR for lean B2B teams</h1>
+            <p className="onyx-hero-copy">
+              Onyx gives you part-time business development support. We find the right prospects, make the calls, and follow up consistently so your team can spend more time in qualified sales conversations.
+            </p>
+            <div className="onyx-hero-actions flex-wrap gap-3">
+              <Link href="/contact" className="btn btn-lg fw-semibold onyx-bdr-primary">Talk about outbound</Link>
+              <a href="#fractional-bdr" className="btn btn-lg fw-semibold">See how it works</a>
             </div>
-            <p className="mt-3 mb-0 text-center">Need both? <Link href="/growth-plan" style={{ color: 'var(--onyx-accent)', fontWeight: '600' }}>See how a Growth Plan brings them together.</Link></p>
           </Container>
         </section>
 
-        <Container maxWidth="lg">
-          <section className="onyx-intro"><Row><Col md={{ size: 12 }}><h2>The Onyx Creative Labs Way.</h2><p className="onyx-intro-copy">We help businesses understand their market, build momentum, and grow with confidence.</p></Col></Row></section>
-        </Container>
-
-        <section className="onyx-muted-section"><Results /></section>
+        <FractionalBdrOverview />
+        <section className="onyx-content-section"><FeaturedCaseStudies /></section>
 
         <section style={{ backgroundColor: '#111827', color: '#fff', padding: '5rem 0' }}>
           <Container maxWidth="lg">
@@ -192,7 +195,6 @@ export default function Index() {
             <div className="text-center mt-2"><Link href="/content-marketing"><Button color="success" size="lg">Tell Your Story</Button></Link></div>
           </Container>
         </section>
-        <section className="onyx-content-section"><FeaturedCaseStudies /></section>
         <section className="onyx-muted-section"><Approach /></section>
       </div>
 
@@ -209,14 +211,21 @@ export default function Index() {
           border-color: #fff !important;
           color: #fff !important;
         }
+        .onyx-hero-inverse .onyx-hero-actions .onyx-bdr-primary {
+          background: var(--onyx-accent) !important;
+          border-color: var(--onyx-accent) !important;
+          color: var(--onyx-black) !important;
+        }
         .onyx-hero-inverse .onyx-hero-actions .btn:hover,
         .onyx-hero-inverse .onyx-hero-actions .btn:focus {
           background: #fff !important;
           border-color: #fff !important;
           color: #18181b !important;
         }
-        .onyx-hero-inverse > .MuiContainer-root > p:last-child { color: #d4d4d8; }
-        .onyx-hero-inverse > .MuiContainer-root > p:last-child a { color: var(--onyx-accent) !important; }
+        .onyx-hero-inverse .onyx-hero-actions .btn:focus-visible {
+          outline: 2px solid #fff;
+          outline-offset: 4px;
+        }
         @media (max-width: 575.98px) {
           .onyx-hero.onyx-hero-inverse { padding: 4rem 0; }
         }

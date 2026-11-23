@@ -1,6 +1,7 @@
 import React from 'react';
+import Head from 'next/head';
 import Link from 'next/link';
-import { Badge, Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
+import { Badge, Card, CardBody, Col, Container, Row } from 'reactstrap';
 import BaseLayout from '../components/layouts/BaseLayouts';
 
 const pilotTiers = [
@@ -52,10 +53,7 @@ function PilotTiersSection() {
     <section className="onyx-muted-section">
       <Container className="onyx-pilot-section onyx-pilot-programs-section">
         <div className="text-center mb-4">
-          <h1 className="onyx-section-heading">Choose Your Pilot</h1>
-          <p className="onyx-section-copy">
-            Stress-test your AI product with disciplined, human-led business development. Each 90-day program puts your product in front of real people, creates live market conversations, and returns the feedback you need to build better.
-          </p>
+          <h2 className="onyx-section-heading">Choose Your Pilot</h2>
         </div>
         <Row className="justify-content-center g-4">
           {pilotTiers.map((tier) => (
@@ -70,8 +68,8 @@ function PilotTiersSection() {
                   <ul className="onyx-feature-list">
                     {tier.features.map((feature) => <li key={feature}>{feature}</li>)}
                   </ul>
-                  <Link href="https://calendly.com/softwaresmitty/discovery">
-                    <Button color="primary" block>Schedule Discovery Call</Button>
+                  <Link href="https://calendly.com/softwaresmitty/discovery" className="btn btn-primary w-100">
+                    Schedule Discovery Call
                   </Link>
                 </CardBody>
               </Card>
@@ -79,7 +77,7 @@ function PilotTiersSection() {
           ))}
         </Row>
         <p className="onyx-pilot-compensation text-center mb-0">
-          <strong>Compensation:</strong> Retainer plus commission on overall sales. Your terms are locked for the full 90-day pilot.
+          Both tiers use a retainer plus commission on overall sales. Your terms are locked for the full 90-day pilot.
         </p>
       </Container>
     </section>
@@ -89,6 +87,18 @@ function PilotTiersSection() {
 export default function NinetyDayPilotPage() {
   return (
     <BaseLayout>
+      <Head>
+        <title>90-Day Pilot for AI Teams | Onyx Creative Labs</title>
+        <meta name="description" content="Test demand for your AI product in 90 days with human-led outreach, qualified buyer conversations, and weekly market feedback from Onyx Creative Labs." />
+      </Head>
+      <section className="onyx-hero bg-white">
+        <Container>
+          <h1 className="onyx-hero-title">90-Day Pilot for AI Teams</h1>
+          <p className="onyx-hero-copy">
+            Put your AI product in front of potential buyers. Over 90 days, we run outreach, qualify interest, and report what buyers say about your offer, pricing, and product.
+          </p>
+        </Container>
+      </section>
       <PilotTiersSection />
 
       <Container className="onyx-pilot-section">

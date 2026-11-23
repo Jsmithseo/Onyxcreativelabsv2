@@ -62,7 +62,7 @@ export default function MyHeader() {
         </button>
 
         <div id="onyx-main-navigation" className={`onyx-nav-links ${isOpen ? 'is-open' : ''}`}>
-          <a className="onyx-nav-link" href="/90-day-pilot" onClick={closeMenus}>90-Day Pilot</a>
+          <a className="onyx-nav-link" href="/#fractional-bdr" onClick={closeMenus}>Fractional BDR</a>
           <a className="onyx-nav-link" href="/content-marketing" onClick={closeMenus}>Content Marketing</a>
           <a className="onyx-nav-link" href="/growth-plan" onClick={closeMenus}>Growth Plan</a>
           <a className="onyx-nav-link" href="/case-studies" onClick={closeMenus}>Case Studies</a>

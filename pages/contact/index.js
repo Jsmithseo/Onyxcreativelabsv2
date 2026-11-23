@@ -17,7 +17,7 @@ import { findReviewPlan, REVIEW_STARTUP_FEE, REVIEW_TRIAL_DAYS } from '../../lib
 
 const REVIEW_INTEREST = 'Onyx Reviews';
 const REVIEW_MESSAGE = 'I’d like to learn how Onyx Reviews can help us earn more customer feedback and grow our reputation.';
-const INTEREST_OPTIONS = ['CRO', 'Web Development', 'Email Marketing', 'Research & Strategy', 'Paid Marketing', REVIEW_INTEREST];
+const INTEREST_OPTIONS = ['Fractional BDR', 'CRO', 'Web Development', 'Email Marketing', 'Research & Strategy', 'Paid Marketing', REVIEW_INTEREST];
 
 function buildReviewMessage(plan, trial, locations) {
   const selectedPlan = findReviewPlan(plan);

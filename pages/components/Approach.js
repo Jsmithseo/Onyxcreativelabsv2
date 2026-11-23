@@ -7,7 +7,7 @@ export default function ExperimentationApproachSection() {
     <Container className="py-5">
       <Row className="align-items-center justify-content-center">
         <Col md="6" className="text-center text-md-start mb-4 mb-md-0">
-          <p className="onyx-products-eyebrow">Featured Product</p>
+          <p className="onyx-products-eyebrow">Onyx Reviews</p>
           <h2 className="onyx-section-heading">
             More Reviews, <span style={{ color: 'var(--onyx-accent)' }}>Less Chasing</span>
           </h2>

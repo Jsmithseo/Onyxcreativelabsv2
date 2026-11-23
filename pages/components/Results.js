@@ -1,51 +1,41 @@
 import React from 'react';
-import { Container, Row, Col, Button } from 'reactstrap';
-import Link from 'next/link';
+import { Container, Row, Col } from 'reactstrap';
 
-export default function EarlyResultsSection() {
-  const metrics = [
-    {
-      value: '90 Days',
-      label: 'to test real market demand',
-      color: '#18181b',
-    },
-    {
-      value: 'Targeted Outreach',
-      label: 'outreach, follow-up, and curated content',
-      color: '#3f3f46',
-    },
-    {
-      value: 'Market Signals',
-      label: 'learn what prospective customers respond to',
-      color: 'var(--onyx-accent)',
-    },
-    {
-      value: 'Clear Next Steps',
-      label: 'use learnings to guide informed decisions',
-      color: '#3f3f46',
-    },
-  ];
+const responsibilities = [
+  {
+    title: 'Prospecting',
+    description: 'Build a list of companies and decision-makers that fit your offer.',
+  },
+  {
+    title: 'Outreach and follow-up',
+    description: 'Make cold calls, send tailored emails, and follow up with prospects and inbound leads.',
+  },
+  {
+    title: 'Qualified meetings',
+    description: 'Confirm fit, book the meeting, and brief your team. We can also help with presentations and closing.',
+  },
+  {
+    title: 'Weekly reporting',
+    description: 'See outreach activity, buyer questions, and objections so you can refine who you target and what you say.',
+  },
+];
 
+export default function FractionalBdrOverview() {
   return (
-    <Container className="text-center py-5">
-      <h2 className="onyx-section-heading">
-        Our 90-Day Pilot <span style={{ color: 'var(--onyx-accent)' }}>in Action</span>
-      </h2>
-      <Row className="mt-5 justify-content-center">
-        {metrics.map((item, idx) => (
-          <Col key={idx} xs="6" md="3" className="mb-4 d-flex flex-column align-items-center">
-            <h3 className="onyx-metric-title" style={{ color: item.color }}>
-              {item.value}
-            </h3>
-            <p className="onyx-metric-copy">{item.label}</p>
-          </Col>
-        ))}
-      </Row>
-      <Link href="/90-day-pilot">
-      <Button color="primary" size="lg" style={{ marginTop: '2rem', fontWeight: '600' }}>
-        Test Your Market
-      </Button>
-      </Link>
-    </Container>
+    <section id="fractional-bdr" className="onyx-muted-section" aria-labelledby="fractional-bdr-heading">
+      <Container className="py-5">
+        <h2 id="fractional-bdr-heading" className="onyx-section-heading text-center">What your fractional BDR handles</h2>
+        <Row className="g-4 mt-3">
+          {responsibilities.map(({ title, description }) => (
+            <Col key={title} sm="6" lg="3">
+              <div className="onyx-deliverable h-100">
+                <h3>{title}</h3>
+                <p className="text-body-secondary">{description}</p>
+              </div>
+            </Col>
+          ))}
+        </Row>
+      </Container>
+    </section>
   );
 }

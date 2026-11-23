@@ -9,12 +9,14 @@ const Footer = () => {
           <Col md="4">
             <h5>About Onyx Creative Labs</h5>
             <p>
-              Onyx Creative Labs helps businesses clarify their value, build meaningful momentum, and create lasting demand. This helps them deepen connections, grow with confidence, and move their vision forward.
+              Onyx Creative Labs provides fractional business development for lean B2B teams, from prospecting and outreach to qualified sales meetings.
             </p>
           </Col>
           <Col md="4">
             <h5>Quick Links</h5>
             <ul className="list-unstyled">
+            <li><a href="/#fractional-bdr" className="text-white">Fractional BDR</a></li>
+            <li><a href="/90-day-pilot" className="text-white">90-Day Pilot</a></li>
             <li><a href="/growth-plan" className="text-white">Growth Plan</a></li>
             <li><a href="/content-marketing" className="text-white">Content Marketing</a></li>
             <li><a href="/partners" className="text-white">Partners</a></li>
