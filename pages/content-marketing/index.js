@@ -46,6 +46,14 @@ const storyExamples = [
     poster: '/vacation-bike-rentals-still.jpg',
     posterPosition: '50% 24%',
   },
+  {
+    title: 'Roll-b Ear Swab',
+    category: 'Product demo',
+    copy: 'A short social video that shows the rolling sleeve in a real first-use demo.',
+    videoSrc: '/videos/roll-b-product-demo.mp4',
+    poster: '/videos/roll-b-product-demo.jpg',
+    posterFit: 'contain',
+  },
 ];
 
 function StorytellingCard({ reel }) {
@@ -80,7 +88,7 @@ function StorytellingCard({ reel }) {
               alt=""
               className="w-100 h-100"
               loading="lazy"
-              style={{ objectFit: 'cover', objectPosition: reel.posterPosition || '50% 50%' }}
+              style={{ objectFit: reel.posterFit || 'cover', objectPosition: reel.posterPosition || '50% 50%' }}
             />
             <span className="storytelling-poster-shade" aria-hidden="true" />
             <span className="storytelling-play" aria-hidden="true">▶</span>
@@ -191,13 +199,12 @@ export default function ContentMarketingPage() {
           <p className="onyx-marketing-eyebrow">Storytelling examples</p>
           <h2 className="fw-bold">See the story in motion.</h2>
           <p className="text-muted mb-0">
-            These three stories bring the people, purpose, and experience behind
-            a product into focus. Watch how each one gives customers a way to connect.
+            Watch how we bring products, people, and experiences to life on video.
           </p>
         </div>
         <Row className="justify-content-center g-4">
           {storyExamples.map((example) => (
-            <Col md="6" lg="4" key={example.videoSrc}>
+            <Col md="6" key={example.videoSrc}>
               <StorytellingCard reel={example} />
             </Col>
           ))}
