@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { Button, Col, Container, Row } from 'reactstrap';
+import { Col, Container, Row } from 'reactstrap';
 import BaseLayout from '../components/layouts/BaseLayouts';
 
 const contentSections = [
@@ -45,14 +45,6 @@ const storyExamples = [
     videoSrc: '/videos/vacation-bike-rentals-story.mp4',
     poster: '/vacation-bike-rentals-still.jpg',
     posterPosition: '50% 24%',
-  },
-  {
-    title: 'Roll-b Ear Swab',
-    category: 'Product demo',
-    copy: 'A short social video that shows the rolling sleeve in a real first-use demo.',
-    videoSrc: '/videos/roll-b-product-demo.mp4',
-    poster: '/videos/roll-b-product-demo.jpg',
-    posterFit: 'contain',
   },
   {
     title: 'Roll-b Founder Story',
@@ -193,6 +185,23 @@ export default function ContentMarketingPage() {
         </Container>
       </section>
 
+      <Container tag="section" className="pt-4 pb-3" aria-labelledby="storytelling-examples-heading">
+        <div className="text-center mx-auto mb-4" style={{ maxWidth: '680px' }}>
+          <p className="onyx-marketing-eyebrow">Storytelling examples</p>
+          <h2 className="fw-bold" id="storytelling-examples-heading">See the story in motion.</h2>
+          <p className="text-muted mb-0">
+            Watch how we bring products, people, and experiences to life on video.
+          </p>
+        </div>
+        <Row className="justify-content-center g-4">
+          {storyExamples.map((example) => (
+            <Col md="6" xl="3" key={example.videoSrc}>
+              <StorytellingCard reel={example} />
+            </Col>
+          ))}
+        </Row>
+      </Container>
+
       <article className="onyx-marketing-body">
         {contentSections.map((section) => (
           <section className="onyx-marketing-section" key={section.heading}>
@@ -203,23 +212,6 @@ export default function ContentMarketingPage() {
       </article>
 
       <Container className="pb-5">
-        <div className="text-center mx-auto mb-4" style={{ maxWidth: '680px' }}>
-          <p className="onyx-marketing-eyebrow">Storytelling examples</p>
-          <h2 className="fw-bold">See the story in motion.</h2>
-          <p className="text-muted mb-0">
-            Watch how we bring products, people, and experiences to life on video.
-          </p>
-        </div>
-        <Row className="justify-content-center g-4">
-          {storyExamples.map((example) => (
-            <Col md="6" lg="4" key={example.videoSrc}>
-              <StorytellingCard reel={example} />
-            </Col>
-          ))}
-        </Row>
-      </Container>
-
-      <Container className="pb-5">
         <div className="onyx-marketing-cta">
           <h2>Let&apos;s keep your story moving.</h2>
           <p>
@@ -227,9 +219,7 @@ export default function ContentMarketingPage() {
             your story rolling out, and gets better as we learn what connects
             with your audience.
           </p>
-          <Link href="/contact?service=content-marketing" passHref legacyBehavior>
-            <Button color="success" size="lg">Tell Your Story</Button>
-          </Link>
+          <Link href="/contact?service=content-marketing" className="btn btn-lg">Tell Your Story</Link>
         </div>
       </Container>
 
@@ -279,14 +269,29 @@ export default function ContentMarketingPage() {
           margin: 0 0 1.5rem;
         }
         .onyx-marketing-cta {
-          background: var(--onyx-accent-soft);
+          background: var(--onyx-accent);
+          color: var(--onyx-on-accent);
           margin: 0 auto;
           max-width: 950px;
           padding: 3rem 2rem;
           text-align: center;
         }
-        .onyx-marketing-cta h2 { font-size: 2rem; margin: 0 0 1rem; }
+        .onyx-marketing-cta h2 { color: inherit; font-size: 2rem; margin: 0 0 1rem; }
         .onyx-marketing-cta p { line-height: 1.7; margin: 0 auto 1.5rem; max-width: 700px; }
+        .onyx-marketing-cta .btn {
+          background: var(--onyx-on-accent) !important;
+          border-color: var(--onyx-on-accent) !important;
+          color: var(--onyx-accent-text) !important;
+        }
+        .onyx-marketing-cta .btn:hover,
+        .onyx-marketing-cta .btn:focus-visible {
+          background: transparent !important;
+          color: var(--onyx-on-accent) !important;
+        }
+        .onyx-marketing-cta .btn:focus-visible {
+          outline: 2px solid var(--onyx-on-accent);
+          outline-offset: 4px;
+        }
         @media (max-width: 575.98px) {
           .onyx-marketing-hero { padding: 3rem 0; }
           .onyx-marketing-body { padding-top: 3rem; }
