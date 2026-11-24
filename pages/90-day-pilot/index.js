@@ -1,7 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { Badge, Card, CardBody, Col, Container, Row } from 'reactstrap';
+import { Card, CardBody, Col, Container, Row } from 'reactstrap';
 import BaseLayout from '../components/layouts/BaseLayouts';
 
 const pilotInquiryHref = '/contact?service=90-day-pilot';
@@ -21,12 +21,10 @@ const pilotTiers = [
     id: 'focused_validation',
     name: 'Focused Validation',
     volume: '4,000',
-    label: 'outreach activities each month',
-    description: 'For AI teams that need focused market feedback and a clear view of where to refine their offer.',
+    description: 'Refine your offer with focused feedback from qualified buyers.',
     features: [
-      'Human-led cold calling and tailored warm-email outreach to qualified prospects or partners',
-      'Inbound lead follow-up from your existing campaigns',
-      'Social network response management',
+      'Human-led calls and tailored emails to qualified prospects or partners',
+      'Follow-up with inbound leads and responses on social channels',
       'Shared activity dashboard and weekly reporting',
       'Market feedback on pricing, positioning, and requested features',
     ],
@@ -35,15 +33,13 @@ const pilotTiers = [
     id: 'expanded_validation',
     name: 'Expanded Validation',
     volume: '8,000',
-    label: 'outreach activities each month',
-    description: 'For AI teams that need a broader market test, higher activity volume, and faster learning loops.',
+    description: 'Test demand across a broader market and hear from more buyers.',
     featured: true,
     features: [
-      'Everything in Focused Validation at expanded weekly activity volume',
-      'More human-led calls, tailored warm emails, and social-network follow-up',
-      'Inbound lead follow-up and response management',
-      'Shared dashboard, weekly reporting, and OKR tracking',
-      'Deeper market analysis across objections, feature demand, and pricing signals',
+      'Everything in Focused Validation',
+      'More human-led calls, tailored emails, and social follow-up',
+      'OKR tracking alongside weekly reporting',
+      'Deeper analysis of objections, feature requests, and pricing feedback',
     ],
   },
 ];
@@ -72,18 +68,19 @@ function PilotTiersSection() {
         <Row className="justify-content-center g-4">
           {pilotTiers.map((tier) => (
             <Col key={tier.id} lg="5">
-              <Card className={`onyx-pilot-card h-100 ${tier.featured ? 'onyx-pilot-card-featured' : ''}`}>
-                <CardBody className="d-flex flex-column p-4 p-md-5">
-                  {tier.featured && <Badge className="onyx-pilot-badge align-self-start mb-3">Higher-volume pilot</Badge>}
-                  <h3>{tier.name}</h3>
-                  <div className="onyx-pilot-volume">{tier.volume}</div>
-                  <p className="onyx-pilot-volume-label">{tier.label}</p>
-                  <p className="text-muted">{tier.description}</p>
+              <Card tag="article" aria-labelledby={`${tier.id}-heading`} className={`onyx-pilot-card h-100 ${tier.featured ? 'onyx-pilot-card-featured' : ''}`}>
+                <CardBody className="d-flex flex-column p-4">
+                  <h3 id={`${tier.id}-heading`}>{tier.name}</h3>
+                  <p className="onyx-pilot-card-description">{tier.description}</p>
+                  <p className="onyx-pilot-metric">
+                    <strong className="onyx-pilot-volume">{tier.volume}</strong>
+                    <span className="onyx-pilot-volume-label">outreach activities per month</span>
+                  </p>
                   <ul className="onyx-feature-list">
                     {tier.features.map((feature) => <li key={feature}>{feature}</li>)}
                   </ul>
-                  <a href={bookingHref(tier.id)} className="btn btn-primary w-100">
-                    Schedule Discovery Call
+                  <a href={bookingHref(tier.id)} className="btn btn-primary w-100 mt-auto">
+                    Discuss {tier.name}
                   </a>
                 </CardBody>
               </Card>
