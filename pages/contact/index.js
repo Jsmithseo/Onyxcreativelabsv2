@@ -186,6 +186,10 @@ export default function ContactFormPage() {
                     <Label for="email">Email address</Label>
                     <Input type="email" name="email" id="email" autoComplete="email" maxLength={320} required value={formData.email} onChange={handleChange} />
                   </FormGroup>
+                  <FormGroup>
+                    <Label for="phone">Phone <span className="text-muted">(optional)</span></Label>
+                    <Input type="tel" name="phone" id="phone" autoComplete="tel" value={formData.phone} onChange={handleChange} />
+                  </FormGroup>
                   <details className="mb-4">
                     <summary className="fw-semibold">Add details <span className="text-muted fw-normal">(optional)</span></summary>
                     <div className="pt-3">
@@ -200,10 +204,6 @@ export default function ContactFormPage() {
                       <FormGroup>
                         <Label for="website">Website</Label>
                         <Input type="text" name="website" id="website" autoComplete="url" inputMode="url" value={formData.website} onChange={handleChange} />
-                      </FormGroup>
-                      <FormGroup>
-                        <Label for="phone">Phone</Label>
-                        <Input type="tel" name="phone" id="phone" autoComplete="tel" value={formData.phone} onChange={handleChange} />
                       </FormGroup>
                       <FormGroup tag="fieldset" aria-describedby="contact-interest-help" className="mb-0">
                         <legend className="fs-6 mb-1">Which services are you interested in?</legend>
