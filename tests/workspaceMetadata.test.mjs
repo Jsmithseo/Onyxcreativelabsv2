@@ -98,6 +98,37 @@ test('the private inquiry inbox keeps its records separate and pages from newest
   } finally { metadata.useTestDatabase(null); await db.close(); }
 });
 
+test('website metrics atomically count anonymous inquiry stages and ignore history beyond 30 days', async () => {
+  const topicsUrl = new URL('../lib/websiteInquiryTopics.mjs', import.meta.url).href;
+  const source = (await readFile(new URL('../lib/websiteInquiryMetrics.mjs', import.meta.url), 'utf8'))
+    .replace("'./workspaceMetadata.mjs'", JSON.stringify(metadataUrl))
+    .replace("'./websiteInquiryTopics.mjs'", JSON.stringify(topicsUrl));
+  const { countInquiryStage, countAcceptedInquiry, getInquiryMetrics } = await import(asModule(source));
+  const db = new PGlite();
+  await db.exec(workspaceMetadataSchema);
+  metadata.useTestDatabase(db);
+  try {
+    const today = new Date();
+    const old = new Date(today.getTime() - 31 * 86400000);
+    await countInquiryStage('general', 'viewed', old);
+    await Promise.all(Array.from({ length: 4 }, () => countInquiryStage('onyx-reviews', 'viewed', today)));
+    await countInquiryStage('onyx-reviews', 'started', today);
+    await assert.rejects(countInquiryStage('unknown@example.test', 'viewed', today), /Invalid inquiry metric/);
+    const lead = {
+      source: 'Website contact inquiry',
+      pageUri: 'https://www.onyxcreativelabs.com/contact?service=growth-plan&product=reviews&ignored=person@example.test',
+      email: 'person@example.test',
+    };
+    await countAcceptedInquiry(lead, { headers: { host: 'preview.vercel.app' } });
+    await countAcceptedInquiry(lead, { headers: { host: 'www.onyxcreativelabs.com' } });
+    assert.deepEqual((await getInquiryMetrics(today)).rows, [
+      { id: 'onyx-reviews', name: 'Onyx Reviews', viewed: 4, started: 1, accepted: 1 },
+    ]);
+    const settings = createWorkspaceMetadataStore(db);
+    assert.doesNotMatch(JSON.stringify(await settings.list('website-inquiry-metrics:')), /person@example|ignored|pageUri/);
+  } finally { metadata.useTestDatabase(null); await db.close(); }
+});
+
 test('the admin roster shows a load error instead of zero contractors and recovers on retry', async () => {
   const source = await readFile(new URL('../public/dialer/admin/app.js', import.meta.url), 'utf8');
   const controls = new Map();

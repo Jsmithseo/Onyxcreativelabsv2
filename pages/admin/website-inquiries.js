@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import WebsiteInquiryMetrics from '../../components/WebsiteInquiryMetrics';
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {
   dateStyle: 'medium',
@@ -51,6 +52,8 @@ export default function WebsiteInquiries() {
       </Head>
       <Link href="/admin">Back to Onyx Admin</Link>
       <h1 className="mt-4">Website inquiries</h1>
+      <WebsiteInquiryMetrics />
+      <h2 className="h5">Saved inquiries</h2>
       <p className="text-muted">These inquiries were saved here when the email notification could not be sent.</p>
       {unavailable && <p className="alert alert-danger" role="alert">The inbox is temporarily unavailable. Refresh the page to try again.</p>}
       {!unavailable && !result && <p role="status">Loading inquiries…</p>}
@@ -58,7 +61,7 @@ export default function WebsiteInquiries() {
       {inquiries.map((inquiry) => (
         <article className="card mb-3" key={inquiry.id}>
           <div className="card-body text-break">
-            <h2 className="h5 mb-1">{inquiry.name}</h2>
+            <h3 className="h5 mb-1">{inquiry.name}</h3>
             <p className="small text-muted mb-2">
               {inquiry.source} · <time dateTime={inquiry.receivedAt}>{dateFormat.format(new Date(inquiry.receivedAt))} PT</time>
             </p>

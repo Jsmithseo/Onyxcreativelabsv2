@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import {
@@ -17,8 +17,8 @@ import BaseLayout from '../components/layouts/BaseLayouts';
 import { useRouter } from 'next/router';
 import { findReviewPlan, REVIEW_STARTUP_FEE, REVIEW_TRIAL_DAYS } from '../../lib/reviewsPricing';
 import { trackInquiryConversion } from '../../lib/websiteConversion';
+import { INTEREST_OPTIONS, PUBLIC_WEBSITE_HOSTS, REVIEW_INTEREST, inquiryTopic } from '../../lib/websiteInquiryTopics.mjs';
 
-const REVIEW_INTEREST = 'Onyx Reviews';
 const REVIEW_MESSAGE = 'I’d like to learn how Onyx Reviews can help us earn more customer feedback and grow our reputation.';
 const GENERAL_INQUIRY_COPY = {
   heading: 'Let’s talk about your project',
@@ -38,18 +38,16 @@ const INQUIRY_COPY = {
     description: 'Send us your contact details and we’ll email you to discuss your product, target buyers, and pilot options.',
   },
 };
-const INTEREST_OPTIONS = [
-  ['fractional-bdr', 'Fractional BDR'],
-  ['90-day-pilot', '90-Day Pilot'],
-  ['content-marketing', 'Content Marketing'],
-  ['growth-plan', 'Growth Plan'],
-  ['onyx-reviews', REVIEW_INTEREST],
-  ['cro', 'CRO'],
-  ['web-development', 'Web Development'],
-  ['email-marketing', 'Email Marketing'],
-  ['research-strategy', 'Research & Strategy'],
-  ['paid-marketing', 'Paid Marketing'],
-];
+function sendInquiryMetric(topic, stage) {
+  if (!PUBLIC_WEBSITE_HOSTS.includes(window.location.hostname)) return;
+  fetch('/api/website-inquiry-metric', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ topic, stage }),
+    credentials: 'omit',
+    keepalive: true,
+  }).catch(() => {});
+}
 
 function buildReviewMessage(plan, trial, locations) {
   const selectedPlan = findReviewPlan(plan);
@@ -91,19 +89,35 @@ export default function ContactFormPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const submissionInProgress = useRef(false);
+  const measuredForm = useRef({ topic: null, started: false });
+  const metricTopic = inquiryTopic(router.query);
   const interest = interestOverride ?? (selectedInterest ? [selectedInterest] : []);
   const reviewPlan = isReviewsInquiry ? findReviewPlan(selectedPlan) : null;
   const serviceLabel = [selectedInterest, reviewPlan?.name].filter(Boolean).join(' · ');
   const { heading, description } = INQUIRY_COPY[isReviewsInquiry ? 'reviews' : serviceId] || GENERAL_INQUIRY_COPY;
 
+  useEffect(() => {
+    if (!router.isReady || measuredForm.current.topic === metricTopic) return;
+    measuredForm.current = { topic: metricTopic, started: false };
+    sendInquiryMetric(metricTopic, 'viewed');
+  }, [router.isReady, metricTopic]);
+
+  const recordFormStart = () => {
+    if (!router.isReady || measuredForm.current.started) return;
+    measuredForm.current.started = true;
+    sendInquiryMetric(metricTopic, 'started');
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (value.trim()) recordFormStart();
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const handleInterestChange = (e) => {
     const { value, checked } = e.target;
+    recordFormStart();
     setInterestOverride(checked ? [...interest, value] : interest.filter((service) => service !== value));
   };
 
@@ -119,6 +133,7 @@ export default function ContactFormPage() {
     }
 
     submissionInProgress.current = true;
+    recordFormStart();
     setSubmitting(true);
     setErrors({});
 

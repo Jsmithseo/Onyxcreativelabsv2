@@ -107,6 +107,30 @@ test('an inquiry is shown as a failure when email, CRM and the private inbox all
   assert.match(res.body.error, /try again/);
 });
 
+test('only accepted inquiries reach the metrics callback and a metrics error leaves acceptance intact', async () => {
+  let counted = 0;
+  const handler = createWebsiteLeadHandler({
+    sendEmail: async () => { throw new Error('Provider unavailable'); },
+    fetchImpl: async () => ({ ok: false, status: 400 }),
+    saveUndeliveredInquiry: async (lead) => {
+      if (lead.source === 'Storage failure') throw new Error('Storage unavailable');
+    },
+    recordAcceptedInquiry: async () => {
+      counted++;
+      throw new Error('Metrics unavailable');
+    },
+    logger: quiet,
+  });
+  const failed = response();
+  await handler({ method: 'POST', body: { ...inquiry, source: 'Storage failure' } }, failed);
+  assert.equal(failed.statusCode, 502);
+  assert.equal(counted, 0);
+  const saved = response();
+  await handler({ method: 'POST', body: inquiry }, saved);
+  assert.equal(saved.statusCode, 200);
+  assert.equal(counted, 1);
+});
+
 test('invalid submissions and unsupported methods cannot send email or create CRM records', async () => {
   let effects = 0;
   const handler = createWebsiteLeadHandler({ sendEmail: async () => { effects++; }, fetchImpl: async () => { effects++; }, logger: quiet });
