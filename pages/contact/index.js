@@ -20,6 +20,24 @@ import { trackInquiryConversion } from '../../lib/websiteConversion';
 
 const REVIEW_INTEREST = 'Onyx Reviews';
 const REVIEW_MESSAGE = 'I’d like to learn how Onyx Reviews can help us earn more customer feedback and grow our reputation.';
+const GENERAL_INQUIRY_COPY = {
+  heading: 'Let’s talk about your project',
+  description: 'Send us your contact details and we’ll email you to discuss how we can help.',
+};
+const INQUIRY_COPY = {
+  reviews: {
+    heading: 'Request a review growth call',
+    description: 'Share your contact details and we’ll email you to discuss a review plan for your business.',
+  },
+  'fractional-bdr': {
+    heading: 'Talk to us about outbound',
+    description: 'We’ll email you to discuss your sales goals and how Onyx can help you reach more qualified prospects.',
+  },
+  '90-day-pilot': {
+    heading: 'Ask about the 90-Day Pilot',
+    description: 'Send us your contact details and we’ll email you to discuss your product, target buyers, and pilot options.',
+  },
+};
 const INTEREST_OPTIONS = [
   ['fractional-bdr', 'Fractional BDR'],
   ['90-day-pilot', '90-Day Pilot'],
@@ -54,10 +72,8 @@ function buildReviewMessage(plan, trial, locations) {
 export default function ContactFormPage() {
   const router = useRouter();
   const isReviewsInquiry = router.query.product === 'reviews';
-  const isOutboundInquiry = router.query.service === 'fractional-bdr';
-  const selectedInterest = isReviewsInquiry
-    ? REVIEW_INTEREST
-    : INTEREST_OPTIONS.find(([id]) => id === router.query.service)?.[1];
+  const [serviceId, serviceName] = INTEREST_OPTIONS.find(([id]) => id === router.query.service) || [];
+  const selectedInterest = isReviewsInquiry ? REVIEW_INTEREST : serviceName;
   const selectedPlan = typeof router.query.plan === 'string' ? router.query.plan : '';
   const selectedTrial = typeof router.query.trial === 'string' ? router.query.trial : '';
   const selectedLocations = typeof router.query.locations === 'string' ? router.query.locations : '';
@@ -78,14 +94,7 @@ export default function ContactFormPage() {
   const interest = interestOverride ?? (selectedInterest ? [selectedInterest] : []);
   const reviewPlan = isReviewsInquiry ? findReviewPlan(selectedPlan) : null;
   const serviceLabel = [selectedInterest, reviewPlan?.name].filter(Boolean).join(' · ');
-  const heading = isReviewsInquiry
-    ? 'Request a review growth call'
-    : isOutboundInquiry ? 'Talk to us about outbound' : 'Let’s talk about your project';
-  const description = isReviewsInquiry
-    ? 'Share your contact details and we’ll email you to discuss a review plan for your business.'
-    : isOutboundInquiry
-      ? 'We’ll email you to discuss your sales goals and how Onyx can help you reach more qualified prospects.'
-      : 'Send us your contact details and we’ll email you to discuss how we can help.';
+  const { heading, description } = INQUIRY_COPY[isReviewsInquiry ? 'reviews' : serviceId] || GENERAL_INQUIRY_COPY;
 
   const handleChange = (e) => {
     const { name, value } = e.target;

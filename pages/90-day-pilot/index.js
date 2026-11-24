@@ -4,8 +4,21 @@ import Link from 'next/link';
 import { Badge, Card, CardBody, Col, Container, Row } from 'reactstrap';
 import BaseLayout from '../components/layouts/BaseLayouts';
 
+const pilotInquiryHref = '/contact?service=90-day-pilot';
+
+function bookingHref(placement) {
+  const tracking = new URLSearchParams({
+    utm_source: 'onyx_website',
+    utm_medium: 'website',
+    utm_campaign: '90_day_pilot',
+    utm_content: placement,
+  });
+  return `https://calendly.com/softwaresmitty/discovery?${tracking}`;
+}
+
 const pilotTiers = [
   {
+    id: 'focused_validation',
     name: 'Focused Validation',
     volume: '4,000',
     label: 'outreach activities each month',
@@ -19,6 +32,7 @@ const pilotTiers = [
     ],
   },
   {
+    id: 'expanded_validation',
     name: 'Expanded Validation',
     volume: '8,000',
     label: 'outreach activities each month',
@@ -50,14 +64,14 @@ const processSteps = [
 
 function PilotTiersSection() {
   return (
-    <section className="onyx-muted-section">
+    <section id="pilot-options" className="onyx-muted-section" aria-labelledby="pilot-options-heading">
       <Container className="onyx-pilot-section onyx-pilot-programs-section">
         <div className="text-center mb-4">
-          <h2 className="onyx-section-heading">Choose Your Pilot</h2>
+          <h2 className="onyx-section-heading" id="pilot-options-heading">Choose Your Pilot</h2>
         </div>
         <Row className="justify-content-center g-4">
           {pilotTiers.map((tier) => (
-            <Col key={tier.name} lg="5">
+            <Col key={tier.id} lg="5">
               <Card className={`onyx-pilot-card h-100 ${tier.featured ? 'onyx-pilot-card-featured' : ''}`}>
                 <CardBody className="d-flex flex-column p-4 p-md-5">
                   {tier.featured && <Badge className="onyx-pilot-badge align-self-start mb-3">Higher-volume pilot</Badge>}
@@ -68,9 +82,9 @@ function PilotTiersSection() {
                   <ul className="onyx-feature-list">
                     {tier.features.map((feature) => <li key={feature}>{feature}</li>)}
                   </ul>
-                  <Link href="https://calendly.com/softwaresmitty/discovery" className="btn btn-primary w-100">
+                  <a href={bookingHref(tier.id)} className="btn btn-primary w-100">
                     Schedule Discovery Call
-                  </Link>
+                  </a>
                 </CardBody>
               </Card>
             </Col>
@@ -96,6 +110,13 @@ export default function NinetyDayPilotPage() {
           <h1 className="onyx-hero-title">90-Day Pilot for AI Teams</h1>
           <p className="onyx-hero-copy">
             Put your AI product in front of potential buyers. Over 90 days, we run outreach, qualify interest, and report what buyers say about your offer, pricing, and product.
+          </p>
+          <div className="onyx-hero-actions flex-wrap gap-3">
+            <a href={bookingHref('hero')} className="btn btn-primary btn-lg">Book a 30-minute discovery call</a>
+            <a href="#pilot-options" className="btn btn-outline-dark btn-lg">Compare pilot options</a>
+          </div>
+          <p className="text-center mt-3 mb-0">
+            <Link href={pilotInquiryHref}>Ask about the pilot by email</Link>
           </p>
         </Container>
       </section>
@@ -167,6 +188,10 @@ export default function NinetyDayPilotPage() {
         <p className="onyx-section-copy">
           A clearer understanding of your market, the feedback behind it, and a practical direction for your product. You will see the objections, pricing questions, feature requests, and engagement patterns that show what to improve next.
         </p>
+        <div className="onyx-hero-actions flex-wrap gap-3">
+          <a href={bookingHref('bottom')} className="btn btn-primary btn-lg">Book a discovery call</a>
+          <Link href={pilotInquiryHref} className="btn btn-outline-dark btn-lg">Ask about the pilot</Link>
+        </div>
       </Container>
     </BaseLayout>
   );
