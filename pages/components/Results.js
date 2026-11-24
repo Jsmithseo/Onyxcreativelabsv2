@@ -1,6 +1,14 @@
 import React from 'react';
 import { Container, Row, Col } from 'reactstrap';
 
+const discoveryTracking = new URLSearchParams({
+  utm_source: 'onyx_website',
+  utm_medium: 'website',
+  utm_campaign: 'fractional_bdr',
+  utm_content: 'homepage_service_overview',
+});
+const discoveryHref = `https://calendly.com/softwaresmitty/discovery?${discoveryTracking}`;
+
 const responsibilities = [
   {
     title: 'Prospecting',
@@ -35,6 +43,11 @@ export default function FractionalBdrOverview() {
             </Col>
           ))}
         </Row>
+        <div className="text-center mt-4">
+          <a href={discoveryHref} className="btn btn-lg">
+            Book a 30-minute discovery call
+          </a>
+        </div>
       </Container>
     </section>
   );
