@@ -1373,6 +1373,49 @@ function followLabel(lead) {
   return `In ${Math.round(minutes / 60)}h`;
 }
 
+function googleReviewProfile(lead) {
+  if (lead.campaign !== "onyx-review-bay-area-1") return null;
+
+  const notes = String(lead.notes || "");
+  const listing = notes.match(/^Google listing:[ \t]*(.+)$/im)?.[1]?.trim();
+  const reviews = notes.match(/^Google reviews:[ \t]*([\d,]+)[ \t]*$/im)?.[1];
+  const count = reviews ? Number(reviews.replaceAll(",", "")) : NaN;
+  const reviewCount = Number.isSafeInteger(count) ? count : null;
+  const checkedAt = new Date(notes.match(/^Verified:[ \t]*(.+)$/im)?.[1]?.trim() || "");
+  let url = "";
+  try {
+    const parsed = new URL(listing);
+    if (["https://www.google.com", "https://google.com"].includes(parsed.origin) && parsed.pathname.startsWith("/maps/")) {
+      url = parsed.href;
+    }
+  } catch {
+    // Some leads may have no saved listing.
+  }
+
+  return url || reviewCount !== null ? { url, reviewCount, checkedAt } : null;
+}
+
+function googleReviewCountLabel(count) {
+  return `${count.toLocaleString("en-US")} Google review${count === 1 ? "" : "s"}`;
+}
+
+function renderGoogleReviewProfile(lead) {
+  const profile = googleReviewProfile(lead);
+  const section = document.getElementById("leadGoogleProfile");
+  section.hidden = !profile;
+  if (!profile) return;
+
+  const link = document.getElementById("leadGoogleListing");
+  link.hidden = !profile.url;
+  if (profile.url) link.href = profile.url;
+  else link.removeAttribute("href");
+  const checked = Number.isNaN(profile.checkedAt.valueOf()) ? "" : ` · Checked ${profile.checkedAt.toLocaleDateString("en-US", {
+    month:"short", day:"numeric", year:"numeric", timeZone:"America/Los_Angeles",
+  })}`;
+  const count = profile.reviewCount === null ? "Google review count unavailable" : googleReviewCountLabel(profile.reviewCount);
+  document.getElementById("leadGoogleReviewCount").textContent = count + checked;
+}
+
 function renderRows() {
   const ordered = orderedLeads();
   const start = currentPage * pageSize;
@@ -1384,7 +1427,11 @@ function renderRows() {
   } else {
     rows.innerHTML = page.map((lead, index) => {
       const due = lead.followAt !== null && lead.followAt <= Date.now();
-      return `<button class="grid grid-row ${lead.id === selectedIndex ? "active" : ""} ${start + index === 0 ? "next" : ""}" data-index="${lead.id}"><span class="row-number">${start + index + 1}</span><span class="name">${escapeHtml(lead.name)}</span><span>${escapeHtml(lead.company)}</span><span>${escapeHtml(formatPhone(lead.phone))}</span><span>${escapeHtml(lead.zone)}</span><span class="${due ? "due" : ""}">${followLabel(lead)}</span><span class="status">${escapeHtml(lead.stage)}</span></button>`;
+      const reviewCount = googleReviewProfile(lead)?.reviewCount;
+      const company = reviewCount == null
+        ? `<span>${escapeHtml(lead.company)}</span>`
+        : `<span class="company-with-reviews"><span>${escapeHtml(lead.company)}</span><small>${googleReviewCountLabel(reviewCount)}</small></span>`;
+      return `<button class="grid grid-row ${lead.id === selectedIndex ? "active" : ""} ${start + index === 0 ? "next" : ""}" data-index="${lead.id}"><span class="row-number">${start + index + 1}</span><span class="name">${escapeHtml(lead.name)}</span>${company}<span>${escapeHtml(formatPhone(lead.phone))}</span><span>${escapeHtml(lead.zone)}</span><span class="${due ? "due" : ""}">${followLabel(lead)}</span><span class="status">${escapeHtml(lead.stage)}</span></button>`;
     }).join("");
   }
   document.querySelectorAll(".grid-row").forEach((row) => {
@@ -1429,6 +1476,7 @@ function selectLead(index) {
   linkedin.toggleAttribute("aria-disabled", !linkedinUrl);
   linkedin.onclick = (event) => { if (!linkedinUrl) event.preventDefault(); };
   document.getElementById("notes").value = lead.notes;
+  renderGoogleReviewProfile(lead);
   document.getElementById("disposition").value = lead.disposition || "";
   const customScript = String(lead.notes || "").match(/(?:^|\n)Call script:\s*\n?([\s\S]*?)(?=\n(?:Source|Verified|Industry):|$)/i)?.[1]?.trim();
   const script = callScripts[lead.campaign] || (lead.campaign.startsWith("onyx-review-") ? callScripts.reviews : callScripts.school);

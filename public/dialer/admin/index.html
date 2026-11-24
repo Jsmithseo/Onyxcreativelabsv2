@@ -151,6 +151,9 @@
       .grid-row span { min-width:0; height:48px; padding:0 10px; display:flex; align-items:center; border-right:1px solid var(--line); font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .grid-row .row-number { justify-content:center; color:#9a9a9a; padding:0; font-size:12px; }
       .grid-row .name { font-weight:650; }
+      .grid-row .company-with-reviews { flex-direction:column; align-items:stretch; justify-content:center; gap:3px; }
+      .grid-row .company-with-reviews > span { display:block; height:auto; padding:0; border:0; }
+      .company-with-reviews small { color:#454545; font-size:11px; line-height:1.2; }
       .status { display:inline-flex!important; align-items:center!important; height:23px!important; width:max-content; align-self:center; margin-left:9px; padding:0 8px!important; border:0!important; border-radius:999px; background:#eef6f1; color:var(--green); font-size:11px!important; }
       .due { color:#a23a3a; font-weight:700; }
       .empty-state { min-height:120px; display:grid; place-items:center; padding:24px; color:var(--muted); font-size:14px; }
@@ -180,6 +183,9 @@
       .overview-list li:last-child { border-bottom:0; } .overview-list li::before { content:"•"; position:absolute; left:1px; color:var(--green); } .overview-list strong { margin-right:4px; }
       .section { padding-top:20px; margin-top:20px; border-top:1px solid var(--line); }
       .section-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:9px; }
+      .lead-google-profile .section-head { flex-wrap:wrap; gap:8px 12px; margin-bottom:5px; }
+      .lead-google-profile a { color:#1558ac; font-size:13px; }
+      .lead-google-profile p { margin:0; color:#454545; font-size:13px; }
       h3 { margin:0; font-size:13px; } .saved { color:var(--muted); font-size:11px; }
       textarea { width:100%; min-height:102px; resize:vertical; border:1px solid var(--line); border-radius:6px; padding:10px; color:var(--ink); background:white; font-size:13px; line-height:1.5; }
       select, input { width:100%; height:38px; border:1px solid var(--line); border-radius:6px; padding:0 9px; color:var(--ink); background:white; font-size:13px; }
@@ -307,6 +313,13 @@
             <div class="call-state" id="callState"><span id="callTimer">Calling · 00:00</span><button id="endCall">End call</button></div>
             <div class="onyx-call-recording" id="trainingRecording" hidden></div>
           </div>
+          <section class="section lead-google-profile" id="leadGoogleProfile" aria-labelledby="leadGoogleProfileTitle" hidden>
+            <div class="section-head">
+              <h3 id="leadGoogleProfileTitle">Google Business Profile</h3>
+              <a id="leadGoogleListing" target="_blank" rel="noopener noreferrer">Open in Google Maps ↗</a>
+            </div>
+            <p id="leadGoogleReviewCount"></p>
+          </section>
           <div class="section"><div class="section-head"><h3>Wrap up</h3></div><div class="form-row"><div class="form-field"><label for="disposition">Disposition</label><select id="disposition"><option value="">Choose outcome</option><option>Connected — qualified</option><option>Connected — follow up</option><option>Left voicemail</option><option>No answer</option><option>Not interested</option></select></div><div class="form-field"><label for="followUp">Follow-up</label><input id="followUp" type="date" value="2026-09-19" /></div></div><div class="save-row"><button class="primary" id="saveLead">Save lead</button></div></div>
           <div class="details-grid">
             <div class="detail-field wide"><label for="detailIndustry">Industry</label><input id="detailIndustry" type="text" placeholder="Not specified" /></div>
@@ -370,6 +383,6 @@
     <script src="../business-nontechnical-research.js"></script>
     <script src="../parsity-school-import-1042.js"></script>
     <script src="../parsity-school-import-17.js"></script>
-    <script src="./app.js?v=twilio-2"></script>
+    <script src="./app.js?v=google-profiles"></script>
   </body>
 </html>
