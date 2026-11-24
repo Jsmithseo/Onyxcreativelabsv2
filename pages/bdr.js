@@ -293,7 +293,7 @@ export default function BdrPage() {
               background: var(--onyx-accent);
               border: 1px solid var(--onyx-accent);
               border-radius: 5px;
-              color: var(--onyx-black);
+              color: var(--onyx-on-accent);
               font-weight: 700;
               margin-top: 12px;
               padding: 14px 18px;
@@ -302,8 +302,8 @@ export default function BdrPage() {
                 transform 0.15s ease;
             }
             .bdr-primary:hover {
-              background: #bfdbfe;
-              border-color: #bfdbfe;
+              background: var(--onyx-accent-hover);
+              border-color: var(--onyx-accent-hover);
               transform: translateY(-1px);
             }
             .bdr-primary:disabled {
@@ -351,7 +351,7 @@ export default function BdrPage() {
               align-items: center;
               background: var(--onyx-accent);
               border-radius: 999px;
-              color: var(--onyx-black);
+              color: var(--onyx-on-accent);
               display: flex;
               font-size: 23px;
               font-weight: 800;
@@ -415,6 +415,7 @@ export default function BdrPage() {
               align-items: center;
               background: var(--onyx-accent);
               border-radius: 999px;
+              color: var(--onyx-on-accent);
               display: inline-flex;
               font-size: 13px;
               font-weight: 800;

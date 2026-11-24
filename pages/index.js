@@ -74,7 +74,7 @@ function StorytellingCard({ reel }) {
         )}
       </div>
       <div className="p-3 p-lg-4">
-        <p className="text-uppercase fw-semibold mb-2" style={{ color: 'var(--onyx-accent)', fontSize: '.72rem', letterSpacing: '.08em' }}>{reel.category}</p>
+        <p className="text-uppercase fw-semibold mb-2" style={{ color: 'var(--onyx-accent-text)', fontSize: '.72rem', letterSpacing: '.08em' }}>{reel.category}</p>
         <h3 className="h5 fw-bold mb-0">{reel.title}</h3>
       </div>
       <style jsx>{`
@@ -171,7 +171,7 @@ export default function Index() {
 
         <section style={{ backgroundColor: '#f8f9fa', padding: '5rem 0' }}>
           <Container maxWidth="lg">
-            <Row className="justify-content-center text-center mb-4"><Col lg="9"><p className="text-uppercase fw-semibold mb-2" style={{ color: 'var(--onyx-accent)', letterSpacing: '0.08em' }}>Content marketing through storytelling</p><h2 className="fw-bold">Content is King.</h2><p className="lead text-muted mb-0">The story behind your product helps customers understand what you do, why it matters, and why they should remember you. We shape that story into content that feels real and resonates.</p></Col></Row>
+            <Row className="justify-content-center text-center mb-4"><Col lg="9"><p className="text-uppercase fw-semibold mb-2" style={{ color: 'var(--onyx-accent-text)', letterSpacing: '0.08em' }}>Content marketing through storytelling</p><h2 className="fw-bold">Content is King.</h2><p className="lead text-muted mb-0">The story behind your product helps customers understand what you do, why it matters, and why they should remember you. We shape that story into content that feels real and resonates.</p></Col></Row>
             <Row className="justify-content-center g-4">
               {storytellingReels.map((reel) => (
                 <Col md="6" lg="4" key={reel.videoSrc}>
@@ -203,7 +203,7 @@ export default function Index() {
         .onyx-hero-inverse .onyx-hero-actions .onyx-bdr-primary {
           background: var(--onyx-accent) !important;
           border-color: var(--onyx-accent) !important;
-          color: var(--onyx-black) !important;
+          color: var(--onyx-on-accent) !important;
         }
         .onyx-hero-inverse .onyx-hero-actions .btn:hover,
         .onyx-hero-inverse .onyx-hero-actions .btn:focus {

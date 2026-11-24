@@ -6,8 +6,13 @@
   --onyx-gray: #71717a;
   --onyx-light-gray: #f4f4f5;
   --onyx-border: #e4e4e7;
-  --onyx-accent: #93c5fd;
-  --onyx-accent-rgb: 147, 197, 253;
+  --onyx-accent: #1b73e8;
+  --onyx-accent-rgb: 27, 115, 232;
+  --onyx-accent-text: #145ab8;
+  --onyx-accent-text-rgb: 20, 90, 184;
+  --onyx-accent-hover: #104b9a;
+  --onyx-accent-on-dark: #7daeec;
+  --onyx-on-accent: #ffffff;
   --onyx-accent-soft: rgba(var(--onyx-accent-rgb), 0.14);
   --onyx-font: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
 }
@@ -120,7 +125,7 @@ p {
 }
 
 .onyx-products-eyebrow {
-  color: var(--onyx-accent);
+  color: var(--onyx-accent-text);
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -267,16 +272,16 @@ p {
 }
 
 .onyx-pilot-card-featured .onyx-pilot-metric {
-  background: #eaf3ff;
-  border-color: #cfe4ff;
+  background: var(--onyx-accent-soft);
+  border-color: rgba(var(--onyx-accent-rgb), 0.25);
 }
 
 .onyx-pilot-card .onyx-feature-list li::before {
-  color: #315b89;
+  color: var(--onyx-accent);
 }
 
 .onyx-pilot-volume {
-  color: #1e3a5f;
+  color: var(--onyx-accent);
   font-size: clamp(2.1rem, 3.7vw, 2.8rem);
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -339,12 +344,16 @@ p {
 }
 
 .onyx-lab-eyebrow {
-  color: var(--onyx-accent);
+  color: var(--onyx-accent-text);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   margin: 0;
   text-transform: uppercase;
+}
+
+.onyx-lab-hero .onyx-lab-eyebrow {
+  color: var(--onyx-accent-on-dark);
 }
 
 .onyx-lab-cta {
@@ -438,7 +447,7 @@ p {
 .onyx-case-section h2 { font-size: clamp(1.8rem, 3vw, 2.5rem); margin: 0; }
 .onyx-case-section > .row > [class*='col'] > p:not(.onyx-lab-eyebrow) { color: var(--onyx-charcoal); font-size: 1.1rem; }
 .onyx-case-method { background: #ffffff; border: 1px solid var(--onyx-border); padding: 1.75rem; }
-.onyx-case-method > p:first-child { color: var(--onyx-accent); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; margin: 0 0 1.5rem; text-transform: uppercase; }
+.onyx-case-method > p:first-child { color: var(--onyx-accent-text); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; margin: 0 0 1.5rem; text-transform: uppercase; }
 .onyx-case-method h3 { font-size: 1.35rem; margin: 0 0 0.75rem; }
 .onyx-case-method > p:last-child { color: var(--onyx-gray); margin: 0; }
 .onyx-case-learning { border-left: 3px solid var(--onyx-accent); margin-top: 2rem; padding: 0.25rem 0 0.25rem 1.25rem; }
@@ -478,7 +487,7 @@ p {
 .onyx-review-thread-header p { color: #1f2329; font-size: .92rem; font-weight: 700; }
 .onyx-review-thread-header div span { color: #697386; font-size: .72rem; }
 .onyx-review-thread-status {
-  color: var(--onyx-accent);
+  color: var(--onyx-accent-text);
   font-size: .72rem;
   font-weight: 700;
   margin-left: auto !important;
@@ -495,7 +504,7 @@ p {
   padding: .75rem .9rem;
 }
 .onyx-review-thread-bubble-incoming { background: #edf0f4; color: #292d35; }
-.onyx-review-thread-bubble-outgoing { background: var(--onyx-accent); color: var(--onyx-black); margin-left: auto; }
+.onyx-review-thread-bubble-outgoing { background: var(--onyx-accent); color: var(--onyx-on-accent); margin-left: auto; }
 .onyx-review-thread-note { color: #697386; font-size: .72rem; margin: 1.15rem 0 0; text-align: center; }
 .onyx-reviews-section h2,
 .onyx-reviews-sms h2 { font-size: clamp(1.9rem, 3vw, 2.6rem); margin: 0; }
@@ -548,8 +557,8 @@ p {
   width: 1.65rem;
 }
 .onyx-review-flow-step strong { color: #353b45; display: block; font-size: .76rem; font-weight: 600; line-height: 1.25; }
-.onyx-review-flow-step-active span { background: var(--onyx-accent); border-color: var(--onyx-accent); color: var(--onyx-black); }
-.onyx-review-flow-step-active strong { color: var(--onyx-accent); }
+.onyx-review-flow-step-active span { background: var(--onyx-accent); border-color: var(--onyx-accent); color: var(--onyx-on-accent); }
+.onyx-review-flow-step-active strong { color: var(--onyx-accent-text); }
 .onyx-review-flow-line { background: #c8ced8; height: 1px; margin: 0 .6rem; position: relative; top: -.35rem; width: 12%; }
 .onyx-review-flow-line::after {
   border-bottom: 3px solid transparent;
@@ -567,7 +576,7 @@ p {
 }
 .onyx-review-card,
 .onyx-review-capability { background: #ffffff; border: 1px solid var(--onyx-border); padding: 1.75rem; }
-.onyx-review-card > p { color: var(--onyx-accent); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; margin: 0 0 1.5rem; }
+.onyx-review-card > p { color: var(--onyx-accent-text); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; margin: 0 0 1.5rem; }
 .onyx-review-card h3,
 .onyx-review-capability h3 { font-size: 1.3rem; margin: 0 0 0.75rem; }
 .onyx-review-card span,
@@ -578,7 +587,7 @@ p {
 .onyx-data-source { color: var(--onyx-gray); font-size: 0.85rem; margin: 1.5rem 0 0; }
 
 a {
-  color: var(--onyx-accent);
+  color: var(--onyx-accent-text);
 }
 
 .navbar.bg-dark,
@@ -642,17 +651,17 @@ footer.bg-dark {
 html:root {
   --bs-primary: var(--onyx-accent);
   --bs-primary-rgb: var(--onyx-accent-rgb);
-  --bs-link-color: var(--onyx-accent);
-  --bs-link-color-rgb: var(--onyx-accent-rgb);
-  --bs-link-hover-color: var(--onyx-accent);
-  --bs-link-hover-color-rgb: var(--onyx-accent-rgb);
+  --bs-link-color: var(--onyx-accent-text);
+  --bs-link-color-rgb: var(--onyx-accent-text-rgb);
+  --bs-link-hover-color: var(--onyx-accent-hover);
+  --bs-link-hover-color-rgb: 16, 75, 154;
   --bs-primary-text-emphasis: var(--onyx-black);
   --bs-primary-bg-subtle: var(--onyx-accent-soft);
   --bs-primary-border-subtle: var(--onyx-accent);
   --bs-focus-ring-color: rgba(var(--onyx-accent-rgb), 0.25);
 }
 a:hover,
-a:focus { color: var(--onyx-accent); }
+a:focus { color: var(--onyx-accent-hover); }
 input,
 textarea,
 select { accent-color: var(--onyx-accent); }
@@ -667,13 +676,13 @@ select { accent-color: var(--onyx-accent); }
 }
 .MuiInputLabel-root.Mui-focused,
 .MuiButton-textPrimary,
+.MuiButton-outlinedPrimary,
 .MuiCheckbox-root.Mui-checked,
-.MuiRadio-root.Mui-checked { color: var(--onyx-accent) !important; }
+.MuiRadio-root.Mui-checked { color: var(--onyx-accent-text) !important; }
 .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
 .MuiButton-outlinedPrimary { border-color: var(--onyx-accent) !important; }
-.MuiButton-outlinedPrimary { color: var(--onyx-accent) !important; }
 .MuiButton-containedPrimary,
 .MuiButton-containedPrimary:hover {
   background-color: var(--onyx-accent) !important;
-  color: var(--onyx-black) !important;
+  color: var(--onyx-on-accent) !important;
 }

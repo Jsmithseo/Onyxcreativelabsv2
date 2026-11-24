@@ -105,7 +105,7 @@ export default function OurStoryPage() {
           padding-bottom: 2rem;
         }
         .onyx-founder-story-eyebrow {
-          color: var(--onyx-accent);
+          color: var(--onyx-accent-text);
           font-size: 0.8rem;
           font-weight: 700;
           letter-spacing: 0.12em;
@@ -151,13 +151,13 @@ export default function OurStoryPage() {
         }
         .onyx-founder-story-footer strong { color: #18181b; }
         .onyx-founder-story-link {
-          color: var(--onyx-accent);
+          color: var(--onyx-accent-text);
           display: inline-block;
           font-weight: 600;
           text-decoration: underline;
           text-underline-offset: 0.25em;
         }
-        .onyx-founder-story-link:hover { color: var(--onyx-accent); }
+        .onyx-founder-story-link:hover { color: var(--onyx-accent-hover); }
         .onyx-founder-story-link:focus-visible {
           outline: 2px solid var(--onyx-accent);
           outline-offset: 5px;

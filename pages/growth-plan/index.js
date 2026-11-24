@@ -45,7 +45,7 @@ export default function GrowthPlanPage() {
         <Container>
           <p
             className="text-uppercase fw-semibold mb-3"
-            style={{ color: 'var(--onyx-accent)', letterSpacing: '0.08em' }}
+            style={{ color: 'var(--onyx-accent-text)', letterSpacing: '0.08em' }}
           >
             Business Development + Content Marketing
           </p>

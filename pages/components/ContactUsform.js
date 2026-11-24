@@ -271,7 +271,7 @@ const ContactForm = () => {
             style={{
               padding: '12px 20px',
               backgroundColor: 'var(--onyx-accent)',
-              color: '#18181b',
+              color: 'var(--onyx-on-accent)',
               border: 'none',
               borderRadius: '5px',
               cursor: 'pointer',

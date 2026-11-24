@@ -1,7 +1,7 @@
 .page {
   --reviews-ink: #18181b;
   --reviews-muted: #545b66;
-  --reviews-blue: #93c5fd;
+  --reviews-blue: var(--onyx-accent);
   --reviews-line: #dce2e9;
   --reviews-paper: #f5f7fa;
   color: var(--reviews-ink);
@@ -49,7 +49,7 @@
   margin: 0 0 22px;
 }
 .hero h1 > span {
-  color: #456c96;
+  color: var(--reviews-blue);
 }
 .heroCopy {
   color: var(--reviews-muted);
@@ -113,7 +113,7 @@
   border-color: var(--reviews-ink);
 }
 .primaryButton:hover {
-  color: var(--reviews-ink);
+  color: var(--onyx-on-accent);
   background: var(--reviews-blue);
   border-color: var(--reviews-blue);
 }
@@ -268,8 +268,8 @@
 }
 .featuredPlan .planTopline {
   background: var(--reviews-blue);
-  border-bottom-color: #577ca6;
-  color: #193454;
+  border-bottom-color: var(--onyx-accent-hover);
+  color: var(--onyx-on-accent);
 }
 .planBody {
   display: flex;
@@ -459,7 +459,7 @@
   width: 28px;
   height: 28px;
   background: var(--reviews-ink);
-  color: var(--reviews-blue);
+  color: var(--onyx-accent-on-dark);
   font-size: 17px;
   font-weight: 600;
   flex-shrink: 0;
@@ -722,7 +722,7 @@
   background: #1b2430;
 }
 .closing .eyebrow {
-  color: var(--reviews-blue);
+  color: var(--onyx-accent-on-dark);
 }
 .closing h2 {
   color: #fff;
@@ -740,12 +740,13 @@
 }
 .closing .primaryButton {
   background: var(--reviews-blue);
-  color: var(--reviews-ink);
-  border-color: var(--reviews-blue);
+  color: var(--onyx-on-accent);
+  border-color: var(--onyx-accent-on-dark);
 }
 .closing .primaryButton:hover {
   background: #fff;
   border-color: #fff;
+  color: var(--reviews-ink);
 }
 .closingActions {
   display: flex;

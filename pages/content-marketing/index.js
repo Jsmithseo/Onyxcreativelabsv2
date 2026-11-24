@@ -105,7 +105,7 @@ function StorytellingCard({ reel }) {
         )}
       </div>
       <div className="p-3 p-lg-4">
-        <p className="text-uppercase fw-semibold mb-2" style={{ color: 'var(--onyx-accent)', fontSize: '.72rem', letterSpacing: '.08em' }}>{reel.category}</p>
+        <p className="text-uppercase fw-semibold mb-2" style={{ color: 'var(--onyx-accent-text)', fontSize: '.72rem', letterSpacing: '.08em' }}>{reel.category}</p>
         <h3 className="h5 fw-bold mb-0">{reel.title}</h3>
         <p className="mt-3 mb-0">{reel.copy}</p>
       </div>
@@ -240,7 +240,7 @@ export default function ContentMarketingPage() {
           text-align: center;
         }
         .onyx-marketing-eyebrow {
-          color: var(--onyx-accent);
+          color: var(--onyx-accent-text);
           font-size: 0.8rem;
           font-weight: 600;
           letter-spacing: 0.08em;
