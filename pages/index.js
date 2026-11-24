@@ -169,19 +169,6 @@ export default function Index() {
         <FractionalBdrOverview />
         <section className="onyx-content-section"><FeaturedCaseStudies /></section>
 
-        <section style={{ backgroundColor: '#111827', color: '#fff', padding: '5rem 0' }}>
-          <Container maxWidth="lg">
-            <Row className="align-items-center g-4">
-              <Col lg="8">
-                <p className="text-uppercase fw-semibold mb-2" style={{ color: 'var(--onyx-accent)', letterSpacing: '0.08em' }}>Onyx Reviews</p>
-                <h2 className="fw-bold">Turn happy customers into public proof.</h2>
-                <p className="lead mb-0" style={{ color: '#d1d5db' }}>A simple, timely review-growth process for service businesses that want more customer feedback without making their team chase reviews.</p>
-              </Col>
-              <Col lg="4" className="text-lg-end"><Link href="/reviews"><Button color="primary" size="lg">Explore Onyx Reviews</Button></Link></Col>
-            </Row>
-          </Container>
-        </section>
-
         <section style={{ backgroundColor: '#f8f9fa', padding: '5rem 0' }}>
           <Container maxWidth="lg">
             <Row className="justify-content-center text-center mb-4"><Col lg="9"><p className="text-uppercase fw-semibold mb-2" style={{ color: 'var(--onyx-accent)', letterSpacing: '0.08em' }}>Content marketing through storytelling</p><h2 className="fw-bold">Content is King.</h2><p className="lead text-muted mb-0">The story behind your product helps customers understand what you do, why it matters, and why they should remember you. We shape that story into content that feels real and resonates.</p></Col></Row>
@@ -195,7 +182,9 @@ export default function Index() {
             <div className="text-center mt-2"><Link href="/content-marketing"><Button color="success" size="lg">Tell Your Story</Button></Link></div>
           </Container>
         </section>
-        <section className="onyx-muted-section"><Approach /></section>
+        <section className="onyx-muted-section" aria-labelledby="onyx-reviews-heading">
+          <Approach />
+        </section>
       </div>
 
       <style jsx global>{`

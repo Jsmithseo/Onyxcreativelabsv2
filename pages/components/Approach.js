@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col, Button } from 'reactstrap';
+import { Container, Row, Col } from 'reactstrap';
 import Link from 'next/link';
 
 export default function ExperimentationApproachSection() {
@@ -8,16 +8,14 @@ export default function ExperimentationApproachSection() {
       <Row className="align-items-center justify-content-center">
         <Col md="6" className="text-center text-md-start mb-4 mb-md-0">
           <p className="onyx-products-eyebrow">Onyx Reviews</p>
-          <h2 className="onyx-section-heading">
+          <h2 className="onyx-section-heading" id="onyx-reviews-heading">
             More Reviews, <span style={{ color: 'var(--onyx-accent)' }}>Less Chasing</span>
           </h2>
           <p className="mt-3 text-muted" style={{ fontSize: '1.1rem', maxWidth: '34rem' }}>
             Onyx Reviews uses AI to automate thoughtful review requests, so you can keep your focus on your customers and your business.
           </p>
-          <Link href="/reviews">
-            <Button color="primary" size="lg" style={{ marginTop: '1rem', fontWeight: '600' }}>
-              Explore Onyx Reviews
-            </Button>
+          <Link href="/reviews" className="btn btn-primary btn-lg mt-3 fw-semibold">
+            Explore Onyx Reviews
           </Link>
         </Col>
         <Col md="6" className="text-center">
