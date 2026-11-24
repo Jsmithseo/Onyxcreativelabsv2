@@ -127,7 +127,7 @@ export default function AdminPage() {
               <CardBody className="p-4 p-md-5">
           {screen === 'checking' && (
             <p className="mb-0">
-              <Spinner size="sm" className="me-2" />
+              <Spinner tag="span" size="sm" className="me-2" />
               Checking secure access…
             </p>
           )}
@@ -154,7 +154,7 @@ export default function AdminPage() {
                 />
                 </FormGroup>
                 <Button color="dark" type="submit" disabled={isRequestingLink}>
-                  {isRequestingLink && <Spinner size="sm" className="me-2" />}
+                  {isRequestingLink && <Spinner tag="span" size="sm" className="me-2" />}
                   {isRequestingLink ? 'Sending link…' : 'Send magic link'}
                 </Button>
               </Form>
