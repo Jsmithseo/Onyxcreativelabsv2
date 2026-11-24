@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { Col, Container, Row } from 'reactstrap';
 import BaseLayout from '../components/layouts/BaseLayouts';
 
+const contentInquiryHref = '/contact?service=content-marketing';
+
 const contentSections = [
   {
     "heading": "A small content engine for your business.",
@@ -182,6 +184,9 @@ export default function ContentMarketingPage() {
           <p className="onyx-marketing-eyebrow">Content Marketing Through Storytelling</p>
           <h1>Content is King.</h1>
           <p className="onyx-marketing-lead">With so much AI and automation, genuine storytelling matters more than ever. Your ability to tell a genuine story is the lifeblood of your business. We help you bring that story to life and keep it reaching the people who matter.</p>
+          <Link href={contentInquiryHref} className="btn btn-lg fw-bold mt-3">
+            Talk about your content project
+          </Link>
         </Container>
       </section>
 
@@ -219,15 +224,29 @@ export default function ContentMarketingPage() {
             your story rolling out, and gets better as we learn what connects
             with your audience.
           </p>
-          <Link href="/contact?service=content-marketing" className="btn btn-lg">Tell Your Story</Link>
+          <Link href={contentInquiryHref} className="btn btn-lg">Tell Your Story</Link>
         </div>
       </Container>
 
       <style jsx global>{`
         .onyx-marketing-hero {
           background: #f8f9fa;
-          padding: 4.5rem 0;
+          padding: 3.5rem 0;
           text-align: center;
+        }
+        .onyx-marketing-hero .btn {
+          background-color: var(--onyx-accent) !important;
+          border-color: var(--onyx-accent) !important;
+          color: var(--onyx-on-accent) !important;
+        }
+        .onyx-marketing-hero .btn:hover,
+        .onyx-marketing-hero .btn:focus-visible {
+          background-color: var(--onyx-accent-hover) !important;
+          border-color: var(--onyx-accent-hover) !important;
+        }
+        .onyx-marketing-hero .btn:focus-visible {
+          outline: 2px solid var(--onyx-accent-hover);
+          outline-offset: 4px;
         }
         .onyx-marketing-eyebrow {
           color: var(--onyx-accent-text);
@@ -293,7 +312,7 @@ export default function ContentMarketingPage() {
           outline-offset: 4px;
         }
         @media (max-width: 575.98px) {
-          .onyx-marketing-hero { padding: 3rem 0; }
+          .onyx-marketing-hero { padding: 2.5rem 0; }
           .onyx-marketing-body { padding-top: 3rem; }
           .onyx-marketing-cta { padding: 2rem 1.5rem; }
         }
