@@ -225,32 +225,30 @@ function PriceCard({ plan, termsAccepted }) {
             month. Cancel anytime. No free trial at checkout.
           </p>
           {termsAccepted ? (
-            <>
-              <a
-                className={`${styles.button} ${
-                  plan.featured ? styles.primaryButton : styles.outlineButton
-                }`}
-                href={plan.checkoutHref}
-              >
-                Start Now
-                <Icon name="arrow" />
-              </a>
-              <Link
-                className={styles.trialInquiry}
-                href={inquiryHref(plan.id)}
-              >
-                Ask about a {REVIEW_TRIAL_DAYS}-day trial
-              </Link>
-            </>
+            <a
+              className={`${styles.button} ${
+                plan.featured ? styles.primaryButton : styles.outlineButton
+              }`}
+              href={plan.checkoutHref}
+            >
+              Start Now
+              <Icon name="arrow" />
+            </a>
           ) : (
             <a
               className={`${styles.button} ${styles.outlineButton}`}
               href="#review-plan-terms"
             >
-              Review terms to continue
+              Review paid checkout terms
               <Icon name="arrow" />
             </a>
           )}
+          <Link
+            className={styles.trialInquiry}
+            href={inquiryHref(plan.id)}
+          >
+            Ask about a {REVIEW_TRIAL_DAYS}-day trial
+          </Link>
           <span>One location. Add more below.</span>
         </div>
       </div>
@@ -582,23 +580,13 @@ export default function Reviews() {
                   {REVIEW_TRIAL_DAYS}-day subscription trial available
                 </span>
               </div>
-              {termsAccepted ? (
-                <Link
-                  className={`${styles.button} ${styles.primaryButton}`}
-                  href={inquiryHref(calculatorPlan.id, locationCount)}
-                >
-                  Build my location plan
-                  <Icon name="arrow" />
-                </Link>
-              ) : (
-                <a
-                  className={`${styles.button} ${styles.outlineButton}`}
-                  href="#review-plan-terms"
-                >
-                  Review terms to continue
-                  <Icon name="arrow" />
-                </a>
-              )}
+              <Link
+                className={`${styles.button} ${styles.primaryButton}`}
+                href={inquiryHref(calculatorPlan.id, locationCount)}
+              >
+                Build my location plan
+                <Icon name="arrow" />
+              </Link>
               <p className={styles.calculatorNote}>
                 An estimate for your inquiry. Enrollment is confirmed with Onyx.
               </p>
