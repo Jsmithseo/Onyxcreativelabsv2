@@ -215,7 +215,14 @@ export default function ContactFormPage() {
                   {selectedInterest && interest.includes(selectedInterest) && (
                     <p className="small text-muted mb-2">Inquiry for {serviceLabel}</p>
                   )}
-                  {errors.submit && <Alert color="danger">{errors.submit}</Alert>}
+                  {errors.submit && (
+                    <Alert color="danger">
+                      {errors.submit}{' '}
+                      <a className="alert-link" href="https://calendly.com/softwaresmitty/discovery" target="_blank" rel="noopener noreferrer">
+                        Schedule a discovery call instead
+                      </a>
+                    </Alert>
+                  )}
                   <Button color="primary" size="lg" type="submit">
                     {submitting ? 'Sending…' : isReviewsInquiry ? 'Request my review growth call' : 'Send my inquiry'}
                   </Button>

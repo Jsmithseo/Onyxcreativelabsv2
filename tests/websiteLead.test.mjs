@@ -70,8 +70,36 @@ test('a CRM rejection never prevents the lead email', async () => {
   assert.equal(res.body.queued, false);
 });
 
-test('an email failure is shown as a failure even when CRM storage succeeds', async () => {
+test('a successful HubSpot copy still accepts the inquiry when Gmail is down', async () => {
   const handler = createWebsiteLeadHandler({ sendEmail: async () => { throw new Error('Provider unavailable'); }, fetchImpl: async () => ({ ok: true }), logger: quiet });
+  const res = response();
+  await handler({ method: 'POST', body: inquiry }, res);
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body, { done: true, emailed: false, queued: true });
+});
+
+test('the private inbox receives the complete inquiry when both external destinations fail', async () => {
+  const saved = [];
+  const handler = createWebsiteLeadHandler({
+    sendEmail: async () => { throw new Error('Provider unavailable'); },
+    fetchImpl: async () => ({ ok: false, status: 400 }),
+    saveUndeliveredInquiry: async (lead) => saved.push(lead),
+    logger: quiet,
+  });
+  const res = response();
+  await handler({ method: 'POST', body: inquiry }, res);
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body, { done: true, emailed: false, queued: false });
+  assert.deepEqual(saved, [normalizeWebsiteLead(inquiry)]);
+});
+
+test('an inquiry is shown as a failure when email, CRM and the private inbox all fail', async () => {
+  const handler = createWebsiteLeadHandler({
+    sendEmail: async () => { throw new Error('Provider unavailable'); },
+    fetchImpl: async () => ({ ok: false, status: 400 }),
+    saveUndeliveredInquiry: async () => { throw new Error('Storage unavailable'); },
+    logger: quiet,
+  });
   const res = response();
   await handler({ method: 'POST', body: inquiry }, res);
   assert.equal(res.statusCode, 502);
@@ -90,6 +118,24 @@ test('invalid submissions and unsupported methods cannot send email or create CR
   assert.equal(get.statusCode, 405);
   assert.equal(get.headers.Allow, 'POST');
   assert.equal(effects, 0);
+});
+
+test('only Onyx admins can read the private inquiry inbox', async () => {
+  const source = (await readFile(new URL('../pages/api/admin/website-inquiries.js', import.meta.url), 'utf8'))
+    .replace("import { currentOperationsPrincipal } from '../../../lib/operationsAccess';", 'const currentOperationsPrincipal = async (request) => request.principal;')
+    .replace("import { listUndeliveredInquiries } from '../../../lib/websiteLeadInbox.mjs';", 'const listUndeliveredInquiries = async () => ({ inquiries: [{ name: "Private lead" }], next: null });');
+  const { default: handler } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+  for (const principal of [null, { role: 'contractor' }]) {
+    const denied = response();
+    await handler({ method: 'GET', principal, query: {} }, denied);
+    assert.equal(denied.statusCode, 401);
+    assert.equal(denied.headers['Cache-Control'], 'private, no-store');
+    assert.equal(denied.body.inquiries, undefined);
+  }
+  const admin = response();
+  await handler({ method: 'GET', principal: { role: 'admin' }, query: {} }, admin);
+  assert.equal(admin.statusCode, 200);
+  assert.equal(admin.body.inquiries[0].name, 'Private lead');
 });
 
 test('the actual Gmail message goes to Jeremy, keeps Reply-To, and safely includes all details', async () => {

@@ -73,6 +73,31 @@ test('recovery refuses inaccessible or malformed source records', async () => {
   assert.deepEqual(recovered, [{key:keyFor(profile.email),value:source}]);
 });
 
+test('the private inquiry inbox keeps its records separate and pages from newest to oldest', async () => {
+  const source = (await readFile(new URL('../lib/websiteLeadInbox.mjs', import.meta.url), 'utf8'))
+    .replace("'./workspaceMetadata.mjs'", JSON.stringify(metadataUrl));
+  const { saveUndeliveredInquiry, listUndeliveredInquiries } = await import(asModule(source));
+  const db = new PGlite();
+  await db.exec(workspaceMetadataSchema);
+  metadata.useTestDatabase(db);
+  try {
+    const records = createWorkspaceMetadataStore(db);
+    await records.write('admin/dashboard-settings.json', { ignored: true });
+    for (let day = 1; day <= 25; day++) {
+      const receivedAt = `2020-10-${String(day).padStart(2, '0')}T00:00:00.000Z`;
+      await records.write(`website-inquiry:${receivedAt}:fixture`, { name: `Visitor ${day}`, receivedAt });
+    }
+    await saveUndeliveredInquiry({ name: 'Newest visitor', email: 'inquiry@example.com', fields: [{ name: 'message', value: 'Follow up' }] });
+    const first = await listUndeliveredInquiries('admin/dashboard-settings.json');
+    assert.equal(first.inquiries.length, 25);
+    assert.equal(first.inquiries[0].name, 'Newest visitor');
+    assert.equal(first.inquiries[0].fields[0].value, 'Follow up');
+    const older = await listUndeliveredInquiries(first.next);
+    assert.deepEqual(older.inquiries.map(({ name }) => name), ['Visitor 1']);
+    assert.equal(older.next, null);
+  } finally { metadata.useTestDatabase(null); await db.close(); }
+});
+
 test('the admin roster shows a load error instead of zero contractors and recovers on retry', async () => {
   const source = await readFile(new URL('../public/dialer/admin/app.js', import.meta.url), 'utf8');
   const controls = new Map();
