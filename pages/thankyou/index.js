@@ -1,15 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Container, Row, Col, Button } from 'reactstrap';
 import BaseLayout from '../components/layouts/BaseLayouts';
 import Link from 'next/link';
 
 export default function ThankYou() {
-  useEffect(() => {
-    window.gtag?.('event', 'conversion', {
-      send_to: 'AW-16644561919/yx4DCJzujcMZEP-334A-'
-    });
-  }, []);
-
   return (
     <BaseLayout>
       <div style={{ backgroundColor: '#f8f9fa', padding: '5rem 0', textAlign: 'center' }}>

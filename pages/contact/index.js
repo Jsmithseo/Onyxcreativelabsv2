@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
 import {
   Container,
   Row,
@@ -14,6 +16,7 @@ import {
 import BaseLayout from '../components/layouts/BaseLayouts';
 import { useRouter } from 'next/router';
 import { findReviewPlan, REVIEW_STARTUP_FEE, REVIEW_TRIAL_DAYS } from '../../lib/reviewsPricing';
+import { trackInquiryConversion } from '../../lib/websiteConversion';
 
 const REVIEW_INTEREST = 'Onyx Reviews';
 const REVIEW_MESSAGE = 'I’d like to learn how Onyx Reviews can help us earn more customer feedback and grow our reputation.';
@@ -50,8 +53,8 @@ function buildReviewMessage(plan, trial, locations) {
 
 export default function ContactFormPage() {
   const router = useRouter();
-  const product = router.query.product;
-  const isReviewsInquiry = router.isReady && product === 'reviews';
+  const isReviewsInquiry = router.query.product === 'reviews';
+  const isOutboundInquiry = router.query.service === 'fractional-bdr';
   const selectedInterest = isReviewsInquiry
     ? REVIEW_INTEREST
     : INTEREST_OPTIONS.find(([id]) => id === router.query.service)?.[1];
@@ -66,152 +69,159 @@ export default function ContactFormPage() {
     company: '',
     website: '',
     message: '',
-    interest: []
   });
-
+  const [interestOverride, setInterestOverride] = useState(null);
   const [errors, setErrors] = useState({});
-
-  useEffect(() => {
-    if (!router.isReady || !selectedInterest) return;
-
-    setFormData((prev) => ({
-      ...prev,
-      interest: prev.interest.includes(selectedInterest)
-        ? prev.interest
-        : [...prev.interest, selectedInterest],
-      message: isReviewsInquiry && !prev.message
-        ? buildReviewMessage(selectedPlan, selectedTrial, selectedLocations)
-        : prev.message,
-    }));
-  }, [router.isReady, selectedInterest, isReviewsInquiry, selectedPlan, selectedTrial, selectedLocations]);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const submissionInProgress = useRef(false);
+  const interest = interestOverride ?? (selectedInterest ? [selectedInterest] : []);
+  const reviewPlan = isReviewsInquiry ? findReviewPlan(selectedPlan) : null;
+  const serviceLabel = [selectedInterest, reviewPlan?.name].filter(Boolean).join(' · ');
+  const heading = isReviewsInquiry
+    ? 'Request a review growth call'
+    : isOutboundInquiry ? 'Talk to us about outbound' : 'Let’s talk about your project';
+  const description = isReviewsInquiry
+    ? 'Share your contact details and we’ll email you to discuss a review plan for your business.'
+    : isOutboundInquiry
+      ? 'We’ll email you to discuss your sales goals and how Onyx can help you reach more qualified prospects.'
+      : 'Send us your contact details and we’ll email you to discuss how we can help.';
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    if (type === 'checkbox') {
-      setFormData((prev) => {
-        const newInterest = checked
-          ? [...prev.interest, value]
-          : prev.interest.filter((s) => s !== value);
-        return { ...prev, interest: newInterest };
-      });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.full_name) newErrors.full_name = 'Name is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    if (!formData.message) newErrors.message = 'Message is required';
-    return newErrors;
+  const handleInterestChange = (e) => {
+    const { value, checked } = e.target;
+    setInterestOverride(checked ? [...interest, value] : interest.filter((service) => service !== value));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-    } else {
-      try {
-        const res = await fetch('/api/lead', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            source: 'Website contact inquiry',
-            context: { pageUri: window.location.href, pageName: document.title },
-            fields: [
-              { name: 'firstname', value: formData.full_name },
-              { name: 'email', value: formData.email },
-              { name: 'phone', value: formData.phone },
-              { name: 'company', value: formData.company },
-              { name: 'website', value: formData.website },
-              { name: 'message', value: formData.message },
-              { name: 'interest', value: formData.interest.join(', ') }
-            ]
-          })
-        });
+    if (submissionInProgress.current) return;
 
-        if (res.ok) {
-          setFormData({ full_name: '', email: '', phone: '', company: '', website: '', message: '', interest: [] });
-          setErrors({});
-          router.push('/thankyou');
-        } else {
-          setErrors({ submit: 'We could not submit your inquiry. Please try again in a moment.' });
-        }
-      } catch (error) {
-        setErrors({ submit: 'We could not submit your inquiry. Please try again in a moment.' });
-      }
+    const fullName = formData.full_name.trim();
+    if (!fullName) {
+      setErrors({ full_name: 'Enter your name.' });
+      e.currentTarget.elements.full_name.focus();
+      return;
     }
+
+    submissionInProgress.current = true;
+    setSubmitting(true);
+    setErrors({});
+
+    const reviewMessage = isReviewsInquiry
+      ? buildReviewMessage(selectedPlan, selectedTrial, selectedLocations)
+      : '';
+    const message = [reviewMessage, formData.message.trim()].filter(Boolean).join('\n\n')
+      || 'Requested a follow-up from Onyx Creative Labs.';
+
+    try {
+      const response = await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'Website contact inquiry',
+          context: { pageUri: window.location.href, pageName: document.title },
+          fields: [
+            { name: 'firstname', value: fullName },
+            { name: 'email', value: formData.email.trim() },
+            { name: 'phone', value: formData.phone },
+            { name: 'company', value: formData.company },
+            { name: 'website', value: formData.website },
+            { name: 'message', value: message },
+            { name: 'interest', value: interest.join(', ') },
+          ],
+        }),
+      });
+
+      if (!response.ok) throw new Error('Inquiry submission failed');
+    } catch {
+      submissionInProgress.current = false;
+      setSubmitting(false);
+      setErrors({ submit: 'We could not submit your inquiry. Please try again in a moment.' });
+      return;
+    }
+
+    setSubmitted(true);
+    trackInquiryConversion();
+    router.push('/thankyou').catch(() => {
+      // The confirmation remains visible if client-side navigation fails.
+    });
   };
 
   return (
     <BaseLayout>
-      <div style={{ backgroundColor: '#f8f9fa', padding: '4rem 0', textAlign: 'center' }}>
-        <Container>
-          <h1 className="fw-bold">{isReviewsInquiry ? 'Book Your Review Growth Call' : 'Let’s Talk'}</h1>
-          <p className="mt-3 text-muted">
-            {isReviewsInquiry
-              ? 'Tell us a little about your business and we will map a practical review-growth plan.'
-              : 'Ready to grow? Tell us more about your project and goals.'}
-          </p>
-        </Container>
-      </div>
-
-      <Container className="py-5">
+      <Head><title>Contact Onyx Creative Labs</title></Head>
+      <Container className="py-4 py-md-5">
         <Row className="justify-content-center">
-          <Col md="8">
-            {errors.submit && <Alert color="danger">{errors.submit}</Alert>}
-            <Form onSubmit={handleSubmit}>
-              <FormGroup>
-                <Label for="name">Full Name *</Label>
-                <Input type="text" name="full_name" id="name" value={formData.full_name} onChange={handleChange} invalid={!!errors.full_name} />
-                <FormFeedback>{errors.full_name}</FormFeedback>
-              </FormGroup>
-              <FormGroup>
-                <Label for="email">Email *</Label>
-                <Input type="email" name="email" id="email" value={formData.email} onChange={handleChange} invalid={!!errors.email} />
-                <FormFeedback>{errors.email}</FormFeedback>
-              </FormGroup>
-              <FormGroup>
-                <Label for="phone">Phone</Label>
-                <Input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleChange} />
-              </FormGroup>
-              <FormGroup>
-                <Label for="company">Company</Label>
-                <Input type="text" name="company" id="company" value={formData.company} onChange={handleChange} />
-              </FormGroup>
-              <FormGroup>
-                <Label for="website">Website (if applicable)</Label>
-                <Input type="text" name="website" id="website" value={formData.website} onChange={handleChange} />
-              </FormGroup>
-              <FormGroup tag="fieldset" aria-describedby="contact-interest-help">
-                <legend className="fs-6 mb-1">Which services are you interested in?</legend>
-                <p id="contact-interest-help" className="text-body-secondary mb-2">Select all that apply.</p>
-                <div className="row gy-2">
-                  {INTEREST_OPTIONS.map(([id, interest]) => (
-                    <Col sm="6" key={id}>
-                      <div className="form-check">
-                        <Input type="checkbox" name="interest" id={`contact-interest-${id}`} value={interest} checked={formData.interest.includes(interest)} onChange={handleChange} />
-                        <Label className="form-check-label" htmlFor={`contact-interest-${id}`}>{interest}</Label>
-                      </div>
-                    </Col>
-                  ))}
-                </div>
-              </FormGroup>
-              <FormGroup>
-                <Label for="message">Message *</Label>
-                <Input type="textarea" name="message" id="message" rows="5" value={formData.message} onChange={handleChange} invalid={!!errors.message} />
-                <FormFeedback>{errors.message}</FormFeedback>
-              </FormGroup>
-              <div className="text-center mt-4">
-                <Button color="primary" size="lg" type="submit">
-                  {isReviewsInquiry ? 'Request My Review Growth Call' : 'Submit Inquiry'}
-                </Button>
-              </div>
-            </Form>
+          <Col md="9" lg="7">
+            <h1 className="fw-bold">{heading}</h1>
+            <p className="text-muted mb-4">{description}</p>
+            {submitted ? (
+              <Alert color="success" role="status">
+                Your inquiry was sent. <Link href="/thankyou" className="alert-link">Continue</Link>
+              </Alert>
+            ) : (
+              <Form onSubmit={handleSubmit} aria-busy={submitting}>
+                <fieldset disabled={submitting}>
+                  <FormGroup>
+                    <Label for="name">Full name</Label>
+                    <Input type="text" name="full_name" id="name" autoComplete="name" maxLength={160} required value={formData.full_name} onChange={handleChange} invalid={!!errors.full_name} aria-describedby={errors.full_name ? 'contact-name-error' : undefined} />
+                    {errors.full_name && <FormFeedback id="contact-name-error">{errors.full_name}</FormFeedback>}
+                  </FormGroup>
+                  <FormGroup>
+                    <Label for="email">Email address</Label>
+                    <Input type="email" name="email" id="email" autoComplete="email" maxLength={320} required value={formData.email} onChange={handleChange} />
+                  </FormGroup>
+                  <details className="mb-4">
+                    <summary className="fw-semibold">Add details <span className="text-muted fw-normal">(optional)</span></summary>
+                    <div className="pt-3">
+                      <FormGroup>
+                        <Label for="message">What would you like help with?</Label>
+                        <Input type="textarea" name="message" id="message" rows="3" maxLength={3500} value={formData.message} onChange={handleChange} />
+                      </FormGroup>
+                      <FormGroup>
+                        <Label for="company">Company</Label>
+                        <Input type="text" name="company" id="company" autoComplete="organization" value={formData.company} onChange={handleChange} />
+                      </FormGroup>
+                      <FormGroup>
+                        <Label for="website">Website</Label>
+                        <Input type="text" name="website" id="website" autoComplete="url" inputMode="url" value={formData.website} onChange={handleChange} />
+                      </FormGroup>
+                      <FormGroup>
+                        <Label for="phone">Phone</Label>
+                        <Input type="tel" name="phone" id="phone" autoComplete="tel" value={formData.phone} onChange={handleChange} />
+                      </FormGroup>
+                      <FormGroup tag="fieldset" aria-describedby="contact-interest-help" className="mb-0">
+                        <legend className="fs-6 mb-1">Which services are you interested in?</legend>
+                        <p id="contact-interest-help" className="text-muted mb-2">Select all that apply.</p>
+                        <Row className="gy-2">
+                          {INTEREST_OPTIONS.map(([id, service]) => (
+                            <Col sm="6" key={id}>
+                              <div className="form-check">
+                                <Input type="checkbox" name="interest" id={`contact-interest-${id}`} value={service} checked={interest.includes(service)} onChange={handleInterestChange} />
+                                <Label className="form-check-label" htmlFor={`contact-interest-${id}`}>{service}</Label>
+                              </div>
+                            </Col>
+                          ))}
+                        </Row>
+                      </FormGroup>
+                    </div>
+                  </details>
+                  {selectedInterest && interest.includes(selectedInterest) && (
+                    <p className="small text-muted mb-2">Inquiry for {serviceLabel}</p>
+                  )}
+                  {errors.submit && <Alert color="danger">{errors.submit}</Alert>}
+                  <Button color="primary" size="lg" type="submit">
+                    {submitting ? 'Sending…' : isReviewsInquiry ? 'Request my review growth call' : 'Send my inquiry'}
+                  </Button>
+                </fieldset>
+              </Form>
+            )}
           </Col>
         </Row>
       </Container>

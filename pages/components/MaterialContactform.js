@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/router';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import { trackInquiryConversion } from '../../lib/websiteConversion';
 
 const MaterialContactform = () => {
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,6 +20,8 @@ const MaterialContactform = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
 
     try {
       const response = await fetch('/api/lead', {
@@ -33,10 +39,14 @@ const MaterialContactform = () => {
       });
 
       if (!response.ok) throw new Error('Lead submission failed');
-      window.location.href = '/thankyou';
     } catch (error) {
+      setSubmitting(false);
       window.alert('We could not submit your message. Please try again in a moment.');
+      return;
     }
+
+    trackInquiryConversion();
+    router.push('/thankyou').catch(() => { window.location.assign('/thankyou'); });
   };
 
   return (
@@ -77,8 +87,8 @@ const MaterialContactform = () => {
         onChange={handleChange}
         required
       />
-      <Button variant="contained" color="primary" type="submit">
-        Submit
+      <Button variant="contained" color="primary" type="submit" disabled={submitting}>
+        {submitting ? 'Sending…' : 'Submit'}
       </Button>
     </form>
   );
